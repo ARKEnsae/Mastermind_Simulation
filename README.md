@@ -17,9 +17,9 @@ Ce qu'il faut faire :
 
 1. Mettre en oeuvre un algorithme basé sur la méthode CE (Cross-Entropy) pour retrouver en un faible nombre de coups le code choisi par le premier joueur. Bien détailler  
 
-  a. la fonction score choisie;
-  b. la famille paramétrique choisie (pour simuler des codes);
-  c. la méthode pour simuler une loi de cette famille;
+  a. la fonction score choisie;  
+  b. la famille paramétrique choisie (pour simuler des codes);  
+  c. la méthode pour simuler une loi de cette famille;  
   d. la méthode utilisée pour estimer le paramètre “optimal” à chaque étape. (On pourra essayer plusieurs valeurs pour $m$ et $n$; les valeurs standards sont $m = 6$, et $n = 4$).
 
 2. Supposons maintenant que le premier joueur doit forcément choisir comme code une permutation (i.e. chaque couleur ne peut apparaître qu’une seule fois; donc $m \ge n$). On propose d’adapter l’approche de la question précédente de cette façon: On choisit aléatoirement la première fiche de la même façon que dans la question 2; puis on choisit la seconde fiche de la même façon, mais conditionellement au fait qu’elle a une couleur différente de la première; et ainsi de suite. Mettre en oeuvre l’algorithme précédent. Est-ce que la méthode d’estimation utilisée dans la question précédente est toujours valide? Commenter.
