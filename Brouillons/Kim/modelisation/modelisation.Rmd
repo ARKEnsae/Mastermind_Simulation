@@ -1,0 +1,33 @@
+---
+title: "Modélisation du problème"
+author: "Kim"
+date: "20 mars 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Le Mastermind est un jeu à deux joueurs, où le premier joueur choisit un “code” (une séquence de n fiches de couleur, parmi m couleurs possibles), et le second joueur doit deviner ce code en un minimum de coups. A chaque coup, le second joueur propose un code, et le premier joueur doit lui donner...
+
+a. le nombre de fiches bien placées (par ex. une fiche noire au troisième emplacement);
+b. et le nombre de fiches de la bonne couleur, mais mal placées.
+
+Objectif : Mettre en oeuvre un algorithme basé sur la méthode CE (Cross-Entropy) pour retrouver en un faible nombre de coups le code choisi par le premier joueur. 
+
+# Notations
+
+- m couleurs : [1, ..., m] par défaut m = 6
+- n billes : [1, ...., n] par défaut n = 4
+
+- fonction de score  : TODO
+- famille paramétrique (simulation de codes) : TODO
+
+# Méthodes
+
+## Comment simuler une loi de la famille paramétrique ? 
+
+## Comment simuler le paramètre optimal à chaque étape ?
+
+
