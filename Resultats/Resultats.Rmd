@@ -1,0 +1,24 @@
+---
+title: "Mastermind et permutations"
+author: "Kim Antunez, Romain Lesauvage, Alain Quartier-la-Tente"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, code = readLines("../ShinyApp/global.R"), include=FALSE}
+```
+
+
+
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+m = 33
+n = 36
+modele <- lancer_algorithme(y=sample(1:m, n, replace = TRUE), n=n, m=m,maxIters=100,stop_d=TRUE)
+tableau <- mise_en_forme_tableau(modele)
+tableau
+```

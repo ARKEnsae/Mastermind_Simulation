@@ -112,8 +112,8 @@ function(input, output, session) {
   }
   
   
-  yInput <- eventReactive(c(input$tirage,input$m,input$n), {
-    y <- initialiser_y(m=input$m,n=input$n)
+  yInput <- eventReactive(c(input$tirage,input$m,input$n,input$avec_remise), {
+    y <- initialiser_y(m=input$m,n=input$n, avec_remise = input$avec_remise)
     return(y)
   }, ignoreNULL = FALSE)
   
@@ -151,7 +151,7 @@ function(input, output, session) {
                                         N = input$N, maxIters=input$maxIters,
                                         rho = input$rho, alpha = input$alpha,
                                         poids_blanc = 1, poids_noir = 2,
-                                        smoothing = input$smoothing, C=C)
+                                        smoothing = input$smoothing, C=C, d=input$d, avec_remise = input$avec_remise)
     
     
     return(liste_matrices)
@@ -171,7 +171,14 @@ function(input, output, session) {
   
   # Textes
   output$titre_iter <- renderText({
-    texte <- paste0("<b>Itération n°",input$iter2,"</b>")
+    texte <- paste0(
+        "</br>",
+      ifelse(!is.null(matricesInput()$indice_stop),
+             paste0("Convergence à l'itération n°", matricesInput()$indice_stop),
+             "Non convergence"),  
+      " (d=",input$d,")</br></br>",
+    "<b>Itération n°",input$iter2,"</b>"
+    )
     return(texte)
   })
   
@@ -180,8 +187,8 @@ function(input, output, session) {
     if(input$iter2>1){
       p_min_max = p_min_max(matricesInput()$P_hat_liste[[input$iter2]])
       texte <- paste0(
-        "Gamma : ",(matricesInput()$gammas_hat)[input$iter2],"</br>",
-        "Smax : ", (matricesInput()$s_max)[input$iter2],"</br>",
+        "Gamma : ",round((matricesInput()$gammas_hat)[input$iter2],3),"</br>",
+        "Smax : ", round((matricesInput()$s_max)[input$iter2],3),"</br>",
         "min : ", round(p_min_max$min,4)," / ",
         "max_min : ", round(p_min_max$max_min,4),"</br>",
         "max : ", round(p_min_max$max,4)," / ",
@@ -200,7 +207,10 @@ function(input, output, session) {
   })
   
  
-  
+  output$tableau <- function() {
+    
+    mise_en_forme_tableau(matricesInput())
+  }
   
   #Fonctionnalité "animation"
   FilmOnInput <- reactive({

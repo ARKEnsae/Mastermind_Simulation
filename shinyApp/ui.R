@@ -27,7 +27,19 @@ fluidPage(
                                                                                 fluidRow(
                                                                                   column(6,numericInput("m", "Couleurs (m)", value = 6, 
                                   min = 0, max = 10)),                            column(6,numericInput("n", "Billes (n)", value = 4,                                         min = 0, max = 6))                            ),
-                                                                                HTML("Combinaison cachée (y) : "),
+
+           fluidRow(        
+                                  
+             column(7,HTML("Combinaison cachée (y) : ")),            
+              column(5,switchInput(inputId = "avec_remise",
+                                  value = TRUE,label="remise",
+                                  size="normal",
+                                  onStatus = "dreamrs",
+                                  onLabel = "avec",
+                                  offLabel = "sans"))                           
+             ),                     
+                                                            
+                                                                               
                                   
                                   fixedRow(style = "background-color:#ecf0f1;padding-top:10px;",
                                     
@@ -86,7 +98,12 @@ fluidPage(
           h3("Paramètres du modèles"),
           hr(),
           
-          sliderInput("maxIters", "Nombre d'itérations",min = 0, max = 50, value = 20),
+          fluidRow(
+            column(8,sliderInput("maxIters", "Nombre d'itérations (maxIters)",min = 1, max = 50, value = 20)),
+            column(4,numericInput("d", "d", value = 5, step=1,  min = 2, max = 10))
+          ),
+            
+          #sliderInput("maxIters", "Nombre d'itérations (maxIters)",min = 0, max = 50, value = 20),
           fluidRow(
             column(4,uiOutput("N0")), 
             column(4,numericInput("rho", "rho", value = 0.1, 
@@ -111,7 +128,7 @@ column(6,
          column(8,
                 htmlOutput("titre_iter"),
                 uiOutput("iter")), 
-         column(4, br(), 
+         column(4, br(),br(),br(),br(), 
                 switchInput(inputId = "film", value = FALSE, label="film",size="small",onStatus = "dreamrs")) #marche pas
        ),
        
@@ -178,8 +195,12 @@ column(6,
 column(6,plotOutput("graph", width = "100%", height = "300px"))
 )
                                                            
-                                                  )#,
-                                             #tabPanel("Tableau",)
+                                                  ),
+                                             tabPanel("Tableau",
+                                                      
+                                      tableOutput("tableau")
+                                                      
+                                                      )
                                       )
                                     ))),
 

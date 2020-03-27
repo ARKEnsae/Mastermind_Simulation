@@ -1,6 +1,8 @@
 rm(list=ls())
 library(plot3D)
 library(shinyWidgets)
+library(kableExtra)
+library(shinyjs)
 
 #################################################################
 ##################### Paramètres du globaux  #####################
@@ -27,8 +29,13 @@ C = 5 #non paramétrable dans shiny
 #################################################################
 
 # Création du vecteur y 
-initialiser_y <- function(m,n){
-  y <- sample(1:m, n, replace = TRUE)
+initialiser_y <- function(m,n, avec_remise=FALSE){
+  if(avec_remise){
+    y <- sample(1:m, n, replace = TRUE) # question 1
+  } else{
+    y <- sample(1:m, n, replace = FALSE) # question 2
+  }
+  
   return(y)
 }
 
@@ -49,8 +56,12 @@ nb_fiches_blanches <- function(x, y){
   sum(mal_places)
 }
 
-score <- function(x, y,poids_noir,poids_blanc){
-  return(poids_noir* nb_fiches_noires(x,y) * poids_blanc + nb_fiches_blanches(x,y))
+score <- function(x, y,poids_noir=2,poids_blanc=1,normalisation=TRUE){
+  score = poids_noir* nb_fiches_noires(x,y) * poids_blanc + nb_fiches_blanches(x,y)
+  if(normalisation){
+    score = score / (poids_noir*length(x))   
+  }
+    return(score)
 }
 #score(X[2,],y)
 
@@ -65,13 +76,19 @@ score <- function(x, y,poids_noir,poids_blanc){
 lancer_algorithme <- function(y, n, m, N = C*m*n, maxIters = 100,
                               rho = 0.1, alpha = 0.7,
                               poids_blanc = 1, poids_noir = 2,
-                              smoothing = TRUE, C=5, d=5){
+                              smoothing = TRUE, C=5, d=5, stop_d=FALSE, avec_remise=FALSE){
   
+  duree = Sys.time()
   
-  # Creation des N vecteurs X  : Matrice X (Nxm)
-  X <- matrix(rep(sample(1:m, N, replace = TRUE),N),
-              nrow = N, ncol = n, byrow=TRUE)
-  X
+  # Creation des N vecteurs X  : Matrice X (Nxn)
+    # X <- matrix(rep(sample(1:m, N, replace = TRUE),N),
+    #             nrow = N, ncol = n, byrow=TRUE)
+  X <- matrix(nrow = N, ncol = n) #Nxn
+  for(i in 1:N){
+   X[i,] <-initialiser_y(m,n, avec_remise=avec_remise) # taille n
+  }
+  
+ 
   
   # Création de la matrice P_hat initiale (n x m) 
   P_hat_tilde <- matrix(nrow = n, ncol = m)
@@ -87,64 +104,122 @@ lancer_algorithme <- function(y, n, m, N = C*m*n, maxIters = 100,
   
   ###### Algo
   
-  for(iter in 2:maxIters){
+  
+  
+  #### début du try
+  
+  tryCatch({
     
-    if(iter>2){
-      ### Calcul des nouveau X
+    for(iter in 2:maxIters){
+      
+      if(iter>2){
+        ### Calcul des nouveau X > à déplacer à la fin de l'algo ?
+       
+       if(avec_remise){
+         for(it in 1:N){ #X : Nxn   Phat : nxm
+           X[it,] <- sample(1:m, n, replace = avec_remise, prob=P_hat[it,])
+         }
+       } else{
+         for(it in 1:N){ #X : Nxn   Phat : nxm
+           couleurs_restantes <- 1:m
+           for(i in 1:n){
+             X[it,i] <- sample(couleurs_restantes, 1,
+                                 prob=P_hat[i,couleurs_restantes])
+             couleurs_restantes <- setdiff(couleurs_restantes,
+                                           X[it,i])
+           }
+           
+         }
+         
+         
+       }
+
+        
+        
+     }
+      
+      #### Calcul du score
+      
+      scores <- apply(X,1,function(ligne){score(ligne,y=y,poids_noir = poids_noir,poids_blanc=poids_blanc)})
+      
+      scores_tries <- sort(scores)
+      
+      # Mise à jour de Gamma 
+      #ceils = rounds each element of X to the nearest integer greater than or equal to that element.
+      eidx = ceiling((1-rho)*N) #plus petit indice du meilleur Score.
+      gamma = scores_tries[eidx]
+      s = scores_tries[N]
+      #  meilleur_score = max(meilleur_score,  scores_tries[N]) #garder une trace du meilleur résultat
+      gammas_hat[iter] = gamma
+      s_max[iter] = s
+      # meilleur_scores[iter] = meilleur_score
+      
+      
       for(i in 1:n){
-        X[,i] <- sample(1:m, N, replace = TRUE, prob=P_hat[i,])
+        for(j in 1:m){
+          P_hat_tilde[i,j]=sum(scores>=gamma & X[,i]==j)/sum(scores>=gamma)
+        }
       }
-    }
-    
-    #### Calcul du score
-    
-    scores <- apply(X,1,function(ligne){score(ligne,y=y,poids_noir = poids_noir,poids_blanc=poids_blanc)})
-   
-    scores_tries <- sort(scores)
-    
-    # Mise à jour de Gamma 
-    #ceils = rounds each element of X to the nearest integer greater than or equal to that element.
-    eidx = ceiling((1-rho)*N) #plus petit indice du meilleur Score.
-    gamma = scores_tries[eidx]
-    s = scores_tries[N]
-  #  meilleur_score = max(meilleur_score,  scores_tries[N]) #garder une trace du meilleur résultat
-    gammas_hat[iter] = gamma
-    s_max[iter] = s
-   # meilleur_scores[iter] = meilleur_score
-    
-    
-    for(i in 1:n){
-      for(j in 1:m){
-        P_hat_tilde[i,j]=sum(scores>=gamma & X[,i]==j)/sum(scores>=gamma)
+      
+      # Smoothing
+      if(smoothing){
+        P_hat <- alpha * P_hat_tilde + (1-alpha)* P_hat_liste[[iter-1]]
+      } else{
+        P_hat <- P_hat_tilde
       }
-    }
-    
-    # Smoothing
-    if(smoothing){
-      P_hat <- alpha * P_hat_tilde + (1-alpha)* P_hat_liste[[iter-1]]
-    } else{
-      P_hat <- P_hat_tilde
-    }
-    
-    P_hat_liste[[iter]] <- P_hat
-    
-    if(length(gammas_hat)>d & is.null(indice_stop)){
-          gammas_d <- gammas_hat[(length(gammas_hat)-d):length(gammas_hat)]
-      if(length(unique(gammas_d))==1){
-        indice_stop <- iter
+      
+      P_hat_liste[[iter]] <- P_hat
+      
+      if(length(gammas_hat)>d & is.null(indice_stop)){
+        gammas_d <- gammas_hat[(length(gammas_hat)-d):length(gammas_hat)]
+        if(length(unique(gammas_d))==1){
+          indice_stop <- iter
+          if(stop_d){
+            stop("Dernière itération : ",indice_stop)  
+          }
+        }
       }
+      
     }
+    
+    
+  },error=function(e){})
+  ### fin de try
   
-  }
+  duree <- round(as.numeric(difftime(Sys.time(), duree),units="secs"),2)
   
-  return(list(P_hat_liste=P_hat_liste,
-              s_max=s_max,
-              gammas_hat=gammas_hat,
-              indice_stop=indice_stop))
+  
+  return(
+    list(
+      duree = duree,
+      parametres=list(
+        n=n,
+        m=m,
+        N=N,
+        maxIters= maxIters,
+        rho = rho,
+        alpha = alpha,
+        smoothing = smoothing,
+        d=d
+        
+      ),
+      
+      
+      P_hat_liste=P_hat_liste,
+      s_max=s_max,
+      gammas_hat=gammas_hat,
+      indice_stop=indice_stop
+    )
+  
+  )
 
   
 }
-modele <- lancer_algorithme(y=sample(1:5, 5, replace = TRUE), n=5, m=5,maxIters=40)
+
+m=5
+n=4
+modele <- lancer_algorithme(y=sample(1:m, n, replace = TRUE), n=n, m=m,maxIters=10,N=10,stop_d=TRUE)
+
 
 #matrice : n lignes (i) m colonnes (j)
 
@@ -183,6 +258,64 @@ dessiner_histo <- function(liste_matrice,indice,colors){
   
 }
 
+tableau_bilan <- function(modele){
+  
+  if(!is.null(modele$indice_stop)){
+    i <- modele$indice_stop
+  } else{
+    i <- modele$parametres$maxIters
+  }
+
+  
+  tableau <- data.frame(
+    t = 1:i,
+    s_max = round(modele$s_max[1:i],3),
+    gammas_hat = round(modele$gammas_hat[1:i],3),
+    min = round(unlist(sapply(modele$P_hat_liste,p_min_max)["min",1:i]),4),
+    max_min =round(unlist(sapply(modele$P_hat_liste,p_min_max)["max_min",1:i]),4),
+    min_max =round(unlist(sapply(modele$P_hat_liste,p_min_max)["min_max",1:i]),4),
+    max = round(unlist(sapply(modele$P_hat_liste,p_min_max)["max",1:i]),4)
+    
+    
+  )
+   
+  
+  return(tableau)
+  
+}
+
+#tab <- tableau_bilan(modele)
+
+mise_en_forme_tableau <- function(modele){
+  
+  tableau <- tableau_bilan(modele)
+  
+  parametres <- paste0(#" : ",
+                       "n = ", modele$parametres$n, " / ",
+                       "m = ", modele$parametres$m, " / ",
+                       "N = ", modele$parametres$N, " / ",
+                       "rho = ", modele$parametres$rho, " / ",
+                       "alpha = ", modele$parametres$alpha, " / ",
+                       "smoothing = ", ifelse(modele$parametres$smoothing,"oui","non"), " / ",
+                       "d = ", modele$parametres$d
+  )
+  
+  tableau_joli <- kable(tableau, align = "c") %>%
+    kable_styling(full_width = F) %>%
+    footnote(general = paste0("Parametres : ",parametres,"\nTemps de calcul : ", modele$duree, " sec."),
+             general_title = "\nNote",
+             title_format = c("italic", "underline")
+    )
+  tableau_joli <- gsub('\\bNA\\b', '  ', tableau_joli) #remove NA
+  
+  return(tableau_joli)
+  
+}
+
+
+#tab_joli <- mise_en_forme_tableau(tab, modele)
+
+
 
 #################################################################
 ###################### Affichage des billes #####################
@@ -190,7 +323,6 @@ dessiner_histo <- function(liste_matrice,indice,colors){
 
 #https://www.html5canvastutorials.com/tutorials/html5-canvas-circles/
   
-library(shinyjs)
 canvas_width <- 25
 canvas_height <- 25
 
