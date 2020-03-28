@@ -17,8 +17,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
 m = 33
-n = 36
-modele <- lancer_algorithme(y=sample(1:m, n, replace = TRUE), n=n, m=m,maxIters=100,stop_d=TRUE)
+n = 30
+modele <- lancer_algorithme(y=sample(1:m, n, replace = TRUE), n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = TRUE)
+tableau <- mise_en_forme_tableau(modele)
+tableau
+```
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+m = 33
+n = 30
+modele <- lancer_algorithme(y=sample(1:m, n, replace = TRUE), n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = FALSE)
 tableau <- mise_en_forme_tableau(modele)
 tableau
 ```

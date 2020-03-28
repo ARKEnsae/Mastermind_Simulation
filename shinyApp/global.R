@@ -3,6 +3,7 @@ library(plot3D)
 library(shinyWidgets)
 library(kableExtra)
 library(shinyjs)
+library(gtools) #pour générer les permutations
 
 #################################################################
 ##################### Paramètres du globaux  #####################
@@ -29,13 +30,8 @@ C = 5 #non paramétrable dans shiny
 #################################################################
 
 # Création du vecteur y 
-initialiser_y <- function(m,n, avec_remise=FALSE){
-  if(avec_remise){
-    y <- sample(1:m, n, replace = TRUE) # question 1
-  } else{
-    y <- sample(1:m, n, replace = FALSE) # question 2
-  }
-  
+initialiser_y <- function(m,n, avec_remise=TRUE){
+  y <- sample(1:m, n, replace = avec_remise) # question 1
   return(y)
 }
 
@@ -76,7 +72,7 @@ score <- function(x, y,poids_noir=2,poids_blanc=1,normalisation=TRUE){
 lancer_algorithme <- function(y, n, m, N = C*m*n, maxIters = 100,
                               rho = 0.1, alpha = 0.7,
                               poids_blanc = 1, poids_noir = 2,
-                              smoothing = TRUE, C=5, d=5, stop_d=FALSE, avec_remise=FALSE){
+                              smoothing = TRUE, C=5, d=5, stop_d=FALSE, avec_remise = TRUE){
   
   duree = Sys.time()
   
@@ -110,33 +106,185 @@ lancer_algorithme <- function(y, n, m, N = C*m*n, maxIters = 100,
   
   tryCatch({
     
+    
     for(iter in 2:maxIters){
+   
       
       if(iter>2){
         ### Calcul des nouveau X > à déplacer à la fin de l'algo ?
-       
-       if(avec_remise){
-         for(it in 1:N){ #X : Nxn   Phat : nxm
-           X[it,] <- sample(1:m, n, replace = avec_remise, prob=P_hat[it,])
-         }
-       } else{
-         for(it in 1:N){ #X : Nxn   Phat : nxm
-           couleurs_restantes <- 1:m
-           for(i in 1:n){
-             X[it,i] <- sample(couleurs_restantes, 1,
-                                 prob=P_hat[i,couleurs_restantes])
-             couleurs_restantes <- setdiff(couleurs_restantes,
-                                           X[it,i])
-           }
-           
-         }
-         
-         
-       }
+        
+        if(avec_remise){
+          # for(it in 1:N){ #X : Nxn   Phat : nxm
+          #   X[it,] <- sample(1:m, n, replace = avec_remise, prob=P_hat[it,])
+          # }
+          for(i in 1:n){
+            X[,i] <- sample(1:m, N, replace = TRUE, prob=P_hat[i,])
+          }
+          
+        } else{
+          for(it in 1:N){ #X : Nxn   Phat : nxm
+            couleurs_restantes <- 1:m
+            for(i in 1:n){
+              X[it,i] <- sample(couleurs_restantes, 1,
+                                prob=P_hat[i,couleurs_restantes])
+              couleurs_restantes <- setdiff(couleurs_restantes,
+                                            X[it,i])
+            }
+            
+          }
+          
+          
+        }
+        
+      }  
+        
+      
+        
+        #### Calcul du score
+        
+        scores <- apply(X,1,function(ligne){score(ligne,y=y,poids_noir = poids_noir,poids_blanc=poids_blanc)})
+        
+        scores_tries <- sort(scores)
+        
+        # Mise à jour de Gamma 
+        #ceils = rounds each element of X to the nearest integer greater than or equal to that element.
+        eidx = ceiling((1-rho)*N) #plus petit indice du meilleur Score.
+        gamma = scores_tries[eidx]
+        s = scores_tries[N]
+        #  meilleur_score = max(meilleur_score,  scores_tries[N]) #garder une trace du meilleur résultat
+        gammas_hat[iter] = gamma
+        s_max[iter] = s
+        # meilleur_scores[iter] = meilleur_score
+        
+        
+        for(i in 1:n){
+          for(j in 1:m){
+            P_hat_tilde[i,j]=sum(scores>=gamma & X[,i]==j)/sum(scores>=gamma)
+          }
+        }
+        
+        # Smoothing
+        if(smoothing){
+          P_hat <- alpha * P_hat_tilde + (1-alpha)* P_hat_liste[[iter-1]]
+        } else{
+          P_hat <- P_hat_tilde
+        }
+        
+        P_hat_liste[[iter]] <- P_hat
+        
+        if(length(gammas_hat)>d & is.null(indice_stop)){
+          gammas_d <- gammas_hat[(length(gammas_hat)-d):length(gammas_hat)]
+          if(length(unique(gammas_d))==1){
+            indice_stop <- iter
+            if(stop_d){
+              stop("Dernière itération : ",indice_stop)  
+            }
+          }
+        }
+        
+        
+      }
+      
+    },error=function(e){})
+  ### fin de try
+  
+  duree <- round(as.numeric(difftime(Sys.time(), duree),units="secs"),2)
+  
+  
+  return(
+    list(
+      duree = duree,
+      parametres=list(
+        n=n,
+        m=m,
+        N=N,
+        maxIters= maxIters,
+        rho = rho,
+        alpha = alpha,
+        smoothing = smoothing,
+        d=d,
+        avec_remise = avec_remise
+        
+      ),
+      
+      
+      P_hat_liste=P_hat_liste,
+      s_max=s_max,
+      gammas_hat=gammas_hat,
+      indice_stop=indice_stop
+    )
+  
+  )
 
+  
+}
+
+#m=5
+#n=4
+#y=sample(1:m, n, replace = FALSE) #4 2 3 5
+#y=c(4,2,3,5)
+#modele <- lancer_algorithme(y, n=n, m=m,maxIters=10,N=10,stop_d=FALSE,avec_remise = TRUE)
+
+proba_hamming <- function(n,x,x_star,lambda){
+  d <- n - nb_fiches_noires(x,x_star)
+  proba <- exp(-lambda*d)
+  return(proba)
+}
+
+
+#### ébauche : ne fonctionne pas encore
+
+lancer_algorithme_hamming <- function(y, n, m, N = C*m*n, maxIters = 100,rho = 0.1, alpha = 0.7,poids_blanc = 1, poids_noir = 2, smoothing = TRUE, C=5, d=5, stop_d=FALSE){
+  
+  duree = Sys.time()
+  
+  possibilites <- permutations(n=m,r=n,v=1:m,repeats.allowed = FALSE)
+  
+  X <- matrix(nrow = N, ncol = n) #Nxn
+  for(i in 1:N){
+    X[i,] <-initialiser_y(m,n, avec_remise=FALSE) # taille n
+  }
+  
+  
+  # Création des paramètres initiaux
+  lambda_tilde = 1
+  x_star_tilde = initialiser_y(m,n, avec_remise=FALSE)
+  lambda_liste <- list()
+  x_star_liste <- list()
+  lambda_liste[[1]] <- lambda_tilde
+  x_star_liste[[1]] <- x_star_tilde
+  
+  
+  # Listes à agrémenter
+  gammas_hat = c()
+  s_max = c()
+  indice_stop = NULL
+  
+  ###### Algo
+  
+  #### début du try
+  
+  tryCatch({
+    
+    
+    for(iter in 2:maxIters){
+      
+      
+      if(iter>2){
+        
+        probabilites <- apply(possibilites,function(x_star){
+          return(proba_hamming(n,x,x_star,lambda))
+        })
+        
+        for(i in 1:N){
+          xi_ligne <- sample(1:length(possibilites), 1, replace = TRUE, prob=probabilites)
+          X[i,] <- possibilites[xi_ligne,] 
+          
+        }
         
         
-     }
+      }  
+      
       
       #### Calcul du score
       
@@ -144,31 +292,30 @@ lancer_algorithme <- function(y, n, m, N = C*m*n, maxIters = 100,
       
       scores_tries <- sort(scores)
       
-      # Mise à jour de Gamma 
-      #ceils = rounds each element of X to the nearest integer greater than or equal to that element.
+      ##### Mise à jour de Gamma 
       eidx = ceiling((1-rho)*N) #plus petit indice du meilleur Score.
       gamma = scores_tries[eidx]
       s = scores_tries[N]
-      #  meilleur_score = max(meilleur_score,  scores_tries[N]) #garder une trace du meilleur résultat
       gammas_hat[iter] = gamma
       s_max[iter] = s
-      # meilleur_scores[iter] = meilleur_score
+
       
-      
-      for(i in 1:n){
-        for(j in 1:m){
-          P_hat_tilde[i,j]=sum(scores>=gamma & X[,i]==j)/sum(scores>=gamma)
-        }
-      }
+      ##### mise à jour de x* et lambda 
+      ##### TODO : (résoudre programme Max selon v de D_hat)
+      lambda_tilde = 1 #TODO 
+      x_star_tilde = 1:n #TODO
       
       # Smoothing
       if(smoothing){
-        P_hat <- alpha * P_hat_tilde + (1-alpha)* P_hat_liste[[iter-1]]
+       lambda_hat <- alpha * lambda_tilde + (1-alpha)* lambda_hat[[iter-1]]
+       x_star_hat <- alpha * x_star_tilde + (1-alpha)* x_star_hat[[iter-1]]
       } else{
-        P_hat <- P_hat_tilde
+        lambda_hat <- lambda_tilde
+        x_star_hat <- x_star_tilde
       }
       
-      P_hat_liste[[iter]] <- P_hat
+      lambda_hat_liste[[iter]] <- lambda_hat
+      x_star_liste[[iter]] <- x_star_hat
       
       if(length(gammas_hat)>d & is.null(indice_stop)){
         gammas_d <- gammas_hat[(length(gammas_hat)-d):length(gammas_hat)]
@@ -180,8 +327,8 @@ lancer_algorithme <- function(y, n, m, N = C*m*n, maxIters = 100,
         }
       }
       
+      
     }
-    
     
   },error=function(e){})
   ### fin de try
@@ -201,24 +348,19 @@ lancer_algorithme <- function(y, n, m, N = C*m*n, maxIters = 100,
         alpha = alpha,
         smoothing = smoothing,
         d=d
-        
       ),
       
-      
-      P_hat_liste=P_hat_liste,
+      x_star_hat_liste=x_star_hat_liste
+      lambda_hat_liste=lambda_hat_liste,
       s_max=s_max,
       gammas_hat=gammas_hat,
       indice_stop=indice_stop
     )
-  
+    
   )
-
+  
   
 }
-
-m=5
-n=4
-modele <- lancer_algorithme(y=sample(1:m, n, replace = TRUE), n=n, m=m,maxIters=10,N=10,stop_d=TRUE)
 
 
 #matrice : n lignes (i) m colonnes (j)
@@ -240,7 +382,7 @@ p_min_max <- function(matrice){
 matrice_to_proposition <- function(matrice){
   
   matrice_ordre <- apply(matrice,1,rank)  
-  return(apply(matrice_ordre,2,function(x){which(x==max(x))})) 
+  return(apply(matrice_ordre,2,function(x){which(x==max(x))[1]})) 
 }
 #matrice_to_proposition(modele$P_hat_liste[[100]])
 
@@ -297,6 +439,7 @@ mise_en_forme_tableau <- function(modele){
                        "rho = ", modele$parametres$rho, " / ",
                        "alpha = ", modele$parametres$alpha, " / ",
                        "smoothing = ", ifelse(modele$parametres$smoothing,"oui","non"), " / ",
+                       "avec remise = ", ifelse(modele$parametres$avec_remise,"oui","non"), " / ",
                        "d = ", modele$parametres$d
   )
   

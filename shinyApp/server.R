@@ -153,6 +153,7 @@ function(input, output, session) {
                                         poids_blanc = 1, poids_noir = 2,
                                         smoothing = input$smoothing, C=C, d=input$d, avec_remise = input$avec_remise)
     
+    liste_matrices <<- liste_matrices
     
     return(liste_matrices)
     

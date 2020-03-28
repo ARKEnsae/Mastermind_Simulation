@@ -34,5 +34,15 @@ Doc en français avec un exemple sur le cas binaire
 https://people.smp.uq.edu.au/DirkKroese/ps/aortut.pdf
 
 
+Permutations sur R
+https://davetang.org/muse/2013/09/09/combinations-and-permutations-in-r/
 
+
+Quelques codes R tout prêts pour la distance de hamming (facile mais bon c'est déjà ça de pris)
+astuce : chercher le code de la fct sur github ou installer le package et faire "?help"
+https://rdrr.io/cran/CSclone/src/R/Hamming.R
+https://www.rdocumentation.org/packages/e1071/versions/1.7-3/topics/hamming.distance
+
+Simuler une distance de hamming
+https://turing.cs.hbg.psu.edu/312applets/Website/HammingDistance/HammingDistance.html#TOP
 
