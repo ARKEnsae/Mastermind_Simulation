@@ -8,8 +8,15 @@
 \begin_preamble
 \usepackage{amsfonts}
 \usepackage{dsfont}
-\newcommand\1{\mathds{1}}
 \usepackage{mathtools}
+% Nouvelles fonctions
+\renewcommand{\P}{\mathds{P}} %Apparement \P existe déjà ?
+\newcommand\1{\mathds{1}}
+\newcommand\E{\mathds{E}}
+\newcommand\ud{\mathrm{d}}
+\DeclareMathOperator*{\argmax}{argmax}
+%Toujours charger en dernier hyperref
+\usepackage{hyperref}
 \end_preamble
 \use_default_options true
 \maintain_unincluded_children false
@@ -143,7 +150,7 @@ Important sampling
 tilting
 \emph default
 ) sont difficiles à obtenir.
- Au conctraire, l'avantage de la méthode de CE est d'avoir une procédure
+ Au contraire, l'avantage de la méthode de CE est d'avoir une procédure
  simple pour estimer les paramètres optimaux.
 \end_layout
 
@@ -204,12 +211,6 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset Graphics
-	filename img/boite_noire.png
-
-\end_inset
-
-
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
@@ -281,7 +282,11 @@ levels
 \begin_inset Formula $\hat{\gamma_{1}},\hat{{\gamma_{2}}},\dots$
 \end_inset
 
- converge vers la valeur optimale (ici 
+ converge vers la valeur 
+\begin_inset Formula $ $
+\end_inset
+
+optimale (ici 
 \begin_inset Formula $n$
 \end_inset
 
@@ -294,7 +299,42 @@ levels
 \end_inset
 
 ).
- L'algorithme est donc le suivant :
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Boxed
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+textbf{Description de l'algorithme}
+\end_layout
+
+\end_inset
+
+ :
 \end_layout
 
 \begin_layout Enumerate
@@ -366,12 +406,15 @@ On utilise le même échantillon pour calculer
 \end_inset
 
  avec la formule : 
-\begin_inset Formula $\hat{p}_{t,j}=\frac{{\sum_{i=1}^{N}\1_{S(X_{i})\geq\hat{{\gamma}}_{t}}}\1_{X_{i,j}=1}}{{\sum_{i=1}^{N}\1_{S(X_{i})\geq\hat{{\gamma}}_{t}}}}$
+\begin_inset Formula 
+\[
+\hat{p}_{t,j}=\frac{{\sum_{i=1}^{N}\1_{S(X_{i})\geq\hat{{\gamma}}_{t}}}\1_{X_{i,j}=1}}{{\sum_{i=1}^{N}\1_{S(X_{i})\geq\hat{{\gamma}}_{t}}}}
+\]
+
 \end_inset
 
-.
- Cette condition s’interprète de la façon suivante : pour mettre à jour
- la jème probabilité, on compte le nombre de vecteurs de 
+Cette condition s’interprète de la façon suivante : pour mettre à jour la
+ jème probabilité, on compte le nombre de vecteurs de 
 \begin_inset Formula $X$
 \end_inset
 
@@ -473,15 +516,1955 @@ On arrête si on rencontre le critère d'arrêt (
 .
 \end_layout
 
-\begin_layout Standard
-\begin_inset Separator plain
 \end_inset
 
 
 \end_layout
 
 \begin_layout Part
-La méthode de CE
+La méthode CE pour les événements rares
+\begin_inset Separator plain
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Soit 
+\begin_inset Formula $X=(X_{1},\dots,X_{n})$
+\end_inset
+
+ un vecteur aléatoire qui prend ses valeurs dans 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\mathcal{X}$
+\end_inset
+
+, 
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\xout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+
+\begin_inset Formula $\{f(\cdot;v),\,v\in\mathcal{V}\}$
+\end_inset
+
+ une famille de densités de probabilités – 
+\emph on
+probability density functions
+\emph default
+ (pdfs) – sur 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\mathcal{X}$
+\end_inset
+
+ associés à une mesure 
+\begin_inset Formula $\nu$
+\end_inset
+
+(mesure de Lebesgue ou mesure de comptage).
+ Pour toute fonction mesurable 
+\begin_inset Formula $H$
+\end_inset
+
+ on a : 
+\begin_inset Formula 
+\[
+\E H(X)=\int_{\mathcal{X}}H(x)f(x;v)\nu(\ud x)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Soit 
+\begin_inset Formula $S$
+\end_inset
+
+ une fonction réelle sur 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\mathcal{X}$
+\end_inset
+
+, on suppose que l'on s'intéresse à la probabilité que 
+\begin_inset Formula $S(x)$
+\end_inset
+
+ soit supérieure à un certain nombre 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ sous la densité 
+\begin_inset Formula $f(\cdot,u)$
+\end_inset
+
+.
+ Cette probabilité s'écrit :
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula 
+\[
+l=\P_{u}(S(X)\geq\gamma)=\E_{u}\1_{\{S(x)\geq\gamma\}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Si cette probabilité est petite (plus petite que 
+\begin_inset Formula $10^{-5})$
+\end_inset
+
+, 
+\begin_inset Formula $\left\{ S(X)\geq\gamma\right\} $
+\end_inset
+
+ est appelé événement rare (
+\emph on
+rare event
+\emph default
+).
+ Une façon simple d'estimer 
+\begin_inset Formula $l$
+\end_inset
+
+ est d'utiliser brutalement une méthode de simulation de Monte-Carlo : on
+ échantillonne 
+\begin_inset Formula $X_{1},\dots,X_{N}$
+\end_inset
+
+ de loi 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $f(\cdot,u)$
+\end_inset
+
+ et ensuite 
+\begin_inset Formula 
+\[
+\frac{1}{N}\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\gamma\}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+nous donne un estimateur sans biais de 
+\begin_inset Formula $l$
+\end_inset
+
+.
+ Le problème est que 
+\begin_inset Formula $\left\{ S(X)\geq\gamma\right\} $
+\end_inset
+
+ est un événement rare : il faut beaucoup de simulations pour estimater
+ avec précisions 
+\begin_inset Formula $l$
+\end_inset
+
+ (i.e.
+ : avec une faible erreur ou un petit intervalle de confiance).
+\end_layout
+
+\begin_layout Standard
+Une façon alternative est d'utiliser l'important sampling : on tire un échantill
+on 
+\begin_inset Formula $X_{1},\dots,X_{N}$
+\end_inset
+
+ à partir d'une densité 
+\begin_inset Formula $g$
+\end_inset
+
+ sur 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\mathcal{X}$
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\xout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+ d'important sampling et on calcule 
+\begin_inset Formula $l$
+\end_inset
+
+ en utilisation l'estimateur du rapport de vraisemblance – 
+\emph on
+likelihood ratio
+\emph default
+ (LR) :
+\begin_inset Formula 
+\[
+\hat{l}=\frac{1}{N}\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\gamma\}}\frac{f(X_{i};u)}{g(X_{i})}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+La meilleure façon d'estimer 
+\begin_inset Formula $l$
+\end_inset
+
+ est d'utiliser la densité 
+\begin_inset Formula 
+\[
+g^{*}(x):=\frac{{\1_{\left\{ S(x)\geq\gamma\right\} }f(x;u)}}{l}\implies\1_{\left\{ S(X_{i})\geq\gamma\right\} }\frac{f(X_{i};u)}{g(X_{i})}=l
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Et donc l'estimateur précédent est de variance nulle.
+ Le problème évident est que 
+\begin_inset Formula $g^{*}$
+\end_inset
+
+ dépend de 
+\begin_inset Formula $l$
+\end_inset
+
+.
+ De plus il est plus pratique de choisir 
+\begin_inset Formula $g$
+\end_inset
+
+ dans 
+\begin_inset Formula $\{f(\cdot;v),\,v\in\mathcal{V}\}$
+\end_inset
+
+ .
+ L'idée est de choisir un paramètre de référence – 
+\emph on
+reference parameter
+\emph default
+ ou 
+\emph on
+tilting parameter
+\emph default
+ – 
+\begin_inset Formula $v$
+\end_inset
+
+ de façon à ce que la distance entre 
+\begin_inset Formula $g^{*}$
+\end_inset
+
+ et 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $f(\cdot,v)$
+\end_inset
+
+ soit minimale.
+ La distance entre deux densités 
+\begin_inset Formula $g$
+\end_inset
+
+ et 
+\begin_inset Formula $h$
+\end_inset
+
+ qui est utilisée est la distance de 
+\family default
+\series default
+\shape default
+\size default
+\emph on
+\bar default
+\strikeout default
+\xout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+Kullback-Leibler
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+, aussi appelée 
+\family default
+\series default
+\shape default
+\size default
+\emph on
+\bar default
+\strikeout default
+\xout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+cross-entropy
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+ entre 
+\begin_inset Formula $g$
+\end_inset
+
+ et 
+\begin_inset Formula $h$
+\end_inset
+
+ :
+\begin_inset Formula 
+\[
+\mathfrak{D}(g,h)=\E_{g}\ln\frac{g(X)}{h(X)}=\int g(x)\ln g(x)\ud x-\int g(x)\ln h(x)\ud x
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Minimiser la distance de Kullback-Leibler entre 
+\begin_inset Formula $g^{*}$
+\end_inset
+
+ et 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $f(\cdot,v)$
+\end_inset
+
+ est équivalent à choisir 
+\begin_inset Formula $v$
+\end_inset
+
+ qui minimise 
+\begin_inset Formula $-\int g^{*}(x)\ln f(x;v)\ud x$
+\end_inset
+
+, soit à résoudre le problème de maximusation :
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula 
+\[
+\underset{v}{{\max}}\int g^{*}(x)\ln f(x;v)\ud x\iff\underset{v}{{\max}}\int\frac{{\1_{\left\{ S(x)\geq\gamma\right\} }f(x;u)}}{l}\ln f(x;v)\ud x
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+On obtient le programme :
+\begin_inset Formula 
+\[
+\underset{v}{{\max}\;}D(v)=\underset{v}{{\max}}\;\E_{u}\1_{\left\{ S(X)\geq\gamma\right\} }\ln f(X;v)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+On peut encore une fois utiliser l'important sampling avec une nouvelle
+ mesure 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $f(\cdot,w)$
+\end_inset
+
+ et le problème précédent devient :
+\begin_inset Formula 
+\[
+\underset{v}{\max}\;D(v)=\underset{v}{\max}\;\E_{w}\1_{\left\{ S(X)\geq\gamma\right\} }W(X;u,w)\ln f(X;v)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Avec 
+\begin_inset Formula ${\displaystyle {\displaystyle W(x;u,w})=\frac{f(x;u)}{f(x;w)}}$
+\end_inset
+
+ le rapport de vraisemblance, en 
+\begin_inset Formula $x$
+\end_inset
+
+, entre 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $f(\cdot,u)$
+\end_inset
+
+ et 
+\begin_inset Formula $f(\cdot,w)$
+\end_inset
+
+.
+ La solution optimale s'écrit :
+\begin_inset Formula 
+\begin{equation}
+v^{*}=\underset{v}{\argmax}\;\E_{w}\1_{\left\{ S(X)\geq\gamma\right\} }W(X;u,w)\ln f(X;v)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+On estime 
+\begin_inset Formula $v^{*}$
+\end_inset
+
+ à partir du programme stochastique – 
+\emph on
+stochastic counterpart
+\emph default
+ – suivant :
+\begin_inset Formula 
+\begin{equation}
+\underset{v}{\max}\;\hat{D}(v)=\underset{v}{\max}\frac{1}{N}\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\gamma\}}W(X_{i};u,w)\ln f(X_{i};v)\label{eq:stochasticcounterpart}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Avec 
+\begin_inset Formula $X_{1},\dots,X_{N}$
+\end_inset
+
+ tirés aléatoirement selon 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $f(\cdot,w)$
+\end_inset
+
+.
+ Dans les applications classiques, 
+\begin_inset Formula $\hat{D}$
+\end_inset
+
+ est différentable et convexe en 
+\begin_inset Formula $v$
+\end_inset
+
+, la solution de 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{eq:stochasticcounterpart
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+}
+\end_layout
+
+\end_inset
+
+ peut alors être obtenue en résolvant les équations :
+\begin_inset Formula 
+\begin{equation}
+\frac{1}{N}\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\gamma\}}W(X_{i};u,w)\nabla_{v}\ln f(X_{i};v)=0
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+textbf{Remarque}
+\end_layout
+
+\end_inset
+
+ : Pour que le programme de CE 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{eq:stochasticcounterpart
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+}
+\end_layout
+
+\end_inset
+
+ soit utile, il faut que la probabilité de l'événement 
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\xout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+
+\begin_inset Formula $\left\{ S(X)\geq\gamma\right\} $
+\end_inset
+
+ ne soit pas trop petite, sinon les 
+\begin_inset Formula $\1_{\{S(X_{i})\geq\gamma\}}$
+\end_inset
+
+ seront souvent égales à 0.
+ 
+\end_layout
+
+\begin_layout Standard
+Pour surmonter cette difficulté, on utilise un algorithme multi-niveau –
+ 
+\emph on
+multi-level algorithm
+\emph default
+.
+ L'idée est de construire une suite de paramètres de références 
+\begin_inset Formula $(v_{t})_{t\geq0}$
+\end_inset
+
+ et une suite de niveaux 
+\begin_inset Formula $(\gamma_{t})_{t\geq1}$
+\end_inset
+
+, l'algorithme consiste à construire itérativement cette suite.
+ L'idée est de choisir 
+\begin_inset Formula $\hat{v}_{0}=u$
+\end_inset
+
+ et de prendre 
+\begin_inset Formula $\hat{\gamma}_{1}$
+\end_inset
+
+ plus petit que 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ : 
+\begin_inset Formula $\hat{v}_{1}$
+\end_inset
+
+ rendra l'événement 
+\begin_inset Formula $\left\{ S(X)\geq\gamma\right\} $
+\end_inset
+
+ un peu moins rare, donc 
+\begin_inset Formula $\hat{\gamma}_{2}$
+\end_inset
+
+ peut être plus proche de 
+\begin_inset Formula $\gamma$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Boxed
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+textbf{Description de l'algorithme de CE pour la simulation d'événements
+ rares} :
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+On pose 
+\begin_inset Formula $\hat{v}_{0}=u$
+\end_inset
+
+ , 
+\begin_inset Formula $t=1$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+On génère un échantillon 
+\begin_inset Formula $X_{1},\dots,X_{N}$
+\end_inset
+
+ de loi 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $f(\cdot,v_{t-1})$
+\end_inset
+
+, on calcule le quantile 
+\begin_inset Formula $(1-\rho)$
+\end_inset
+
+ de la fonction score qui donne 
+\begin_inset Formula $\hat{\gamma}_{t}$
+\end_inset
+
+ :
+\begin_inset Formula 
+\[
+\hat{\gamma}_{t}=S_{\lceil(1-\rho)N\rceil}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+On utilise le 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+textbf{même}
+\end_layout
+
+\end_inset
+
+ échantillon 
+\begin_inset Formula $X_{1},\dots,X_{N}$
+\end_inset
+
+ pour résoudre le problème stochastique :
+\begin_inset Formula 
+\[
+\hat{v}_{t}=\underset{v}{\argmax}\;\hat{D}(v)=\underset{v}{\argmax}\frac{1}{N}\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}W(X_{i};u,\hat{v}_{t-1})\ln f(X_{i};v)\label{}
+\]
+
+\end_inset
+
+La solution nous donne 
+\begin_inset Formula $\hat{v}_{t}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Si 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\hat{\gamma}_{t}<\gamma$
+\end_inset
+
+, 
+\begin_inset Formula $t=t+1$
+\end_inset
+
+ et on recommence à l'étape 2.
+ Sinon on estime la probabilité 
+\begin_inset Formula $l$
+\end_inset
+
+ en utilisant le rapport de vraisemblance 
+\begin_inset Formula 
+\[
+\hat{l}=\frac{1}{N_{1}}\sum_{i=1}^{N_{1}}\1_{\{S(X_{i})\geq\gamma_{t}\}}W(X_{i};u,\hat{v}_{T})
+\]
+
+\end_inset
+
+Avec 
+\begin_inset Formula $T$
+\end_inset
+
+ le nombre total d'itération.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part
+La méthode de CE pour l'optimisation combinatoire
+\end_layout
+
+\begin_layout Section
+Description générale
+\end_layout
+
+\begin_layout Subsection
+Le problème d'optimisation combinatoire
+\end_layout
+
+\begin_layout Standard
+On considère le problème de maximisation suivant : soit 
+\begin_inset Formula $\mathcal{X}$
+\end_inset
+
+ un ensemble fini d'états (
+\emph on
+states
+\emph default
+) et 
+\begin_inset Formula $S$
+\end_inset
+
+ une fonction de performance.
+ On cherche à trouver le maximum de 
+\begin_inset Formula $S$
+\end_inset
+
+ sur 
+\begin_inset Formula $\mathcal{X}$
+\end_inset
+
+ et les points pour lesquels ce maximum est atteint.
+ Si on note 
+\begin_inset Formula $\gamma^{*}$
+\end_inset
+
+ ce maximum, on cherche donc :
+\begin_inset Formula 
+\begin{equation}
+S(x^{*})=\gamma^{*}=\underset{x\in\mathcal{X}}{{\max}}S(x)\label{eq:defscore}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Le point de départ de la méthode de CE est d'associer un problème d'estimation
+ avec un problème d'optimisation précédent.
+ Pour cela on définit un ensemble d'indécatrices 
+\begin_inset Formula $\1_{{\left\{ S(x)\geq\gamma\right\} }}$
+\end_inset
+
+ sur 
+\begin_inset Formula $\mathcal{X}$
+\end_inset
+
+ pour plusieurs niveaux 
+\begin_inset Formula $\gamma\in\mathbb{R}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+On note 
+\begin_inset Formula $\{f(\cdot;v),\,v\in\mathcal{V}\}$
+\end_inset
+
+ une famille discrète de probabilités sur 
+\begin_inset Formula $\mathcal{X}$
+\end_inset
+
+, paramétrée par un paramètre vectoriel 
+\begin_inset Formula $v$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Pour un certain 
+\begin_inset Formula $u\in\mathcal{V}$
+\end_inset
+
+ on associer le problème de maximisation 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{eq:defscore}
+\end_layout
+
+\end_inset
+
+, le problème d'estimation du nombre
+\begin_inset Formula 
+\begin{equation}
+l(\gamma)=\mathbb{P}_{u}(S(X)\geq\gamma)=\sum_{x}\1_{{S(x)\geq\gamma}}f(x;u)=\mathbb{E}_{u}\1_{{S(x)\geq\gamma}}\label{eq:loss}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+C'est le problème stochastique associé – 
+\emph on
+associated stochastic problem
+\emph default
+ (ASP).
+ Cela permet de voire l'analogie avec un problème d'estimation d'une probabilité
+ d'événement rare.
+ En effet, si 
+\begin_inset Formula $f(\cdot;u)$
+\end_inset
+
+ est la densité uniforme sur 
+\begin_inset Formula $\mathcal{X}$
+\end_inset
+
+ alors 
+\begin_inset Formula $l(\gamma^{*})=f(x^{*};u)=\frac{1}{\lvert\mathcal{X}\rvert}$
+\end_inset
+
+ et donc si 
+\begin_inset Formula $\mathcal{X}$
+\end_inset
+
+ contient beaucoup d'événements, 
+\begin_inset Formula $S(X)\geq\gamma^{*}$
+\end_inset
+
+est un événement rare.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Boxed
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+textbf{Description de l'algorithme de CE pour l'optimisation} :
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Il faut définir en avance 
+\begin_inset Formula $\hat{v}_{0}$
+\end_inset
+
+, la taille de l'échantillon 
+\begin_inset Formula $N$
+\end_inset
+
+ et le nombre 
+\begin_inset Formula $\rho$
+\end_inset
+
+ (
+\begin_inset Formula $10\%$
+\end_inset
+
+ dans notre projet sur Master Mind)
+\end_layout
+
+\begin_layout Enumerate
+On prend 
+\begin_inset Formula $\hat{v}_{0}$
+\end_inset
+
+ fixé arbitrairement , 
+\begin_inset Formula $t=1$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+On génère un échantillon 
+\begin_inset Formula $X_{1},\dots,X_{N}$
+\end_inset
+
+ de loi 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $f(\cdot,v_{t-1})$
+\end_inset
+
+, on calcule le quantile 
+\begin_inset Formula $(1-\rho)$
+\end_inset
+
+ de la fonction score qui donne 
+\begin_inset Formula $\hat{\gamma}_{t}$
+\end_inset
+
+ :
+\begin_inset Formula 
+\[
+\hat{\gamma}_{t}=S_{\lceil(1-\rho)N\rceil}
+\]
+
+\end_inset
+
+ Si 
+\begin_inset Formula $\hat{\gamma}_{t}\geq\gamma$
+\end_inset
+
+ on prend 
+\begin_inset Formula $\hat{\gamma}_{t}=\gamma$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+On utilise le 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+textbf{même}
+\end_layout
+
+\end_inset
+
+ échantillon 
+\begin_inset Formula $X_{1},\dots,X_{N}$
+\end_inset
+
+ pour résoudre le problème stochastique (avec 
+\begin_inset Formula $W=1$
+\end_inset
+
+) :
+\begin_inset Formula 
+\begin{equation}
+\hat{v}_{t}=\underset{v}{\argmax}\;\hat{D}(v)=\underset{v}{\argmax}\frac{1}{N}\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\ln f(X_{i};v)\label{eq:maxopti}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Si pour un certain 
+\begin_inset Formula $t\geq d$
+\end_inset
+
+, (par exemple 
+\begin_inset Formula $d=5$
+\end_inset
+
+), on a 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+:
+\begin_inset Formula 
+\[
+\hat{\gamma}_{t}=\hat{\gamma}_{t-1}=\dots=\hat{\gamma}_{t-d}
+\]
+
+\end_inset
+
+alors on arrête l'algorithme.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Smoothed updating
+\end_layout
+
+\begin_layout Standard
+Plutôt que de mettre à jour directement 
+\begin_inset Formula $\hat{v}_{t-1}$
+\end_inset
+
+ à partir de la formule du problème 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{eq:maxopti}
+\end_layout
+
+\end_inset
+
+, on réalise souvent une mise à jour lissée – 
+\family default
+\series default
+\shape default
+\size default
+\emph on
+\bar default
+\strikeout default
+\xout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+smoothed updating
+\emph default
+ :
+\begin_inset Formula 
+\begin{equation}
+\hat{v}_{t}=\alpha\hat{w}_{t}+(1-\alpha)\hat{v}_{t-1}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+avec 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\hat{w}_{t}$
+\end_inset
+
+ la valeur obtenue en résolvant le problème 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{eq:maxopti}
+\end_layout
+
+\end_inset
+
+ (
+\begin_inset Formula $\hat{w}_{t}$
+\end_inset
+
+ correspondait donc à la précédente valeur qu'on utilisait avant pour 
+\begin_inset Formula $\hat{v}_{t}$
+\end_inset
+
+ ).
+ C'est en particulier pertinent pour les problèmes d'optimisaiton avec des
+ variables discrètes : cela permet d'éviter l'occurence de 0 ou de 1 dans
+ les paramètres des vecteurs.
+ En effet, le problème est que dès lors qu'on a un 0 ou un 1, il le reste
+ souvent pour toujours, ce qui a des effets indésirables.
+ On trouve empiriquement que 
+\begin_inset Formula $0,4\leq\alpha\leq0,9$
+\end_inset
+
+ donne des meilleurs résultats.
+\end_layout
+
+\begin_layout Standard
+Si 
+\begin_inset Formula $\alpha=1$
+\end_inset
+
+ on retrouve l'algorithme précédent.
+\end_layout
+
+\begin_layout Standard
+Dans beaucoup d'applications on observe une convergence numérique de 
+\begin_inset Formula $f(\cdot;\hat{v}_{t})$
+\end_inset
+
+ vers une mesure dégénérée (une mesure de Dirac), c'est-à-dire que l'on
+ affecte toute la masse de probabilité à un seul état 
+\begin_inset Formula $x_{T}$
+\end_inset
+
+ pour lequel, par définition, on a 
+\begin_inset Formula $S(x_{T})\geq\hat{\gamma}_{T}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Estimation du maximum de vraisemblance
+\end_layout
+
+\begin_layout Standard
+Le problème 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{eq:maxopti}
+\end_layout
+
+\end_inset
+
+ est étroitement lié au problème de maximisation de la vraisemblance.
+ En effet, le problème de maximisasion de vraisemblance revient à a
+\begin_inset Formula 
+\begin{equation}
+\hat{v}_{t}=\underset{v}{\argmax}\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\ln f(X_{i};v)\label{eq:emv}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+La seule différence avec le problème 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{eq:maxopti}
+\end_layout
+
+\end_inset
+
+ est la présence de 
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\xout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+
+\begin_inset Formula $\1_{{\left\{ S(X_{i})\geq\hat{\gamma}_{t}\right\} }}$
+\end_inset
+
+.
+ Le problème d'optimisation combinatoire peut être réécrit en : 
+\begin_inset Formula 
+\begin{equation}
+\hat{v}_{t}=\underset{v}{\argmax}\sum_{X_{i}\,:\,S(X_{i})\geq\hat{\gamma}_{t}}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\ln f(X_{i};v)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+En d'autres termes, 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\hat{v}_{t}$
+\end_inset
+
+ est égal à l'estimateur de maximum de vraisemblance de 
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\xout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+
+\begin_inset Formula $\hat{v}_{t-1}$
+\end_inset
+
+ calculé uniquement à partir des vecteurs 
+\begin_inset Formula $X_{i}$
+\end_inset
+
+ qui ont une performance supérieure ou égale à 
+\begin_inset Formula $\hat{\gamma}_{t}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Paramètres
+\end_layout
+
+\begin_layout Standard
+Le choix de la taille de l'échantillon 
+\begin_inset Formula $N$
+\end_inset
+
+ et du paramètre 
+\begin_inset Formula $\rho$
+\end_inset
+
+ dépendent de la taille du problème et du nombre de paramètres dans le problème
+ de maximisation.
+ 
+\end_layout
+
+\begin_layout Standard
+En particulier dans les problème de type s
+\emph on
+tochastic node networks
+\emph default
+ (SNN), on prend généralement 
+\begin_inset Formula $N=cn$
+\end_inset
+
+ avec 
+\begin_inset Formula $n$
+\end_inset
+
+ le nombre de 
+\emph on
+nodes
+\emph default
+ et 
+\begin_inset Formula $c$
+\end_inset
+
+ une constante (
+\begin_inset Formula $c>1$
+\end_inset
+
+), souvent 
+\begin_inset Formula $5\leq c\leq10$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Dans les problème de type 
+\emph on
+stochastic edge networks
+\emph default
+ (SEN) on prend généralement 
+\begin_inset Formula $N=cn^{2}$
+\end_inset
+
+ avec 
+\begin_inset Formula $n^{2}$
+\end_inset
+
+ le nombre de 
+\emph on
+edges
+\emph default
+ dans le réseau.
+ La taille de l'échantillon est donc liée au nombre de paramètres à estimer
+ (
+\begin_inset Formula $n$
+\end_inset
+
+ et 
+\begin_inset Formula $n^{2}$
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+Pour estimer 
+\begin_inset Formula $k$
+\end_inset
+
+ paramètres, il faut prendre une taille d'échantillon 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+textbf{au minimum}
+\end_layout
+
+\end_inset
+
+ égale à 
+\begin_inset Formula $N=ck$
+\end_inset
+
+ avec 
+\begin_inset Formula $c>1$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Pour 
+\begin_inset Formula $\rho$
+\end_inset
+
+ il est souvent conseillé de prendre 
+\begin_inset Formula $\rho$
+\end_inset
+
+autour de 0,01 si n est grand (
+\begin_inset Formula $n\geq100$
+\end_inset
+
+) et de prendre un 
+\begin_inset Formula $\rho$
+\end_inset
+
+ plus grand, 
+\begin_inset Formula $\rho\simeq\frac{\ln(n)}{n}$
+\end_inset
+
+ pour 
+\begin_inset Formula $n<100$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Les paramètres 
+\begin_inset Formula $N$
+\end_inset
+
+ et 
+\begin_inset Formula $\rho$
+\end_inset
+
+ peuvent aussi être déterminés de façon itérative : c'est ce qui est fait
+ dans l'algorithme FACE ou dans Homem-de-Mello, T.
+ and Rubinstein, R.
+ (2002).
+ Rare event estimation for static models via cross-entropy and importance
+ sampling.
+ Submitted for publication.
+\end_layout
+
+\begin_layout Section
+Application au mastermind
+\end_layout
+
+\begin_layout Standard
+Dans notre projet, on a 
+\begin_inset Formula $n$
+\end_inset
+
+ boules et 
+\begin_inset Formula $m$
+\end_inset
+
+ couleurs.
+ On numérote les couleurs de 1 à 
+\begin_inset Formula $m$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+On a donc 
+\begin_inset Formula $\mathcal{X}=\left\{ 1,2,\dots,m\right\} ^{n}$
+\end_inset
+
+ .
+\end_layout
+
+\begin_layout Standard
+Les composantes du vecteur 
+\begin_inset Formula $X=(X_{1},\dots,X_{n})\in\mathcal{X}$
+\end_inset
+
+ sont tirées aléatoirement de façons à ce que leur distribution soit déterminée
+ par une suite 
+\begin_inset Formula $p_{1},\dots,p_{n}$
+\end_inset
+
+ de vecteurs de probabilités, la 
+\begin_inset Formula $j$
+\end_inset
+
+ème composante de 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+ étant égale à 
+\begin_inset Formula $p_{ij}=\P(X_{i}=j)$
+\end_inset
+
+.
+ On peut représenter cette loi par une matrice 
+\begin_inset Formula 
+\[
+P=\left(p_{i,j}\right)_{i,j}=\left(\P(X_{i}=j)\right)_{i,j}\in\left\{ \text{{matrices\;stochastiques\;de\;}}\mathcal{M}_{n,m}(\mathbb{R})\right\} 
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+La densité s'écrit :
+\begin_inset Formula 
+\[
+f(X;p)=\prod_{i=1}^{n}\prod_{j=1}^{m}p_{i,j}^{\1_{\left\{ X_{i}=j\right\} }}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Il vient :
+\begin_inset Formula 
+\[
+\ln f(X;p)=\sum_{i=1}^{n}\sum_{j=1}^{m}\1_{\left\{ X_{i}=j\right\} }\ln p_{i,j}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+On suppose dans un premier temps qu'il n'y a pas de lien entre les 
+\begin_inset Formula $p_{i,j}$
+\end_inset
+
+ (comme si on n'avait pas 
+\begin_inset Formula $\sum_{j=1}^{m}p_{i,j}=1$
+\end_inset
+
+) : 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial p_{k,l}}\ln f(X;p)=\frac{\partial}{\partial p_{k,l}}\sum_{j=1}^{m}\1_{\left\{ X_{k}=j\right\} }\ln p_{k,j}=\frac{\1_{\left\{ X_{k}=l\right\} }}{p_{k,l}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Le programme de maximisation peut s'écrire comme un problème de maximisation
+ sous contrainte :
+\begin_inset Formula 
+\[
+\begin{cases}
+\underset{p_{i,j}}{\max} & \sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\ln f(X_{i};v)\\
+s.c & \forall i\::\:\sum_{j=1}^{m}p_{i,j}=1
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Le Lagrangien s'écrit :
+\begin_inset Formula 
+\[
+\mathcal{L}=\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\ln f(X_{i};v)+\sum_{i=1}^{n}\lambda_{i}\left(\sum_{j=1}^{m}p_{i,j}-1\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+La condition d'optimalité en 
+\begin_inset Formula $p_{k,l}$
+\end_inset
+
+ :
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial p_{k,l}}\mathcal{L}=0\implies\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\frac{\1_{\left\{ X_{i,k}=l\right\} }}{p_{k,l}}-\lambda_{k}=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Soit : 
+\begin_inset Formula 
+\[
+\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{i,k}=l\right\} }=\lambda_{k}p_{k,l}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+En sommant sur 
+\begin_inset Formula $l$
+\end_inset
+
+ et en utilisant la condition sur les 
+\begin_inset Formula $p_{i,j}$
+\end_inset
+
+ , il vient :
+\begin_inset Formula 
+\[
+\lambda_{k}=\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\underbrace{\sum_{l=1}^{m}\1_{\left\{ X_{i,k}=l\right\} }}_{=1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+D'où la formule de mise à jour :
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Doublebox
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Formula 
+\[
+p_{k,l}=\frac{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{i,k}=l\right\} }}{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_body
