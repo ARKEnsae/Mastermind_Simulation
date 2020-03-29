@@ -9,24 +9,50 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-```{r, code = readLines("../ShinyApp/global.R"), include=FALSE}
+```{r, code = readLines("../ShinyApp/global.R", encoding="UTF-8"), include=FALSE}
 ```
 
 
-
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+#set.seed(1)
+```
+# m=6 n=4
 
 ```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
-m = 33
-n = 30
-modele <- lancer_algorithme(y=sample(1:m, n, replace = TRUE), n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = TRUE)
+m = 6
+n = 4
+y=sample(1:m, n, replace = FALSE)
+```
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = FALSE)
+tableau <- mise_en_forme_tableau(modele)
+tableau
+```
+  
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = TRUE)
 tableau <- mise_en_forme_tableau(modele)
 tableau
 ```
 
+# m=33 n=30
+
 ```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
 m = 33
 n = 30
-modele <- lancer_algorithme(y=sample(1:m, n, replace = TRUE), n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = FALSE)
+y=sample(1:m, n, replace = FALSE)
+```
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = FALSE)
 tableau <- mise_en_forme_tableau(modele)
 tableau
 ```
+  
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = TRUE)
+tableau <- mise_en_forme_tableau(modele)
+tableau
+```
+
