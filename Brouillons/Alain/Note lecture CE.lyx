@@ -2205,7 +2205,11 @@ Pour
 \begin_inset Formula $\rho$
 \end_inset
 
-autour de 0,01 si n est grand (
+ autour de 0,01 si 
+\begin_inset Formula $n$
+\end_inset
+
+ est grand (
 \begin_inset Formula $n\geq100$
 \end_inset
 
@@ -2240,6 +2244,42 @@ Les paramètres
  Rare event estimation for static models via cross-entropy and importance
  sampling.
  Submitted for publication.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Boxed
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+Dans notre cas, il faut donc prend 
+\begin_inset Formula $N=c\times m\times n$
+\end_inset
+
+ avec 
+\begin_inset Formula $c>1$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
