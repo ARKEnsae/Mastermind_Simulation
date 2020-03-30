@@ -291,11 +291,7 @@ levels
 \begin_inset Formula $\hat{\gamma_{1}},\hat{{\gamma_{2}}},\dots$
 \end_inset
 
- converge vers la valeur 
-\begin_inset Formula $ $
-\end_inset
-
-optimale (ici 
+ converge vers la valeur optimale (ici 
 \begin_inset Formula $n$
 \end_inset
 
@@ -423,7 +419,24 @@ On utilise le même échantillon pour calculer
 \end_inset
 
 Cette condition s’interprète de la façon suivante : pour mettre à jour la
- jème probabilité, on compte le nombre de vecteurs de 
+ 
+\begin_inset Formula $j$
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ieme
+\end_layout
+
+\end_inset
+
+ probabilité, on compte le nombre de vecteurs de 
 \begin_inset Formula $X$
 \end_inset
 
@@ -431,8 +444,25 @@ Cette condition s’interprète de la façon suivante : pour mettre à jour la
 \begin_inset Formula $\hat{\gamma}_{t}$
 \end_inset
 
- et dont la jème composante est égale à 1 et on divise ce nombre par le
- nombre de vecteurs de 
+ et dont la 
+\begin_inset Formula $j$
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ieme
+\end_layout
+
+\end_inset
+
+ composante est égale à 1 et on divise ce nombre par le nombre de vecteurs
+ de 
 \begin_inset Formula $X$
 \end_inset
 
@@ -988,7 +1018,7 @@ Minimiser la distance de Kullback-Leibler entre
 \begin_inset Formula $-\int g^{*}(x)\ln f(x;v)\ud x$
 \end_inset
 
-, soit à résoudre le problème de maximusation :
+, soit à résoudre le problème de maximisation :
 \end_layout
 
 \begin_layout Standard
@@ -1158,20 +1188,7 @@ status open
 
 
 \backslash
-ref{eq:stochasticcounterpart
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-}
+ref{eq:stochasticcounterpart}
 \end_layout
 
 \end_inset
@@ -1221,20 +1238,7 @@ status open
 
 
 \backslash
-ref{eq:stochasticcounterpart
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\xout off
-\uuline off
-\uwave off
-\noun off
-\color none
-}
+ref{eq:stochasticcounterpart}
 \end_layout
 
 \end_inset
@@ -1420,9 +1424,9 @@ textbf{même}
 
  pour résoudre le problème stochastique :
 \begin_inset Formula 
-\[
+\begin{equation}
 \hat{v}_{t}=\underset{v}{\argmax}\;\hat{D}(v)=\underset{v}{\argmax}\frac{1}{N}\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}W(X_{i};u,\hat{v}_{t-1})\ln f(X_{i};v)\label{}
-\]
+\end{equation}
 
 \end_inset
 
@@ -2334,7 +2338,20 @@ Les composantes du vecteur
 \begin_inset Formula $j$
 \end_inset
 
-ème composante de 
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ieme
+\end_layout
+
+\end_inset
+
+ composante de 
 \begin_inset Formula $p_{i}$
 \end_inset
 
@@ -2514,6 +2531,523 @@ p_{k,l}=\frac{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{
 \end_inset
 
 
+\end_layout
+
+\begin_layout Part
+Algorithme de Metropolis
+\end_layout
+
+\begin_layout Section
+Description générale
+\end_layout
+
+\begin_layout Subsection
+Intuition
+\end_layout
+
+\begin_layout Standard
+Le but de l'algorithme de Metropolis-Hastings est de générer des échantillons
+ d'une distribution 
+\begin_inset Formula $P(x)$
+\end_inset
+
+, sachant que l'on connait une fonction 
+\begin_inset Formula $f(x)$
+\end_inset
+
+ proportionnelle à la densité de 
+\begin_inset Formula $P$
+\end_inset
+
+.
+ Remarquons qu'il suffit que 
+\begin_inset Formula $f(x)$
+\end_inset
+
+ soit proportionnelle à la densité de 
+\begin_inset Formula $P$
+\end_inset
+
+, ce n'est pas utile qu'il y ait égalité, c'est notamment utile parce que
+ le calcul du facteur de normalisation est souvent difficile.
+\end_layout
+
+\begin_layout Standard
+Pour générer 
+\begin_inset Formula $P(x)$
+\end_inset
+
+ on va construire itérativement une chaîne de Markov qui converge une asymptotiq
+uement vers une unique loi stationnaire 
+\begin_inset Formula $\pi(x)=P(x)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Une chaîne de Markov est uniquement définie par sa probabilité de transition
+ 
+\begin_inset Formula $P(x'\lvert x)$
+\end_inset
+
+ qui représente la probabilité d'arriver à l'état 
+\begin_inset Formula $x$
+\end_inset
+
+ sachant que l'on est à l'état 
+\begin_inset Formula $x'$
+\end_inset
+
+.
+ On a une unique distribution stationnaire si on a les deux conditions suivantes
+ :
+\end_layout
+
+\begin_layout Enumerate
+Existence : une condition suffisante est que la condition de balance soit
+ vérifiée : 
+\begin_inset Formula $\pi(x)P(x'\lvert x)=\pi(x')P(x\lvert x')$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Unicité : garantie par l'ergodicité des processus markovien vérifiée lorsque
+ le processus est aperiodique (on ne retourne pas au même état à des intervalles
+ fixes) et positive récurrente (on retourne au même étant en un temps fini).
+\end_layout
+
+\begin_layout Subsection
+Algorithme
+\end_layout
+
+\begin_layout Standard
+L'algorithme de Metropolis-Hastings est le suivant :
+\end_layout
+
+\begin_layout Enumerate
+Initialisation :
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+On choisit un état initial 
+\begin_inset Formula $x_{0}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+On fixe 
+\begin_inset Formula $t=0$
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Itération :
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+On prend une densité de probabilité aléatoire arbitraire 
+\begin_inset Formula $g(x'|x_{t})$
+\end_inset
+
+ qui suggère un nouveau candidat pour le prochain échantillon 
+\begin_inset Formula $x'$
+\end_inset
+
+ sachant que l'on est à l'état 
+\begin_inset Formula $x_{t}$
+\end_inset
+
+.
+ La fonction 
+\begin_inset Formula $g$
+\end_inset
+
+ appelée 
+\emph on
+proposal density
+\emph default
+ ou 
+\emph on
+jumping distribution
+\emph default
+.
+ 
+\end_layout
+
+\begin_layout Enumerate
+On calcule la probabilité d'acceptation :
+\begin_inset Formula 
+\[
+A(x',x_{t})=\min\left(1,\,\frac{P(x')}{P(x_{t})}\frac{g(x_{t}|x')}{g(x'|x_{t})}\right)
+\]
+
+\end_inset
+
+Remarquons que si 
+\begin_inset Formula $g$
+\end_inset
+
+ est symétrique (i.e.
+ 
+\begin_inset Formula $g(x|y)=g(y|x)$
+\end_inset
+
+) alors le rapport précédent se simplifie.
+ Un cas clasique est de choisir 
+\begin_inset Formula $g(x|y)$
+\end_inset
+
+ comme étant une distribution gaussienne centrée en 
+\begin_inset Formula $y$
+\end_inset
+
+ : les points proches de 
+\begin_inset Formula $y$
+\end_inset
+
+ ont plus de chances d'être visités.
+\end_layout
+
+\begin_layout Enumerate
+Acceptation ou rejet :
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Un génére une loi uniforme 
+\begin_inset Formula $u\in[0,1]$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Si 
+\begin_inset Formula $u\leq A(x',x_{t})$
+\end_inset
+
+ alors on accepte le nouvel état et 
+\begin_inset Formula $x_{t+1}=x'$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Si 
+\begin_inset Formula $u>A(x',x_{t})$
+\end_inset
+
+ on rejette le nouvel état et on garde l'ancien état 
+\begin_inset Formula $x_{t+1}=x_{t}$
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Incrémentation : 
+\begin_inset Formula $t=t+1$
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Subsection
+Interprétation dans le cas 
+\begin_inset Formula $g$
+\end_inset
+
+ est symétrique
+\end_layout
+
+\begin_layout Standard
+Le principe de l'algorithme est d'essayer de se déplacer aléatoirement dans
+ l'espace, parfois en acceptant de se déplacer et d'autres fois en restant
+ sur place (sur le même état).
+ Le rapport d'acceptation 
+\begin_inset Formula $A(x',x_{t})$
+\end_inset
+
+ indique la probabilité du nouvel échantillon par rapport à la situation
+ actuelle, sous la distribution 
+\begin_inset Formula $P(x)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Si on essaye de se déplacer dans un point qui est plus probable que le point
+ actuel (i.e.
+ : un point qui a une plus grande densité sur 
+\begin_inset Formula $P(x)$
+\end_inset
+
+) alors on va toujours accepter de ce déplacer (
+\begin_inset Formula $A(x',x_{t})=1$
+\end_inset
+
+).
+ Toutefois, si on essaye de de se déplacer vers un point moins probable,
+ on va parfois rejeter le déplace, et plus la baisse relative de probabilité
+ est grande, plus on est susceptible de rejeter le nouveau point.
+\end_layout
+
+\begin_layout Standard
+Ainsi, on a tendance à rester dans des régions à haute densité de 
+\begin_inset Formula $P(x)$
+\end_inset
+
+ (et à renvoyer un grand nombre d'échantillons dans ces régions), tout en
+ visitant occasionnellement les régions à faible densité.
+ Intuitivement, ça explique pourquoi cet algorithme marche et renvoie des
+ échantillons qui suivent la distribution souhaitée 
+\begin_inset Formula $P(x)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Désavantages de l'algorithme Metropolis–Hastings
+\end_layout
+
+\begin_layout Standard
+Par rapport à d'autres algorithme du type 
+\begin_inset CommandInset href
+LatexCommand href
+name "adaptative rejection sampling"
+target "https://en.wikipedia.org/wiki/Rejection_sampling#Adaptive_rejection_sampling"
+literal "false"
+
+\end_inset
+
+ qui génère directement des échantillons indépendants, Metropolis–Hastings
+ et les autres algorithmes MCMC ont plusieurs désavantages :
+\end_layout
+
+\begin_layout Itemize
+Les échantillons sont 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+textbf{corrélés}
+\end_layout
+
+\end_inset
+
+.
+ Même si à long terme il suivent bien 
+\begin_inset Formula $P(x)$
+\end_inset
+
+, un ensemble d'échantillons proches sera corrélé entre eux et ne reflétera
+ pas correctement la distribution.
+ Cela signifie que si on souhaite générer des échantillons indépendants,
+ il faut rejeter la majorité d'entre eux et par exemple ne garder que le
+ 
+\begin_inset Formula $n$
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ieme
+\end_layout
+
+\end_inset
+
+ échantillon, pour un certain 
+\begin_inset Formula $n$
+\end_inset
+
+ fixé (habituellement déterminé en examinant l'autocorrélation entre les
+ échantillons adjacents).
+ L'autocorrélation peut aussi être atténuée en augmentant le 
+\emph on
+jumping width
+\emph default
+ (la taille moyenne du saut, qui est liée à la variance de la distribution
+ de la 
+\emph on
+jumping distribution
+\emph default
+ 
+\begin_inset Formula $g$
+\end_inset
+
+), mais cela va aussi augmenter la probabilité de rejet du saut.
+ Une taille de saut trop grande ou trop petite va mener à une slow-mixing
+ chaîne de Marking, i.e; : un ensemble d'échantillons hautement corrélés,
+ de sorte qu'un très grand nombre d'échantillons sera nécessaire pour obtenir
+ une estimation raisonnable des propriétés de la distribution.
+\end_layout
+
+\begin_layout Itemize
+Même si la chaîne de Markov converge vers la distribution souhaitée, les
+ échantillons initiaux peuvent suivre une distribution très différente,
+ notamment si le point de départ se trouve dans une région à faible densité.
+ En conséquence, une période de 
+\emph on
+burn-in 
+\emph default
+est nécessaire, où les échantillons initiaux sont rejetés (par exemple les
+ 1000 premiers).
+\end_layout
+
+\begin_layout Standard
+Toutefois, la plupart des méthodes d'échantillon de rejet souffre du fléau
+ de la dimension, où la probabilité de rejet augmente de façon exponentielle
+ en fonction du nombre de dimensions.
+ Metropolis – Hastings, ainsi que d'autres méthodes MCMC, n'ont pas ce problème
+ à un tel degré et sont souvent les seules solutions disponibles lorsque
+ le nombre de dimensions de la distribution à échantillonner est élevée.
+ 
+\end_layout
+
+\begin_layout Subsection
+Application à notre projet
+\end_layout
+
+\begin_layout Standard
+Dans notre projet, on prend 
+\begin_inset Formula $P(x)=\exp{(−\lambda d(x,x^{*}))}$
+\end_inset
+
+ avec 
+\begin_inset Formula $d(x,x^{*})$
+\end_inset
+
+ la distance de Hamming entre 
+\begin_inset Formula $x$
+\end_inset
+
+ et 
+\begin_inset Formula $x^{*}$
+\end_inset
+
+ (i.e.
+ : le nombre de positions où les deux permutations 
+\begin_inset Formula $x$
+\end_inset
+
+ et 
+\begin_inset Formula $x^{*}$
+\end_inset
+
+ sont différentes).
+\end_layout
+
+\begin_layout Standard
+Le mécanisme de proposition suggérer est d'inverser deux éléments d'une
+ permutation : si on est à l'état 
+\begin_inset Formula $x_{t}$
+\end_inset
+
+, la proposition 
+\begin_inset Formula $x'$
+\end_inset
+
+ est donnée en inversant deux éléments de 
+\begin_inset Formula $x_{t}$
+\end_inset
+
+.
+ On a donc 
+\begin_inset Formula $g$
+\end_inset
+
+ symétrique : la probabilité de proposer 
+\begin_inset Formula $x$
+\end_inset
+
+ sachant que l'on est en 
+\begin_inset Formula $y$
+\end_inset
+
+ est égale à la probabilité de proposer 
+\begin_inset Formula $y$
+\end_inset
+
+ sachant que l'on est en 
+\begin_inset Formula $x$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Pour l'initialisation 
+\begin_inset Formula $x_{0}$
+\end_inset
+
+ il suffit de prendre une permutation aléatoire.
+\end_layout
+
+\begin_layout Standard
+La probabilité d'acceptation est donc égale à
+\begin_inset Formula 
+\[
+A(x',x_{t})=\min\left(1,\,\mathrm{e^{-\lambda(d(x',x^{*})-d(x_{t},x^{*}))}}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Remarquons (mais je ne sais pas si c'est utile) que :
+\begin_inset Formula 
+\[
+\lvert d(x',x^{*})-d(x_{t},x^{*})\rvert\in\llbracket0,2\rrbracket
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Pour lutter contre l'autocorrélation on peut garder un échantillon sur 7
+ (la corrélation entre 
+\begin_inset Formula $X_{t}$
+\end_inset
+
+ et 
+\begin_inset Formula $X_{t-7}$
+\end_inset
+
+ est nulle).
+ Pour éviter le 
+\emph on
+burn-in
+\emph default
+ on peut aussi enlever les 1 000 premiers échantillons.
 \end_layout
 
 \end_body
