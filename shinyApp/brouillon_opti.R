@@ -33,12 +33,13 @@ library(ompr)
 library(magrittr)
 # ?add_variable
 # bdd : list avec toutes les échantillons
+# hamming à définir (doit déjà être codé quelque part)
 result <- MIPModel() %>%
   add_variable(x_star[i],
                i=1:n,
                type = "integer",lb = 1, ub = m) %>%
   add_variable(lambda, type = "continuous", lb = 0) %>%
-  set_objective(sum_expr(lambda * hamming(bdd[[i]],x_star), i = 1:M), "max")
+  set_objective(sum_expr(lambda * hamming(bdd[[i]],x_star), i = 1:m), "max")
 # n <- 5
 # result <- MIPModel() %>%
 #   add_variable(x_star[i], i = 1:n)
