@@ -7,8 +7,11 @@
 \textclass article
 \begin_preamble
 \usepackage{amsfonts}
+\usepackage{amsmath}
+
 \usepackage{dsfont}
 \usepackage{mathtools}
+\usepackage{graphicx}
 % Nouvelles fonctions
 \renewcommand{\P}{\mathds{P}} %Apparement \P existe déjà ?
 \newcommand\1{\mathds{1}}
@@ -163,7 +166,7 @@ tilting
  simple pour estimer les paramètres optimaux.
 \end_layout
 
-\begin_layout Part
+\begin_layout Section
 Exemple d'un problème d'optimisation combinatoire
 \end_layout
 
@@ -220,6 +223,12 @@ sideways false
 status open
 
 \begin_layout Plain Layout
+\begin_inset Graphics
+	filename boite_noire.png
+
+\end_inset
+
+
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
@@ -560,7 +569,7 @@ On arrête si on rencontre le critère d'arrêt (
 
 \end_layout
 
-\begin_layout Part
+\begin_layout Section
 La méthode CE pour les événements rares
 \begin_inset Separator plain
 \end_inset
@@ -1484,12 +1493,8 @@ Avec
 
 \end_layout
 
-\begin_layout Part
-La méthode de CE pour l'optimisation combinatoire
-\end_layout
-
 \begin_layout Section
-Description générale
+La méthode de CE pour l'optimisation combinatoire
 \end_layout
 
 \begin_layout Subsection
@@ -1957,6 +1962,19 @@ Dans beaucoup d'applications on observe une convergence numérique de
 
 \begin_layout Subsection
 Estimation du maximum de vraisemblance
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+label{sec:emv}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2295,7 +2313,7 @@ Dans notre cas, il faut donc prend
 
 \end_layout
 
-\begin_layout Section
+\begin_layout Subsection
 Application au mastermind
 \end_layout
 
@@ -2419,7 +2437,20 @@ On suppose dans un premier temps qu'il n'y a pas de lien entre les
 \end_layout
 
 \begin_layout Standard
-Le programme de maximisation peut s'écrire comme un problème de maximisation
+On prend maintenant un échantillon de taille 
+\begin_inset Formula $N$
+\end_inset
+
+, 
+\begin_inset Formula $X_{1},\dots,X_{N}\overset{i.i.d}{\sim}X$
+\end_inset
+
+ et on note 
+\begin_inset Formula $X_{i}=(X_{i,1},\dots,X_{i,n})\in\mathcal{X}$
+\end_inset
+
+.
+ Le programme de maximisation peut s'écrire comme un problème de maximisation
  sous contrainte :
 \begin_inset Formula 
 \[
@@ -2533,16 +2564,12 @@ p_{k,l}=\frac{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{
 
 \end_layout
 
-\begin_layout Part
+\begin_layout Section
 Algorithme de Metropolis
 \end_layout
 
-\begin_layout Section
-Description générale
-\end_layout
-
 \begin_layout Subsection
-Intuition
+Intuition de l'algorithme
 \end_layout
 
 \begin_layout Standard
@@ -2932,6 +2959,10 @@ Toutefois, la plupart des méthodes d'échantillon de rejet souffre du fléau
 Application à notre projet
 \end_layout
 
+\begin_layout Subsubsection
+Application de l'algorithme de Metropolis–Hastings
+\end_layout
+
 \begin_layout Standard
 Dans notre projet, on prend 
 \begin_inset Formula $P(x)=\exp{(−\lambda d(x,x^{*}))}$
@@ -3033,6 +3064,20 @@ Remarquons (mais je ne sais pas si c'est utile) que :
 \end_layout
 
 \begin_layout Standard
+Comme 
+\begin_inset Formula $e^{0}=1$
+\end_inset
+
+, si 
+\begin_inset Formula $d(x',x^{*})-d(x_{t},x^{*})\leq0$
+\end_inset
+
+, i.e.
+ : dans la nouvelle proposition il y a au moins un élément mieux placé par
+ rapport à l'état actuel, alors on va forcément accepter ce nouvel état.
+\end_layout
+
+\begin_layout Standard
 Pour lutter contre l'autocorrélation on peut garder un échantillon sur 7
  (la corrélation entre 
 \begin_inset Formula $X_{t}$
@@ -3048,6 +3093,142 @@ Pour lutter contre l'autocorrélation on peut garder un échantillon sur 7
 burn-in
 \emph default
  on peut aussi enlever les 1 000 premiers échantillons.
+\end_layout
+
+\begin_layout Subsubsection
+Application de la méthode de cross-entropy
+\end_layout
+
+\begin_layout Standard
+Qu'en est-il pour l'application de la méthode de cross-entropy avec cette
+ loi ?
+\end_layout
+
+\begin_layout Standard
+Dans cette nouvelle application on a toujours 
+\begin_inset Formula $n$
+\end_inset
+
+ boules et 
+\begin_inset Formula $m$
+\end_inset
+
+ couleurs, mais 
+\begin_inset Formula $m\ge n$
+\end_inset
+
+ et on considère qu'une couleur ne peut apparaitre qu'une fois.
+ La loi est permutation est :
+\begin_inset Formula 
+\[
+\pi(x)\propto\exp{(−\lambda d(x,x^{*}))}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Avec 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ et 
+\begin_inset Formula $x^{*}$
+\end_inset
+
+ à déterminer.
+\end_layout
+
+\begin_layout Standard
+On a 
+\begin_inset Formula $\mathcal{X}=\left\{ (\sigma_{1},\dots,\sigma_{n})\mathrel{}\middle|\mathrel{}\sigma_{i}\in\llbracket0,m\rrbracket\text{ deux à deux différents}\right\} \subset\left\{ 1,2,\dots,m\right\} ^{n}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Soit 
+\begin_inset Formula $X\in\mathcal{X}$
+\end_inset
+
+, on a :
+\begin_inset Formula 
+\[
+f_{X}(x)\propto\exp{(−\lambda d(x,x^{*}))}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+On prend maintenant un échantillon de taille 
+\begin_inset Formula $N$
+\end_inset
+
+, 
+\begin_inset Formula $X_{1},\dots,X_{N}\overset{i.i.d}{\sim}X$
+\end_inset
+
+.
+ La vraisemblance s'écrit 
+\begin_inset Formula 
+\[
+f(X_{1},\dots,X_{N};\lambda,x^{*})\propto\prod_{i=1}^{N}\exp{(−\lambda d(X_{i},x^{*}))}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Le programme de maximisation s'écrit de la façon suivante :
+\begin_inset Formula 
+\[
+\underset{\lambda,x^{*}}{\max}\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\ln f(X_{i};\lambda,x^{*})=\underset{\lambda,x^{*}}{\min}\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\lambda d(X_{i},x^{*})
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Il y a donc 
+\begin_inset Formula $n+1$
+\end_inset
+
+ paramètres
+\end_layout
+
+\begin_layout Standard
+La distance de Hamming n'étant pas différentiable, on ne peut trouver une
+ réponse analytique.
+ On va donc utiliser une méthode d'approximation pour estimer les paramètres.
+ Comme souligné dans la partie 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+label{sec:emv}
+\end_layout
+
+\end_inset
+
+, cela revient à calculer l'estimateur de maximum de vraisemblance sur les
+ observations qui ont un score plus grand que 
+\begin_inset Formula $\hat{\gamma}_{t}.$
+\end_inset
+
+
 \end_layout
 
 \end_body
