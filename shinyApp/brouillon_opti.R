@@ -32,7 +32,7 @@ optim_nm(fun = hi, k = n+1, start = seq(0,n))
 library(ompr)
 library(magrittr)
 # ?add_variable
-# bdd : list avec toutes les
+# bdd : list avec toutes les échantillons
 result <- MIPModel() %>%
   add_variable(x_star[i],
                i=1:n,
