@@ -1,113 +1,134 @@
 
 function(input, output, session) {
-  
-  
-  
+
   ########## Fonctions servant aux couleurs des billes
   
   updateBoulesY <- function(input, output, n) {
-      
-      output$guesscell1 <- renderText({
-       
-        js$drawCircle('guesscell1js',  colorsInput()[1])
-      })
-      
-      output$guesscell2 <- renderText({
-        if(n>=2){
-          js$drawCircle('guesscell2js', colorsInput()[2])  
+    
+    for (i in 1:6){
+      requete <- sprintf("
+      output$guesscell%i <- renderText({
+        if(n>=%i){
+          js$drawCircle('guesscell%ijs', colorsInput()[%i])
         }else{
-          js$clearCircle('guesscell2js')
+          js$clearCircle('guesscell%ijs')
         }
       })
-      output$guesscell3 <- renderText({
-        if(n>=3){
-          js$drawCircle('guesscell3js',  colorsInput()[3]) 
-        }else{
-          js$clearCircle('guesscell3js')
-        }
-        
-      })
-      output$guesscell4 <- renderText({
-        if(n>=4){
-          js$drawCircle('guesscell4js',  colorsInput()[4])
-        }else{
-          js$clearCircle('guesscell4js')
-        }
-        
-      })
-   
-      output$guesscell5 <- renderText({
-        if(n>=5){
-          js$drawCircle('guesscell5js',  colorsInput()[5])
-        }else{
-          js$clearCircle('guesscell5js')
-        }
-        
-      })
-      
-      output$guesscell6 <- renderText({
-        if(n>=6){
-          js$drawCircle('guesscell6js',  colorsInput()[6])
-        }else{
-          js$clearCircle('guesscell6js')
-        }
-        
-      })
+      ", i, i, i, i, i)
+      eval(parse(text = requete))
+    }
+
+      # output$guesscell1 <- renderText({
+      # 
+      #   js$drawCircle('guesscell1js',  colorsInput()[1])
+      # })
+      # 
+      # output$guesscell2 <- renderText({
+      #   if(n>=2){
+      #     js$drawCircle('guesscell2js', colorsInput()[2])
+      #   }else{
+      #     js$clearCircle('guesscell2js')
+      #   }
+      # })
+      # output$guesscell3 <- renderText({
+      #   if(n>=3){
+      #     js$drawCircle('guesscell3js',  colorsInput()[3])
+      #   }else{
+      #     js$clearCircle('guesscell3js')
+      #   }
+      # 
+      # })
+      # output$guesscell4 <- renderText({
+      #   if(n>=4){
+      #     js$drawCircle('guesscell4js',  colorsInput()[4])
+      #   }else{
+      #     js$clearCircle('guesscell4js')
+      #   }
+      # 
+      # })
+      # 
+      # output$guesscell5 <- renderText({
+      #   if(n>=5){
+      #     js$drawCircle('guesscell5js',  colorsInput()[5])
+      #   }else{
+      #     js$clearCircle('guesscell5js')
+      #   }
+      # 
+      # })
+      # 
+      # output$guesscell6 <- renderText({
+      #   if(n>=6){
+      #     js$drawCircle('guesscell6js',  colorsInput()[6])
+      #   }else{
+      #     js$clearCircle('guesscell6js')
+      #   }
+      # 
+      # })
       output
     }
   
   updateBoulesIter <- function(input, output, n) {
-    
-    
-    output$itercell1 <- renderText({
-      if(input$iter2>1){
-        js$drawCircle('itercell1js',  colorsPropInput()[1])
+    for (i in 1:6){
+      requete <- sprintf("
+      output$itercell%i <- renderText({
+      if(n>=%i){
+        js$drawCircle('itercell%ijs',  colorsPropInput()[%i])
       }else{
-        js$clearCircle('itercell1js')
+        js$clearCircle('itercell%ijs')
       }
     })
-    
-    output$itercell2 <- renderText({
-      if(n>=2 &input$iter2>1){
-        js$drawCircle('itercell2js', colorsPropInput()[2])  
-      }else{
-        js$clearCircle('itercell2js')
-      }
-    })
-    output$itercell3 <- renderText({
-      if(n>=3 & input$iter2>1){
-        js$drawCircle('itercell3js',  colorsPropInput()[3]) 
-      }else{
-        js$clearCircle('itercell3js')
-      }
-      
-    })
-    output$itercell4 <- renderText({
-      if(n>=4 & input$iter2>1){
-        js$drawCircle('itercell4js',  colorsPropInput()[4])
-      }else{
-        js$clearCircle('itercell4js')
-      }
-      
-    })
-    
-    output$itercell5 <- renderText({
-      if(n>=5 & input$iter2>1){
-        js$drawCircle('itercell5js',  colorsInput()[5])
-      }else{
-        js$clearCircle('itercell5js')
-      }
-      
-    })
-    
-    output$itercell6 <- renderText({
-      if(n>=6 & input$iter2>1){
-        js$drawCircle('itercell6js',  colorsInput()[6])
-      }else{
-        js$clearCircle('itercell6js')
-      }
-      
-    })
+      ", i, i, i, i, i)
+      eval(parse(text = requete))
+    }
+    # output$itercell1 <- renderText({
+    #   if(n>=1 & input$iter2>1){
+    #     js$drawCircle('itercell1js',  colorsPropInput()[1])
+    #   }else{
+    #     js$clearCircle('itercell1js')
+    #   }
+    # })
+    # 
+    # output$itercell2 <- renderText({
+    #   if(n>=2 &input$iter2>1){
+    #     js$drawCircle('itercell2js', colorsPropInput()[2])
+    #   }else{
+    #     js$clearCircle('itercell2js')
+    #   }
+    # })
+    # output$itercell3 <- renderText({
+    #   if(n>=3 & input$iter2>1){
+    #     js$drawCircle('itercell3js',  colorsPropInput()[3])
+    #   }else{
+    #     js$clearCircle('itercell3js')
+    #   }
+    # 
+    # })
+    # output$itercell4 <- renderText({
+    #   if(n>=4 & input$iter2>1){
+    #     js$drawCircle('itercell4js',  colorsPropInput()[4])
+    #   }else{
+    #     js$clearCircle('itercell4js')
+    #   }
+    # 
+    # })
+    # 
+    # output$'itercell5' <- renderText({
+    #   if(n>=5 & input$iter2>1){
+    #     js$drawCircle('itercell5js',  colorsInput()[5])
+    #   }else{
+    #     js$clearCircle('itercell5js')
+    #   }
+    # 
+    # })
+    # 
+    # output$'itercell6' <- renderText({
+    #   if(n>=6 & input$iter2>1){
+    #     js$drawCircle('itercell6js',  colorsInput()[6])
+    #   }else{
+    #     js$clearCircle('itercell6js')
+    #   }
+    # 
+    # })
     output
   }
   
@@ -118,10 +139,12 @@ function(input, output, session) {
   }, ignoreNULL = FALSE)
   
   colorsPropInput <- eventReactive(c(input$tirage,input$iter2), {
-    matrice <- (matricesInput()$P_hat_liste)[[input$iter2]]
-    prop <- matrice_to_proposition(matrice)
-    couleurs <- colors[prop]
-    return(couleurs)
+    if(!is.null(input$iter2)){
+      matrice <- (matricesInput()$P_hat_liste)[[input$iter2]]
+      prop <- meilleure_proposition(matrice)
+      couleurs <- colors[prop]
+      return(couleurs)
+    }
   })
   
   colorsInput <- eventReactive(yInput(), {
@@ -130,7 +153,11 @@ function(input, output, session) {
   }, ignoreNULL = FALSE)
  
   output$iter <- renderUI({
-    sliderInput("iter2", label=NULL,min = 1, max = input$maxIters, value = 1,step = 1) 
+    default_value <- 1
+    # Si on veut commencer par défaut à la simulation de convergence
+    # if(!is.null(matricesInput()$indice_stop))
+    #   default_value <- matricesInput()$indice_stop
+    sliderInput("iter2", label=NULL,min = 1, max = input$maxIters, value = default_value,step = 1) 
   })
   
   output$N0 <- renderUI({
@@ -139,9 +166,6 @@ function(input, output, session) {
                  min = 0, max = 2*C*input$n*input$m)
   })
   
-  
-  
-
   
   # matricesInput <- eventReactive(c(input$lancer_modele,input$tirage,input$n,input$m), {
   matricesInput<- reactive({
@@ -161,9 +185,12 @@ function(input, output, session) {
   
   
   graphInput <- eventReactive(c(input$tirage,input$n,input$m,input$iter2), {
-    return(
-      dessiner_histo(matricesInput()$P_hat_liste,input$iter2,colors[1:input$m])
+    if(!is.null(input$iter2)){
+      return(
+        dessiner_histo(matricesInput()$P_hat_liste,input$iter2,colors[1:input$m])
       )
+    }
+    
   }, ignoreNULL = FALSE)
   
   output$graph <- renderPlot({
@@ -184,8 +211,7 @@ function(input, output, session) {
   })
   
   output$texte_iter <- renderText({
-    
-    if(input$iter2>1){
+    if(!is.null(input$iter2)){
       p_min_max = p_min_max(matricesInput()$P_hat_liste[[input$iter2]])
       texte <- paste0(
         "Gamma : ",round((matricesInput()$gammas_hat)[input$iter2],3),"</br>",
@@ -195,16 +221,30 @@ function(input, output, session) {
         "max : ", round(p_min_max$max,4)," / ",
         "min_max : ", round(p_min_max$min_max,4),"</br>",
         
-      #  "Meilleur score :",(matricesInput()$meilleur_scores)[input$iter2],
+        #  "Meilleur score :",(matricesInput()$meilleur_scores)[input$iter2],
         "Meilleure proposition :"
       )
-    } else{
-      texte <- "</br></br></br></br></br></br></br>"
-      
+      return(texte)
     }
-
+    
+    # if(input$iter2>1){
+    #   p_min_max = p_min_max(matricesInput()$P_hat_liste[[input$iter2]])
+    #   texte <- paste0(
+    #     "Gamma : ",round((matricesInput()$gammas_hat)[input$iter2],3),"</br>",
+    #     "Smax : ", round((matricesInput()$s_max)[input$iter2],3),"</br>",
+    #     "min : ", round(p_min_max$min,4)," / ",
+    #     "max_min : ", round(p_min_max$max_min,4),"</br>",
+    #     "max : ", round(p_min_max$max,4)," / ",
+    #     "min_max : ", round(p_min_max$min_max,4),"</br>",
+    #     
+    #   #  "Meilleur score :",(matricesInput()$meilleur_scores)[input$iter2],
+    #     "Meilleure proposition :"
+    #   )
+    # } else{
+    #   texte <- "</br></br></br></br></br></br></br>"
+    #   
+    # }
   
-    return(texte)
   })
   
  

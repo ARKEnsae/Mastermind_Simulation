@@ -5,11 +5,12 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 ```
 
 
-```{r, code = readLines("../ShinyApp/global.R", encoding="UTF-8"), include=FALSE}
+```{r, include=FALSE}
+source("../ShinyApp/global.R", encoding="UTF-8",chdir = TRUE)
 ```
 
 

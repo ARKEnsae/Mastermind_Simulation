@@ -21,14 +21,17 @@ fluidPage(
              windowTitle="windowtitle", 
              includeCSS("www/template_mastermind.css"),
              tabPanel("Simulations",
-                    sidebarLayout(position = "right",
+                      sidebarLayout(position = "right",
                                     fluidRow(column(width = 4,wellPanel(id="sidebar", 
                                                                         tags$div(id = "module_css",
-                                                                                fluidRow(
-                                                                                  column(6,numericInput("m", "Couleurs (m)", value = 6, 
-                                  min = 0, max = 10)),                            column(6,numericInput("n", "Billes (n)", value = 4,                                         min = 0, max = 6))                            ),
-
-           fluidRow(        
+                                                                                 fluidRow(
+                                                                                   column(6,numericInput("m", "Couleurs (m)", value = 6, 
+                                                                                                         min = 1, max = 10)),                            
+                                                                                   column(6,numericInput("n", "Billes (n)", value = 4,                                         
+                                                                                                         min = 1, max = 6))
+                                                                                   ),
+                                                                                 
+                                                                                 fluidRow(        
                                   
              column(7,HTML("Combinaison cachée (y) : ")),            
               column(5,switchInput(inputId = "avec_remise",
