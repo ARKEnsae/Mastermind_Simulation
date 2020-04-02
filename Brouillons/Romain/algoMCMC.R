@@ -3,8 +3,8 @@ library(mvtnorm)
 library(gridExtra)
 library(forecast)
 
-x1 <- matrix(c(1,2,3,4),nrow= 1, ncol = 4)
-x2 <- matrix(c(1,3,2,4),nrow= 1, ncol = 4)
+m <- 4
+n <- 4
 
 # DEFINITION DE LA DENSITE PI(X°)
 pi_density <- function(x,lambda,x_etoiles){
@@ -22,7 +22,7 @@ inverse_deux_elements <- function(X){
 
 # METROPOLIS HASTINGS
 pi_density_MCMC <- function(numSim, lambda, x_etoiles){
-  X <-matrix(rep(x_etoiles,numSim),numSim,length(x_etoiles),byrow = T)
+  X <-matrix(rep(sample(1:m,n),numSim),numSim,n,byrow = T)
   for (t in (1:(numSim-1))){
     Xprop=inverse_deux_elements(X[t,])
     
@@ -36,10 +36,28 @@ pi_density_MCMC <- function(numSim, lambda, x_etoiles){
   return(X)
 }
 
+# ENLEVER BURN-IN ET TRAITER AUTO_CORR
+
+modif_metro <- function(x){
+  x_temp <- x[1000:dim(x)[1],]
+  resultat <- acf(x_temp,plot=F)
+  indice <- which.max(as.integer(abs(resultat$acf)<=1.95/sqrt(resultat$n.used)))-1
+  x_temp_acf <- x_temp[seq(1,dim(x_temp)[1],indice),]
+  res <- vector("list",dim(x_temp_acf)[1])
+  for(i in 1:dim(x_temp_acf)[1]){
+    val <- c()
+    for(j in 1:dim(x_temp_acf)[2]){
+      val <- c(val,x_temp_acf[i,j])
+    }
+    res[[i]] <- val
+  }
+  res
+}
+
 # TESTS
-nSim=5000
-x_etoiles = x1 # 1 2 3 4
-lambda=c(0.001,0.1,0.5,1)
+nSim=10000
+x_etoiles = sample(1:m,n)
+lambda=c(0.001,0.01,0.1)
 out <- pi_density_MCMC(nSim,lambda,x_etoiles)
 
 # PLOT ACF / TRACE
@@ -51,7 +69,7 @@ plotTrace<-lapply(lambda,function(lambda){
     labs(title=paste('trace plot for X1\n', 'lambda=',lambda),x='',y='')
 }
 )
-out[,1]
+result_acf <- acf(out[,1])
 
 plotACF<-lapply(lambda,function(lambda){
   out<-pi_density_MCMC(nSim,lambda,x_etoiles);
@@ -62,3 +80,6 @@ plotACF<-lapply(lambda,function(lambda){
 
 grid.arrange(grobs=plotTrace)
 grid.arrange(grobs=plotACF)
+
+test <- modif_metro(out)
+test

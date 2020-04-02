@@ -12,15 +12,14 @@ sample_ark <- function(x, n, probas, replace = TRUE){
   resultat = c()
   if(replace){
     for(k in 1:n){
-      indice = round(runif(1,1,taille))
+      indice = as.integer(runif(1,1,taille+1))
       resultat = c(resultat,choix[indice])
     } 
-    
   } else {
     sous_choix = choix
     for(k in 1:n){
       taille_sc = length(sous_choix)
-      indice = round(runif(1,1,taille_sc))
+      indice = as.integer(runif(1,1,taille_sc+1))
       resultat = c(resultat,sous_choix[indice])
       sous_choix = sous_choix[sous_choix != sous_choix[indice]]
     } 
@@ -31,4 +30,8 @@ sample_ark <- function(x, n, probas, replace = TRUE){
 for(i in 1:100){
   print(sample_ark(1:10,3,c(0.1111,0.1111,0.1111,0.1111,0.1111
                             ,0.1111,0.1111,0.1111,0.1111,1-0.9999),replace=FALSE))
+}
+
+for(i in 1:100){
+  print(sample_ark(1:10,3,rep(0.1,10),replace=FALSE))
 }
