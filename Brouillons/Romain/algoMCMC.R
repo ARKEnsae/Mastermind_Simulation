@@ -3,15 +3,12 @@ library(mvtnorm)
 library(gridExtra)
 library(forecast)
 
-m <- 4
-n <- 4
-
-# DEFINITION DE LA DENSITE PI(X°)
+# Définition de la densité PI(X)
 pi_density <- function(x,lambda,x_etoiles){
   return(exp(-lambda*sum(x != x_etoiles)))
 }
 
-# FONCTION INVERSE DEUX ELEMENTS
+# Fonction qui permet d'inverser deux éléments d'une permutation
 inverse_deux_elements <- function(X){
   indices = sample(1:length(X),2)
   temp = X[indices[1]]
@@ -20,7 +17,7 @@ inverse_deux_elements <- function(X){
   return(X)
 }
 
-# METROPOLIS HASTINGS
+# Fonction pour appliquer l'algo de Metropolis Hastings
 pi_density_MCMC <- function(numSim, lambda, x_etoiles){
   X <-matrix(rep(sample(1:m,n),numSim),numSim,n,byrow = T)
   for (t in (1:(numSim-1))){
@@ -36,7 +33,7 @@ pi_density_MCMC <- function(numSim, lambda, x_etoiles){
   return(X)
 }
 
-# ENLEVER BURN-IN ET TRAITER AUTO_CORR
+# Traiter le burn-in et les auto-corrélations (éventuellement à modif pour burn-in)
 
 modif_metro <- function(x){
   x_temp <- x[1000:dim(x)[1],]
@@ -51,16 +48,36 @@ modif_metro <- function(x){
     }
     res[[i]] <- val
   }
-  res
+  return(res)
 }
 
-# TESTS
+# Fonction à utiliser qui renvoie un échantillon indépendant de N X_i qui suivent la loi PI(X) pour lambda et x_etoiles
+# donnés
+
+hamming <- function(N,lambda, x_etoiles, numSim = 10000){
+  out <- pi_density_MCMC <- function(numSim, lambda, x_etoiles)
+  out_traite <- modif_metro(out)
+  indices <- sample(1:length(out_traite),N)
+  return(out_traite[indices])
+}
+
+#########
+# TESTS #
+#########
+
+m <- 4
+n <- 4
 nSim=10000
 x_etoiles = sample(1:m,n)
-lambda=c(0.001,0.01,0.1)
+lambda=0.1
 out <- pi_density_MCMC(nSim,lambda,x_etoiles)
+out_hamming <- hamming(n,lambda,x_etoiles)
 
-# PLOT ACF / TRACE
+
+
+####################
+# PLOT ACF / TRACE #
+####################
 
 plotTrace<-lapply(lambda,function(lambda){
   out<-pi_density_MCMC(nSim,lambda,x_etoiles);
@@ -69,17 +86,12 @@ plotTrace<-lapply(lambda,function(lambda){
     labs(title=paste('trace plot for X1\n', 'lambda=',lambda),x='',y='')
 }
 )
-result_acf <- acf(out[,1])
-
 plotACF<-lapply(lambda,function(lambda){
   out<-pi_density_MCMC(nSim,lambda,x_etoiles);
   ggAcf(out[,1])+
     labs(title=paste('ACF for X1\n','lambda=',lambda))
 }
 )
-
 grid.arrange(grobs=plotTrace)
 grid.arrange(grobs=plotACF)
 
-test <- modif_metro(out)
-test
