@@ -63,8 +63,12 @@ initialisation_sample_sans_remise <- function(m, n, N, P_hat){
   for(it in 1:N){ #X : Nxn   Phat : nxm
     couleurs_restantes <- 1:m
     for(i in 1:n){
-      X[it,i] <- sample(couleurs_restantes, 1,
-                        prob = P_hat[i,couleurs_restantes])
+      if(length(couleurs_restantes)>1){
+        X[it,i] <- sample(couleurs_restantes, 1,
+                          prob = P_hat[i,couleurs_restantes])
+      }else{
+        X[it,i] <- couleurs_restantes
+      }
       couleurs_restantes <- setdiff(couleurs_restantes,
                                     X[it,i])
     }
