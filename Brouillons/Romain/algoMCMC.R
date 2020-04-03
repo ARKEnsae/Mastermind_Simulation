@@ -55,7 +55,7 @@ modif_metro <- function(x){
 # donnés
 
 hamming <- function(N,lambda, x_etoiles, numSim = 10000){
-  out <- pi_density_MCMC <- function(numSim, lambda, x_etoiles)
+  out <- pi_density_MCMC(numSim, lambda, x_etoiles)
   out_traite <- modif_metro(out)
   indices <- sample(1:length(out_traite),N)
   return(out_traite[indices])
@@ -67,12 +67,18 @@ hamming <- function(N,lambda, x_etoiles, numSim = 10000){
 
 m <- 4
 n <- 4
-nSim=10000
+nSim=100000
 x_etoiles = sample(1:m,n)
 lambda=0.1
-out <- pi_density_MCMC(nSim,lambda,x_etoiles)
-out_hamming <- hamming(n,lambda,x_etoiles)
+out_hamming <- hamming(n,lambda,x_etoiles,nSim)
 
+
+# ACF de ce qu'on obtient
+out <- pi_density_MCMC(nSim,lambda,x_etoiles)
+x_temp <- out[1000:dim(out)[1],]
+resultat <- acf(x_temp,plot=F)
+indice <- which.max(as.integer(abs(resultat$acf)<=1.95/sqrt(resultat$n.used)))-1
+x_temp_acf <- x_temp[seq(1,dim(x_temp)[1],indice),]
 
 
 ####################
@@ -88,7 +94,7 @@ plotTrace<-lapply(lambda,function(lambda){
 )
 plotACF<-lapply(lambda,function(lambda){
   out<-pi_density_MCMC(nSim,lambda,x_etoiles);
-  ggAcf(out[,1])+
+  ggAcf(x_temp_acf[,1])+
     labs(title=paste('ACF for X1\n','lambda=',lambda))
 }
 )
