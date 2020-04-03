@@ -44,7 +44,7 @@ nb_boules_blanches <- function(x, y){
 # m = nb couleurs
 # n = nb boules
 # N = taille
-initialisation_sample <- function(m, n, N, P_hat, avec_remise = TRUE){
+initialisation_sample <- function(m, n, N, P_hat = NULL, avec_remise = TRUE){
   if(avec_remise){
     initialisation_sample_avec_remise(m, n, N, P_hat)
   } else{
