@@ -81,12 +81,12 @@ lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
     x_star <- sample(x_star,size = 1)
     x_star <- X_top[x_star,]
     
-    # Ou de manière équivalente
+    # Ou autre façon : 
     # permutations_top <- apply(X_top,1,paste0,collapse=",")
     # comptage_permutations_top <- table(permutations_top)
     # comptage_permutations_top[paste0(x_star,collapse=",")]
-    # x_star <- sample(which(comptage_permutations_top == max(comptage_permutations_top)),1)
-    # x_star <- names(comptage_permutations_top)[x_star]
+    # x_star <- which(comptage_permutations_top == max(comptage_permutations_top))
+    # x_star <- names(x_star)[sample(length(x_star),1)]
     # x_star <- as.numeric(strsplit(x_star,",")[[1]])
 
     lambda <- param_liste[[iter]]$lambda  - param_liste[[1]]$lambda /(maxIters+1)
