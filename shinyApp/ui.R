@@ -28,18 +28,13 @@ fluidPage(
                                                                                    column(6,numericInput("m", "Couleurs (m)", value = 6, 
                                                                                                          min = 1, max = 10)),                            
                                                                                    column(6,numericInput("n", "Billes (n)", value = 4,                                         
-                                                                                                         min = 1, max = 6))
+                                                                                                         min = 1, max = 8))
                                                                                    ),
                                                                                  
                                                                                  fluidRow(        
                                   
-             column(7,HTML("Combinaison cachée (y) : ")),            
-              column(5,switchInput(inputId = "avec_remise",
-                                  value = TRUE,label="remise",
-                                  size="normal",
-                                  onStatus = "dreamrs",
-                                  onLabel = "avec",
-                                  offLabel = "sans"))                           
+             column(5,HTML("Combinaison</br>cachée (y) : ")),            
+             column(7,actionButton("tirage", "Changer\ncombinaison"))                        
              ),                     
                                                             
                                                                                
@@ -51,8 +46,10 @@ fluidPage(
                                            column(1, htmlOutput(guesscell3)),
                                            column(1, htmlOutput(guesscell4)),
                                            column(1, htmlOutput(guesscell5)),  
-                                           column(1, htmlOutput(guesscell6))
-                                  ),
+                                           column(1, htmlOutput(guesscell6)),
+                                           column(1, htmlOutput(guesscell7)),
+                                           column(1, htmlOutput(guesscell8))
+                                           ),
                                   
                                   fixedRow(style = "background-color:#ecf0f1;",
                                            useShinyjs(),
@@ -93,13 +90,45 @@ fluidPage(
                                                               width = canvas_width,
                                                               height = canvas_height
                                                   )
-                                           )                                                              ),
+                                           ),
+                                           column(1,
+                                                  tags$canvas(id = 'guesscell7js',
+                                                              width = canvas_width,
+                                                              height = canvas_height
+                                                  )
+                                           ),
+                                           column(1,
+                                                  tags$canvas(id = 'guesscell8js',
+                                                              width = canvas_width,
+                                                              height = canvas_height
+                                                  )
+                                           )
+                                           
+                                           
+                                  ),
                                   
                                                                                 
-          actionButton("tirage", "Changer combinaison"),
-          br(),
-          h3("Paramètres du modèles"),
+          # switchInput(inputId = "avec_remise",
+          #                value = TRUE,label="remise",
+          #                size="normal",
+          #                onStatus = "dreamrs",
+          #                onLabel = "avec",
+          #                offLabel = "sans"),
+          h3("Paramètres du modèle"),
           hr(),
+          prettyRadioButtons(inputId = "methode",
+                        label = "Méthode",
+                        shape = "curve",
+                        outline = FALSE,
+                        thick = FALSE,
+                        fill = FALSE,
+                        plain = FALSE,
+                        animation = "smooth",
+                        icon = icon("check-circle"),
+                        inline = FALSE,
+                        choices = c("Tirage avec remise" = "q1",
+                         "Tirage sans remise" = "q2",
+                         "Loi avec distance de Hamming" = "q3")),
           
           fluidRow(
             column(8,sliderInput("maxIters", "Nombre d'itérations (maxIters)",min = 1, max = 50, value = 20)),
@@ -127,14 +156,9 @@ fluidPage(
 fluidRow(
 column(6,
        
-       fluidRow(
-         column(8,
-                htmlOutput("titre_iter"),
-                uiOutput("iter")), 
-         column(4, br(),br(),br(),br(), 
-                switchInput(inputId = "film", value = FALSE, label="film",size="small",onStatus = "dreamrs")) #marche pas
-       ),
-       
+      # switchInput(inputId = "film", value = FALSE, label="film",size="small",onStatus = "dreamrs"), 
+       htmlOutput("titre_iter"),
+       uiOutput("iter"), 
         uiOutput("texte_iter"),
     
                 
@@ -146,7 +170,9 @@ column(6,
                          column(1, htmlOutput(itercell3)),
                          column(1, htmlOutput(itercell4)),
                          column(1, htmlOutput(itercell5)),  
-                         column(1, htmlOutput(itercell6))
+                         column(1, htmlOutput(itercell6)),
+                         column(1, htmlOutput(itercell7)),
+                         column(1, htmlOutput(itercell8))
                 ),
                 
                 fixedRow(style = "background-color:#ffffff;",
@@ -189,13 +215,25 @@ column(6,
                                             width = canvas_width,
                                             height = canvas_height
                                 )
+                         ),
+                         column(1,
+                                tags$canvas(id = 'itercell7js',
+                                            width = canvas_width,
+                                            height = canvas_height
+                                )
+                         ),                         
+                         column(1,
+                                tags$canvas(id = 'itercell8js',
+                                            width = canvas_width,
+                                            height = canvas_height
+                                )
                          )
-                )
+                                         )
        
        
        
        ),
-column(6,plotOutput("graph", width = "100%", height = "300px"))
+column(6,uiOutput("vhat"))
 )
                                                            
                                                   ),

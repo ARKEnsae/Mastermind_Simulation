@@ -5,11 +5,11 @@ function(input, output, session) {
   
   updateBoulesY <- function(input, output, n) {
     
-    for (i in 1:6){
+    for (i in 1:8){
       requete <- sprintf("
       output$guesscell%i <- renderText({
         if(n>=%i){
-          js$drawCircle('guesscell%ijs', colorsInput()[%i])
+          js$drawCircle('guesscell%ijs', colorsYInput()[%i])
         }else{
           js$clearCircle('guesscell%ijs')
         }
@@ -20,59 +20,17 @@ function(input, output, session) {
 
       # output$guesscell1 <- renderText({
       # 
-      #   js$drawCircle('guesscell1js',  colorsInput()[1])
-      # })
-      # 
-      # output$guesscell2 <- renderText({
-      #   if(n>=2){
-      #     js$drawCircle('guesscell2js', colorsInput()[2])
-      #   }else{
-      #     js$clearCircle('guesscell2js')
-      #   }
-      # })
-      # output$guesscell3 <- renderText({
-      #   if(n>=3){
-      #     js$drawCircle('guesscell3js',  colorsInput()[3])
-      #   }else{
-      #     js$clearCircle('guesscell3js')
-      #   }
-      # 
-      # })
-      # output$guesscell4 <- renderText({
-      #   if(n>=4){
-      #     js$drawCircle('guesscell4js',  colorsInput()[4])
-      #   }else{
-      #     js$clearCircle('guesscell4js')
-      #   }
-      # 
-      # })
-      # 
-      # output$guesscell5 <- renderText({
-      #   if(n>=5){
-      #     js$drawCircle('guesscell5js',  colorsInput()[5])
-      #   }else{
-      #     js$clearCircle('guesscell5js')
-      #   }
-      # 
-      # })
-      # 
-      # output$guesscell6 <- renderText({
-      #   if(n>=6){
-      #     js$drawCircle('guesscell6js',  colorsInput()[6])
-      #   }else{
-      #     js$clearCircle('guesscell6js')
-      #   }
-      # 
+      #   js$drawCircle('guesscell1js',  colorsYInput()[1])
       # })
       output
     }
   
   updateBoulesIter <- function(input, output, n) {
-    for (i in 1:6){
+    for (i in 1:8){ ## new : input$methode!='q3'
       requete <- sprintf("
       output$itercell%i <- renderText({
-      if(n>=%i){
-        js$drawCircle('itercell%ijs',  colorsPropInput()[%i])
+      if(n>=%i & input$methode!='q3'){
+        js$drawCircle('itercell%ijs',  colorsIterInput()[%i])
       }else{
         js$clearCircle('itercell%ijs')
       }
@@ -82,72 +40,72 @@ function(input, output, session) {
     }
     # output$itercell1 <- renderText({
     #   if(n>=1 & input$iter2>1){
-    #     js$drawCircle('itercell1js',  colorsPropInput()[1])
+    #     js$drawCircle('itercell1js',  colorsIterInput()[1])
     #   }else{
     #     js$clearCircle('itercell1js')
     #   }
     # })
     # 
-    # output$itercell2 <- renderText({
-    #   if(n>=2 &input$iter2>1){
-    #     js$drawCircle('itercell2js', colorsPropInput()[2])
-    #   }else{
-    #     js$clearCircle('itercell2js')
-    #   }
-    # })
-    # output$itercell3 <- renderText({
-    #   if(n>=3 & input$iter2>1){
-    #     js$drawCircle('itercell3js',  colorsPropInput()[3])
-    #   }else{
-    #     js$clearCircle('itercell3js')
-    #   }
-    # 
-    # })
-    # output$itercell4 <- renderText({
-    #   if(n>=4 & input$iter2>1){
-    #     js$drawCircle('itercell4js',  colorsPropInput()[4])
-    #   }else{
-    #     js$clearCircle('itercell4js')
-    #   }
-    # 
-    # })
-    # 
-    # output$'itercell5' <- renderText({
-    #   if(n>=5 & input$iter2>1){
-    #     js$drawCircle('itercell5js',  colorsInput()[5])
-    #   }else{
-    #     js$clearCircle('itercell5js')
-    #   }
-    # 
-    # })
-    # 
-    # output$'itercell6' <- renderText({
-    #   if(n>=6 & input$iter2>1){
-    #     js$drawCircle('itercell6js',  colorsInput()[6])
-    #   }else{
-    #     js$clearCircle('itercell6js')
-    #   }
-    # 
-    # })
     output
   }
   
+  updateBoulesXstar <- function(input, output, n) {
+    
+    
+    for (i in 1:8){
+      requete <- sprintf("
+                   output$xstarcell%i <- renderText({
+                        if(n>=%i){
+              js$drawCircle('xstarcell%ijs', colorsXstarInput()[%i])
+    }else{
+                         js$clearCircle('xstarcell%ijs')
+    }
+  })
+                         ", i, i, i, i, i)
+      eval(parse(text = requete))
+    }
+    
+    output
+}
   
-  yInput <- eventReactive(c(input$tirage,input$m,input$n,input$avec_remise), {
-    y <- initialiser_y(m=input$m,n=input$n, avec_remise = input$avec_remise)
+  
+  
+  yInput <- eventReactive(c(input$tirage,input$m,input$n,remiseInput(),input$methode), {
+    y <- initialiser_y(m=input$m,n=input$n, avec_remise = remiseInput())
     return(y)
   }, ignoreNULL = FALSE)
   
-  colorsPropInput <- eventReactive(c(input$tirage,input$iter2), {
+  # xstarInput <-reactive({
+  #   xstar <- (modeleInput()$x_star_hat_liste)[[input$iter2]]
+  #   return(xster)
+  # })
+  # 
+  # iterBoulesInput <-reactive({
+  #   xstar <- (modeleInput()$x_star_hat_liste)[[input$iter2]]
+  #   return(xster)
+  # })
+  
+#  colorsIterInput <- eventReactive(c(input$tirage,input$iter2), {
+  colorsIterInput <-reactive({
+      
     if(!is.null(input$iter2)){
-      matrice <- (matricesInput()$P_hat_liste)[[input$iter2]]
+      matrice <- (modeleInput()$P_hat_liste)[[input$iter2]]
       prop <- meilleure_proposition(matrice)
       couleurs <- colors[prop]
       return(couleurs)
     }
   })
   
-  colorsInput <- eventReactive(yInput(), {
+  colorsXstarInput <- reactive({
+    if(!is.null(input$iter2)){
+    prop <- (modeleInput()$x_star_hat_liste)[[input$iter2]]
+    couleurs <- colors[prop]
+    return(couleurs)
+    }
+  })
+  
+  
+  colorsYInput <- eventReactive(yInput(), {
     couleurs <- colors[yInput()]
     return(couleurs)
   }, ignoreNULL = FALSE)
@@ -155,9 +113,9 @@ function(input, output, session) {
   output$iter <- renderUI({
     default_value <- 1
     # Si on veut commencer par défaut à la simulation de convergence
-    # if(!is.null(matricesInput()$indice_stop))
-    #   default_value <- matricesInput()$indice_stop
-    sliderInput("iter2", label=NULL,min = 1, max = input$maxIters, value = default_value,step = 1) 
+    # if(!is.null(modeleInput()$indice_stop))
+    #   default_value <- modeleInput()$indice_stop
+    sliderInput("iter2", label=NULL,min = 1, max = input$maxIters, value = default_value,step = 1,animate = animationOptions(interval = 700,playButton = icon('play', "fa-1x"),pauseButton = icon('pause', "fa-1x"))) 
   })
   
   output$N0 <- renderUI({
@@ -167,42 +125,154 @@ function(input, output, session) {
   })
   
   
-  # matricesInput <- eventReactive(c(input$lancer_modele,input$tirage,input$n,input$m), {
-  matricesInput<- reactive({
+  # modeleInput <- eventReactive(c(input$lancer_modele,input$tirage,input$n,input$m), {
+  modeleInput<- reactive({
     
-    liste_matrices <- lancer_algorithme(y=yInput(),n=input$n, 
-                                        m=input$m,
-                                        N = input$N, maxIters=input$maxIters,
-                                        rho = input$rho, alpha = input$alpha,
-                                        poids_blanc = 1, poids_noir = 2,
-                                        smoothing = input$smoothing, C=C, d=input$d, avec_remise = input$avec_remise)
+    if(input$methode!="q3"){
+      modele <- lancer_algorithme(y=yInput(),n=input$n, 
+                                  m=input$m,
+                                  N = input$N, maxIters=input$maxIters,
+                                  rho = input$rho, alpha = input$alpha,
+                                  poids_blanc = 1, poids_noir = 2,
+                                  smoothing = input$smoothing, C=C, d=input$d, avec_remise = remiseInput(),stop_d=FALSE)
+    } else{
+      modele <-  lancer_algorithme_hamming(y=yInput(), n=input$n, m=input$m, N = input$N, maxIters = input$maxIters,rho = input$rho, alpha = input$alpha,poids_blanc = 1, poids_noir = 2, smoothing = TRUE, C=C, d=input$d, stop_d=FALSE)
+    }
+
+    modele <<- modele 
     
-    modele2 <<- liste_matrices
-    
-    return(liste_matrices)
+    return(modele)
     
   })
   
+  remiseInput <- reactive({
+    if(input$methode=="q1"){
+      bool <- TRUE
+    } else{
+      bool <- FALSE
+    }
+    return(bool)
+  })
   
-  graphInput <- eventReactive(c(input$tirage,input$n,input$m,input$iter2), {
-    if(!is.null(input$iter2)){
-      return(
-        dessiner_histo(matricesInput()$P_hat_liste,input$iter2,colors[1:input$m])
-      )
+    
+  vhatQ1Q2Input <- eventReactive(c(input$tirage,input$n,input$m,input$iter2,input$methode), {
+  
+    if(!is.null(input$iter2) & input$methode!="q3"){ 
+        return(
+          dessiner_histo(modeleInput()$P_hat_liste,input$iter2,colors[1:input$m])
+        )
+
     }
     
   }, ignoreNULL = FALSE)
   
-  output$graph <- renderPlot({
-    graphInput()
+  vhatQ3Input <- eventReactive(c(input$tirage,input$n,input$m,input$iter2,input$methode), {
+    
+    if(!is.null(input$iter2) & input$methode=="q3"){ 
+      return("hello")
+    }
+    
+  }, ignoreNULL = FALSE)
+  
+  output$vhatQ1Q2 <- renderPlot({
+    vhatQ1Q2Input()
+  })
+  
+  output$vhatQ3 <- renderUI({
+    fixedRow(
+      br(),
+      br(),
+      h4("lambda : "),
+      p(round((modeleInput()$lambda_hat_liste)[[input$iter2]],4)),
+      h4("x* : "),
+      
+      fixedRow(style = "background-color:#ffffff;padding-top:10px;",
+               
+               column(1, htmlOutput(xstarcell1)),
+               column(1, htmlOutput(xstarcell2)),
+               column(1, htmlOutput(xstarcell3)),
+               column(1, htmlOutput(xstarcell4)),
+               column(1, htmlOutput(xstarcell5)),  
+               column(1, htmlOutput(xstarcell6)),
+               column(1, htmlOutput(xstarcell7)),
+               column(1, htmlOutput(xstarcell8))
+      ),
+      
+      fixedRow(style = "background-color:#ffffff;",
+               useShinyjs(),
+               extendShinyjs(text = jsDrawCircle),
+               extendShinyjs(text = jsClearCircle),
+               column(1,
+                      tags$canvas(id = 'xstarcell1js',
+                                  width = canvas_width,
+                                  height = canvas_height
+                      )
+               ),                                             
+               column(1,
+                      tags$canvas(id = 'xstarcell2js',
+                                  width = canvas_width,
+                                  height = canvas_height
+                      )
+               ),                                                                    
+               column(1,
+                      tags$canvas(id = 'xstarcell3js',
+                                  width = canvas_width,
+                                  height = canvas_height
+                      )
+               ),  
+               column(1,
+                      tags$canvas(id = 'xstarcell4js',
+                                  width = canvas_width,
+                                  height = canvas_height
+                      )
+               ), 
+               
+               column(1,
+                      tags$canvas(id = 'xstarcell5js',
+                                  width = canvas_width,
+                                  height = canvas_height
+                      )
+               ), 
+               column(1,
+                      tags$canvas(id = 'xstarcell6js',
+                                  width = canvas_width,
+                                  height = canvas_height
+                      )
+               ),
+               column(1,
+                      tags$canvas(id = 'xstarcell7js',
+                                  width = canvas_width,
+                                  height = canvas_height
+                      )
+               ),                         
+               column(1,
+                      tags$canvas(id = 'xstarcell8js',
+                                  width = canvas_width,
+                                  height = canvas_height
+                      )
+               )
+      )
+      
+    )
+    
+    
+     })
+  
+  output$vhat <- renderUI({
+    if(input$methode!="q3"){
+      plotOutput("vhatQ1Q2", width = "100%", height = "300px")
+    } else{
+      uiOutput("vhatQ3")
+    }
+    
   })
   
   # Textes
   output$titre_iter <- renderText({
     texte <- paste0(
         "</br>",
-      ifelse(!is.null(matricesInput()$indice_stop),
-             paste0("Convergence à l'itération n°", matricesInput()$indice_stop),
+      ifelse(!is.null(modeleInput()$indice_stop),
+             paste0("Convergence à l'itération n°", modeleInput()$indice_stop),
              "Non convergence"),  
       " (d=",input$d,")</br></br>",
     "<b>Itération n°",input$iter2,"</b>"
@@ -212,62 +282,54 @@ function(input, output, session) {
   
   output$texte_iter <- renderText({
     if(!is.null(input$iter2)){
-      p_min_max = p_min_max(matricesInput()$P_hat_liste[[input$iter2]])
+      
       texte <- paste0(
-        "Gamma : ",round((matricesInput()$gammas_hat)[input$iter2],3),"</br>",
-        "Smax : ", round((matricesInput()$s_max)[input$iter2],3),"</br>",
-        "min : ", round(p_min_max$min,4)," / ",
-        "max_min : ", round(p_min_max$max_min,4),"</br>",
-        "max : ", round(p_min_max$max,4)," / ",
-        "min_max : ", round(p_min_max$min_max,4),"</br>",
+        "Gamma : ",round((modeleInput()$gammas_hat)[input$iter2],3),"</br>",
+        "Smax : ", round((modeleInput()$s_max)[input$iter2],3),"</br>")
         
-        #  "Meilleur score :",(matricesInput()$meilleur_scores)[input$iter2],
-        "Meilleure proposition :"
-      )
+        if(input$methode!="q3"){
+          p_min_max = p_min_max(modeleInput()$P_hat_liste[[input$iter2]])
+ texte <- paste0(texte,"min : ", round(p_min_max$min,4)," / ",
+                 "max_min : ", round(p_min_max$max_min,4),"</br>",
+                  "max : ", round(p_min_max$max,4)," / ",
+                  "min_max : ", round(p_min_max$min_max,4),
+                 "</br>","Meilleure proposition :"
+ )
+          
+        } else{
+          
+        }
+      
       return(texte)
     }
-    
-    # if(input$iter2>1){
-    #   p_min_max = p_min_max(matricesInput()$P_hat_liste[[input$iter2]])
-    #   texte <- paste0(
-    #     "Gamma : ",round((matricesInput()$gammas_hat)[input$iter2],3),"</br>",
-    #     "Smax : ", round((matricesInput()$s_max)[input$iter2],3),"</br>",
-    #     "min : ", round(p_min_max$min,4)," / ",
-    #     "max_min : ", round(p_min_max$max_min,4),"</br>",
-    #     "max : ", round(p_min_max$max,4)," / ",
-    #     "min_max : ", round(p_min_max$min_max,4),"</br>",
-    #     
-    #   #  "Meilleur score :",(matricesInput()$meilleur_scores)[input$iter2],
-    #     "Meilleure proposition :"
-    #   )
-    # } else{
-    #   texte <- "</br></br></br></br></br></br></br>"
-    #   
-    # }
   
   })
   
  
   output$tableau <- function() {
-    
-    mise_en_forme_tableau(matricesInput())
+    if(input$methode=="q3"){
+      bool = FALSE
+    } else{
+      bool = TRUE
+    }
+    mise_en_forme_tableau(modele=modeleInput(),matriciel=bool)
   }
   
-  #Fonctionnalité "animation"
-  FilmOnInput <- reactive({
-    if(input$film){
-      if(!is.null(input$iter2)){
-        input$iter2
-      }
-    }
-  })
-
-  observeEvent({ 
-    FilmOnInput()
-      }, { 
-    delay(1000, updateSliderInput(session,inputId="iter2", value = (input$iter2+1)))
-
-    })
+  #Fonctionnalité "animation" 
+  # FilmOnInput <- reactive({
+  #   if(input$film){
+  #     if(!is.null(input$iter2)){
+  #       input$iter2
+  #     }
+  #   }
+  # })
+  # 
+  # observeEvent({ 
+  #   FilmOnInput()
+  #     }, { 
+  #   delay(1000, updateSliderInput(session,inputId="iter2", value = (input$iter2+1)))
+  # 
+  #   })
     
  
 
@@ -287,8 +349,10 @@ function(input, output, session) {
   
   observeEvent({
     input$iter2
+    yInput()
   }, {
     updateBoulesIter(input=input, output=output,n=input$n)
+    updateBoulesXstar(input=input, output=output,n=input$n)
   })
   
   

@@ -7736,5 +7736,16 @@ box-shadow: none;*/
 }
 
 
+/*prettycheckbox*/
 
+.pretty.p-icon .state .icon:before {
+    background-color: #333333;
+}
 
+.pretty input:checked~.state.p-primary .icon, .pretty input:checked~.state.p-primary .svg, .pretty.p-toggle .state.p-primary .icon, .pretty.p-toggle .state.p-primary .svg {
+   /* border-color: #333333;*/
+}
+
+.pretty.p-curve .state label:after,.pretty.p-curve .state label:before{
+    border-color: #333333;
+}

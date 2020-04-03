@@ -83,6 +83,7 @@ lancer_algorithme <- function(y, n, m, N = C * m * n, maxIters = 100,
     list(
       duree = duree,
       parametres=list(
+        y=y,
         n=n,
         m=m,
         N=N,

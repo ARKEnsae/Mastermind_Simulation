@@ -14,7 +14,7 @@ dessiner_histo <- function(liste_matrice,indice,colors){
   }
 }
 
-tableau_bilan <- function(modele){
+tableau_bilan <- function(modele,matriciel=TRUE){
   
   if(!is.null(modele$indice_stop)){
     i <- modele$indice_stop
@@ -22,18 +22,26 @@ tableau_bilan <- function(modele){
     i <- modele$parametres$maxIters
   }
   
+  if(matriciel){
+    tableau <- data.frame(
+      t = 1:i,
+      s_max = round(modele$s_max[1:i],3),
+      gammas_hat = round(modele$gammas_hat[1:i],3),
+      min = round(unlist(sapply(modele$P_hat_liste,p_min_max)["min",1:i]),4),
+      max_min =round(unlist(sapply(modele$P_hat_liste,p_min_max)["max_min",1:i]),4),
+      min_max =round(unlist(sapply(modele$P_hat_liste,p_min_max)["min_max",1:i]),4),
+      max = round(unlist(sapply(modele$P_hat_liste,p_min_max)["max",1:i]),4)
+    )
+  }else{
+    tableau <- data.frame(
+      t = 1:i,
+      s_max = round(modele$s_max[1:i],3),
+      gammas_hat = round(modele$gammas_hat[1:i],3),
+      lambda=unlist(lapply(1:i,function(k){modele$lambda_hat_liste[[k]]})),
+      score_xstar= unlist(lapply(1:i,function(k){score(modele$x_star_hat_liste[[k]], modele$parametres$y)}))
+    )
+  }
   
-  tableau <- data.frame(
-    t = 1:i,
-    s_max = round(modele$s_max[1:i],3),
-    gammas_hat = round(modele$gammas_hat[1:i],3),
-    min = round(unlist(sapply(modele$P_hat_liste,p_min_max)["min",1:i]),4),
-    max_min =round(unlist(sapply(modele$P_hat_liste,p_min_max)["max_min",1:i]),4),
-    min_max =round(unlist(sapply(modele$P_hat_liste,p_min_max)["min_max",1:i]),4),
-    max = round(unlist(sapply(modele$P_hat_liste,p_min_max)["max",1:i]),4)
-    
-    
-  )
   
   
   return(tableau)
@@ -42,9 +50,9 @@ tableau_bilan <- function(modele){
 
 #tab <- tableau_bilan(modele)
 
-mise_en_forme_tableau <- function(modele){
+mise_en_forme_tableau <- function(modele,matriciel=TRUE){
   
-  tableau <- tableau_bilan(modele)
+  tableau <- tableau_bilan(modele,matriciel)
   
   parametres <- paste0(#" : ",
     "n = ", modele$parametres$n, " / ",
@@ -88,6 +96,8 @@ guesscell3 <- 'guesscell3'
 guesscell4 <- 'guesscell4'
 guesscell5 <- 'guesscell5'
 guesscell6 <- 'guesscell6'
+guesscell7 <- 'guesscell7'
+guesscell8 <- 'guesscell8'
 
 itercell1 <- 'itercell1'
 itercell2 <- 'itercell2'
@@ -95,6 +105,17 @@ itercell3 <- 'itercell3'
 itercell4 <- 'itercell4'
 itercell5 <- 'itercell5'
 itercell6 <- 'itercell6'
+itercell7 <- 'itercell7'
+itercell8 <- 'itercell8'
+
+xstarcell1 <- 'xstarcell1'
+xstarcell2 <- 'xstarcell2'
+xstarcell3 <- 'xstarcell3'
+xstarcell4 <- 'xstarcell4'
+xstarcell5 <- 'xstarcell5'
+xstarcell6 <- 'xstarcell6'
+xstarcell7 <- 'xstarcell7'
+xstarcell8 <- 'xstarcell8'
 
 jsDrawCircle <-
   "shinyjs.drawCircle = function(args){var id = args[0]; var code_color = args[1]; console.log(id); var canvas = document.getElementById(id); console.log(canvas); var ctx = canvas.getContext('2d'); ctx.beginPath(); ctx.arc(10, 10, 10, 0, Math.PI * 2, true); ctx.fillStyle = code_color; ctx.fill(); ctx.closePath(); ctx.stroke();}"
