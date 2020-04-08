@@ -1,24 +1,24 @@
 library(mvtnorm)
 
 source("ShinyApp/fonctions_initialisation.R", encoding = "UTF-8")
-m=10
+m=6
 n=6
 avec_remise = FALSE
-N = m*n*6
+N = 5 * n*m
 maxIters = 20
 C = 5
 rho = 0.1
 poids_blanc = 1
 poids_noir = 2
 smoothing = TRUE
-d=10
+d=5
 stop_d = TRUE
-set.seed(2)
+set.seed(1)
 y <- initialiser_y(m=m,n=n, avec_remise = avec_remise)
-resultat <- lancer_algorithme_perm(y,n,m, stop_d = TRUE,maxIters = 100,d=10)
+resultat <- lancer_algorithme_perm(y,n,m,N = N, stop_d = TRUE,maxIters = 200,d=10)
 param_liste <- resultat$param_liste
 x_star <- sapply(param_liste,function(x)x$x_star)
-x_star
+tail(t(x_star))
 y
 resultat$gammas_hat
 lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
@@ -33,7 +33,7 @@ lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
   param_liste <- list()
   P_hat_tilde <- matrix(nrow = n, ncol = m)
   param_liste <- list()
-  param_liste[[1]] <- list (lambda = 1.5,
+  param_liste[[1]] <- list (lambda = 2,
                             x_star = initialisation_sample(m = m, n = n, N = 1,
                                                            avec_remise = FALSE))
   # Listes à agrémenter
@@ -53,8 +53,8 @@ lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
   eidx = ceiling((1-rho)*N) #plus petit indice du meilleur Score.
   while(critere_arret & (iter+1)<= maxIters){
     iter <- iter + 1
-    print(iter)
-    X <- simul_permutation(N = N, param = param_liste[[iter]],numSim = 30000)
+    
+    X <- simul_permutation(N = N, param = param_liste[[iter]],numSim = 100000)
     
     #### Calcul du score
     
@@ -67,8 +67,7 @@ lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
     gamma = scores_tries[eidx]
     s = scores_tries[N]
     #  meilleur_score = max(meilleur_score,  scores_tries[N]) #garder une trace du meilleur résultat
-    gammas_hat[iter] = gamma
-    s_max[iter] = s
+
     # meilleur_scores[iter] = meilleur_score
     
     X_top = X[scores>=gamma,]
@@ -77,9 +76,67 @@ lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
     }
     # Remplacer X_top par X ne change pas grand chose
     loss_tot <- apply(X_top,1,objectif)
-    x_star <- which(loss_tot == min(loss_tot))
+    min_loss <- min(loss_tot)
+    x_star <- which(loss_tot == min_loss)
     x_star <- sample(x_star,size = 1)
     x_star <- X_top[x_star,]
+    
+    
+    
+    permutations_top <- apply(X_top,1,paste0,collapse=",")
+    comptage_permutations_top <- table(permutations_top)
+    comptage_permutations_top[paste0(x_star,collapse=",")]
+    x_star <- which(comptage_permutations_top == max(comptage_permutations_top))
+    x_star <- names(x_star)[sample(length(x_star),1)]
+    x_star <- as.numeric(strsplit(x_star,",")[[1]])
+    min_loss <- sum(apply(X_top,1, function(x) sum(x != x_star)))
+    
+    # permutations_top <- apply(X_top,2, function(x){
+    #   freq <- table(x)
+    #   x_star_i <- which(freq == max(freq))
+    #   x_star_i <- names(x_star_i)[sample(length(x_star_i),1)]
+    #   as.numeric(x_star_i)
+    # })
+    # x_star <- permutations_top
+    # min_loss <- sum(apply(X_top,1, function(x) sum(x != x_star)))
+    
+    # if(min_loss == 0){
+    #   lambda <- lambda
+    # }else{
+    #   lambda <- nrow(X_top)/min_loss
+    # }
+
+    mle <- function(lambda) {   ## Rosenbrock Banana function
+      N_top = nrow(X_top)
+      p1 <- lambda * N_top * m
+      sum_exp <- sum(sapply(seq(0,m),function(k){
+        (exp(lambda) - 1)^k / factorial(k)
+      }))
+      p2 <- -N_top * log(sum_exp)
+      p3 <- -lambda * min_loss
+      p1+p2+p3
+    }
+    # Non utile ici
+    # gradient <- function(lambda) {
+    #   N_top = nrow(X_top)
+    #   p1 <- N_top * m
+    #   sum_exp <- sapply(seq(0,m),function(k){
+    #     (exp(lambda) - 1)^k / factorial(k)
+    #   })
+    #   p2 <- -N_top*sum(sum_exp[-length(sum_exp)])/sum(sum_exp)
+    #   p3 <- - min_loss
+    #   p1+p2+p3
+    # }
+
+    max <- optimize(mle,c(0,2), maximum = TRUE)
+    lambda <- max$maximum
+    print(sprintf("iter %s - nrow(X_top) %s - lambda %.3f - gamma %.3f - loss %.3f",iter,
+                  nrow(X_top), lambda, gamma,min_loss))
+    
+    gammas_hat[iter] = gamma
+    s_max[iter] = s
+    param_liste[[iter+1]] <- list(lambda = lambda,
+                                   x_star = x_star)
     
     # Ou autre façon : 
     # permutations_top <- apply(X_top,1,paste0,collapse=",")
@@ -89,15 +146,31 @@ lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
     # x_star <- names(x_star)[sample(length(x_star),1)]
     # x_star <- as.numeric(strsplit(x_star,",")[[1]])
 
-    lambda <- param_liste[[iter]]$lambda  - param_liste[[1]]$lambda /(maxIters+1)
+    # lambda <- param_liste[[iter]]$lambda*0.87
+                          
     
+    # if(runif(1)> (score(x_star, y)/ score(param_liste[[iter]]$x_star,y)) ){
+    #   if(iter>1){
+    #     gammas_hat[iter] = gammas_hat[iter-1]
+    #     s_max[iter] = s_max[iter-1]
+    #   }
+    #   param_liste[[iter+1]] <- param_liste[[iter]]
+    # }else{
+    #   gammas_hat[iter] = gamma
+    #   s_max[iter] = s
+    #   param_liste[[iter+1]] <- list (lambda = lambda,
+    #                                  x_star = x_star)
+    # }
     
-    param_liste[[iter+1]] <- list (lambda = lambda,
-                              x_star = x_star)
-    
+    if(isTRUE(all.equal(score(x = x_star,y = y, poids_noir = poids_noir, poids_blanc = poids_blanc), 1))){
+      indice_stop <- iter
+      if(stop_d){
+        critere_arret <- FALSE
+      }
+    }
     if(length(gammas_hat) > d & is.null(indice_stop)){
       gammas_d <- tail(gammas_hat,d)
-      if(length(unique(gammas_d))==1){
+      if(isTRUE(all.equal(tail(gammas_hat,1), 1))){
         indice_stop <- iter
         if(stop_d){
           critere_arret <- FALSE
@@ -195,3 +268,4 @@ simul_permutation <- function(N, param, numSim = 10000){
   indices <- sample.int(nrow(out_traite), size =  N, replace = FALSE)
   return(out_traite[indices,])
 }
+
