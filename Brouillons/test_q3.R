@@ -33,7 +33,7 @@ lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
   param_liste <- list()
   P_hat_tilde <- matrix(nrow = n, ncol = m)
   param_liste <- list()
-  param_liste[[1]] <- list (lambda = 2,
+  param_liste[[1]] <- list (lambda = 1,
                             x_star = initialisation_sample(m = m, n = n, N = 1,
                                                            avec_remise = FALSE))
   # Listes à agrémenter
@@ -71,34 +71,34 @@ lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
     # meilleur_scores[iter] = meilleur_score
     
     X_top = X[scores>=gamma,]
-    objectif <- function(x_star){
-      sum(apply(X_top,1, function(x) sum(x != x_star)))
-    }
-    # Remplacer X_top par X ne change pas grand chose
-    loss_tot <- apply(X_top,1,objectif)
-    min_loss <- min(loss_tot)
-    x_star <- which(loss_tot == min_loss)
-    x_star <- sample(x_star,size = 1)
-    x_star <- X_top[x_star,]
+    # objectif <- function(x_star){
+    #   sum(apply(X_top,1, function(x) sum(x != x_star)))
+    # }
+    # # Remplacer X_top par X ne change pas grand chose
+    # loss_tot <- apply(X_top,1,objectif)
+    # min_loss <- min(loss_tot)
+    # x_star <- which(loss_tot == min_loss)
+    # x_star <- sample(x_star,size = 1)
+    # x_star <- X_top[x_star,]
     
     
     
-    permutations_top <- apply(X_top,1,paste0,collapse=",")
-    comptage_permutations_top <- table(permutations_top)
-    comptage_permutations_top[paste0(x_star,collapse=",")]
-    x_star <- which(comptage_permutations_top == max(comptage_permutations_top))
-    x_star <- names(x_star)[sample(length(x_star),1)]
-    x_star <- as.numeric(strsplit(x_star,",")[[1]])
-    min_loss <- sum(apply(X_top,1, function(x) sum(x != x_star)))
-    
-    # permutations_top <- apply(X_top,2, function(x){
-    #   freq <- table(x)
-    #   x_star_i <- which(freq == max(freq))
-    #   x_star_i <- names(x_star_i)[sample(length(x_star_i),1)]
-    #   as.numeric(x_star_i)
-    # })
-    # x_star <- permutations_top
+    # permutations_top <- apply(X_top,1,paste0,collapse=",")
+    # comptage_permutations_top <- table(permutations_top)
+    # comptage_permutations_top[paste0(x_star,collapse=",")]
+    # x_star <- which(comptage_permutations_top == max(comptage_permutations_top))
+    # x_star <- names(x_star)[sample(length(x_star),1)]
+    # x_star <- as.numeric(strsplit(x_star,",")[[1]])
     # min_loss <- sum(apply(X_top,1, function(x) sum(x != x_star)))
+    
+    permutations_top <- apply(X_top,2, function(x){
+      freq <- table(x)
+      x_star_i <- which(freq == max(freq))
+      x_star_i <- names(x_star_i)[sample(length(x_star_i),1)]
+      as.numeric(x_star_i)
+    })
+    x_star <- permutations_top
+    min_loss <- sum(apply(X_top,1, function(x) sum(x != x_star)))
     
     # if(min_loss == 0){
     #   lambda <- lambda
@@ -130,8 +130,9 @@ lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
 
     max <- optimize(mle,c(0,2), maximum = TRUE)
     lambda <- max$maximum
-    print(sprintf("iter %s - nrow(X_top) %s - lambda %.3f - gamma %.3f - loss %.3f",iter,
-                  nrow(X_top), lambda, gamma,min_loss))
+    print(sprintf("i %s - N_top %s - lambda %.3f - gamma %.3f - loss %.3f - prop %s",
+                  iter,
+                  nrow(X_top), lambda, gamma,min_loss, paste(x_star,collapse = " ")))
     
     gammas_hat[iter] = gamma
     s_max[iter] = s
