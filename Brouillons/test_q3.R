@@ -1,8 +1,9 @@
 library(mvtnorm)
+library(clue)
 
 source("ShinyApp/fonctions_initialisation.R", encoding = "UTF-8")
-m=6
-n=6
+m=12
+n=12
 avec_remise = FALSE
 N = 5 * n*m
 maxIters = 20
@@ -33,7 +34,7 @@ lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
   param_liste <- list()
   P_hat_tilde <- matrix(nrow = n, ncol = m)
   param_liste <- list()
-  param_liste[[1]] <- list (lambda = 1,
+  param_liste[[1]] <- list (lambda = 0.5,
                             x_star = initialisation_sample(m = m, n = n, N = 1,
                                                            avec_remise = FALSE))
   # Listes à agrémenter
@@ -71,6 +72,8 @@ lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
     # meilleur_scores[iter] = meilleur_score
     
     X_top = X[scores>=gamma,]
+    
+    # Méthode 1 #
     # objectif <- function(x_star){
     #   sum(apply(X_top,1, function(x) sum(x != x_star)))
     # }
@@ -81,8 +84,7 @@ lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
     # x_star <- sample(x_star,size = 1)
     # x_star <- X_top[x_star,]
     
-    
-    
+    # Méthode 2 #
     # permutations_top <- apply(X_top,1,paste0,collapse=",")
     # comptage_permutations_top <- table(permutations_top)
     # comptage_permutations_top[paste0(x_star,collapse=",")]
@@ -91,13 +93,37 @@ lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
     # x_star <- as.numeric(strsplit(x_star,",")[[1]])
     # min_loss <- sum(apply(X_top,1, function(x) sum(x != x_star)))
     
-    permutations_top <- apply(X_top,2, function(x){
-      freq <- table(x)
-      x_star_i <- which(freq == max(freq))
-      x_star_i <- names(x_star_i)[sample(length(x_star_i),1)]
-      as.numeric(x_star_i)
-    })
-    x_star <- permutations_top
+    # Méthode 3 #
+    # permutations_top <- apply(X_top,2, function(x){
+    #   freq <- table(x)
+    #   x_star_i <- which(freq == max(freq))
+    #   x_star_i <- names(x_star_i)[sample(length(x_star_i),1)]
+    #   as.numeric(x_star_i)
+    # })
+    # x_star <- permutations_top
+    
+    # Méthode 4 #
+    creer_matriceF <- function(X_top,n,m){
+      matriceF <- matrix(rep(0,n*m),nrow = n, ncol = m)
+      for(i in 1:dim(X_top)[1]){
+        x <- X_top[i,]
+        for(i in 1:length(x)){
+          matriceF[i,x[i]] <- matriceF[i,x[i]] + 1
+        }
+      }
+      return(matriceF)
+    }
+    matriceF <- creer_matriceF(X_top,n,m)
+    hongarian <- solve_LSAP(matriceF,maximum=TRUE)
+    res <- cbind(seq_along(hongarian), hongarian)
+    x_star <- 1:n
+    for(i in 1:n){
+      x_star[i] <- as.numeric(res[i,"hongarian"])
+    }
+    if(score(param_liste[[iter]]$x_star,y) >score(x_star,y)){
+      x_star = param_liste[[iter]]$x_star
+    }
+
     min_loss <- sum(apply(X_top,1, function(x) sum(x != x_star)))
     
     # if(min_loss == 0){
@@ -106,16 +132,17 @@ lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
     #   lambda <- nrow(X_top)/min_loss
     # }
 
-    mle <- function(lambda) {   ## Rosenbrock Banana function
-      N_top = nrow(X_top)
-      p1 <- lambda * N_top * m
-      sum_exp <- sum(sapply(seq(0,m),function(k){
-        (exp(lambda) - 1)^k / factorial(k)
-      }))
-      p2 <- -N_top * log(sum_exp)
-      p3 <- -lambda * min_loss
-      p1+p2+p3
-    }
+    # mle <- function(lambda) {   ## Rosenbrock Banana function
+    #   N_top = nrow(X_top)
+    #   p1 <- lambda * N_top * m
+    #   sum_exp <- sum(sapply(seq(0,m),function(k){
+    #     (exp(lambda) - 1)^k / factorial(k)
+    #   }))
+    #   p2 <- -N_top * log(sum_exp)
+    #   p3 <- -lambda * min_loss
+    #   p1+p2+p3
+    # }
+    
     # Non utile ici
     # gradient <- function(lambda) {
     #   N_top = nrow(X_top)
@@ -128,8 +155,11 @@ lancer_algorithme_perm <- function(y, n, m, N = C * m * n, maxIters = 100,
     #   p1+p2+p3
     # }
 
-    max <- optimize(mle,c(0,2), maximum = TRUE)
-    lambda <- max$maximum
+    # max <- optimize(mle,c(0,2), maximum = TRUE)
+    # lambda <- max$maximum
+    
+    lambda <- param_liste[[iter]]$lambda - param_liste[[1]]$lambda/(maxIters+1)
+    
     print(sprintf("i %s - N_top %s - lambda %.3f - gamma %.3f - loss %.3f - prop %s",
                   iter,
                   nrow(X_top), lambda, gamma,min_loss, paste(x_star,collapse = " ")))
