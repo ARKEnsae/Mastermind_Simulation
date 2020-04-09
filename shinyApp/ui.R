@@ -160,8 +160,6 @@ column(6,
        htmlOutput("titre_iter"),
        uiOutput("iter"), 
         uiOutput("texte_iter"),
-    
-                
                 ### début boules
                 fixedRow(style = "background-color:#ffffff;padding-top:10px;",
                          
@@ -233,7 +231,84 @@ column(6,
        
        
        ),
-column(6,uiOutput("vhat"))
+column(6,
+       uiOutput("vhat"),
+       
+       ### début boules 1
+       
+       
+       fixedRow(style = "background-color:#ffffff;padding-top:10px;",
+                
+                column(1, htmlOutput(xstarcell1)),
+                column(1, htmlOutput(xstarcell2)),
+                column(1, htmlOutput(xstarcell3)),
+                column(1, htmlOutput(xstarcell4)),
+                column(1, htmlOutput(xstarcell5)),  
+                column(1, htmlOutput(xstarcell6)),
+                column(1, htmlOutput(xstarcell7)),
+                column(1, htmlOutput(xstarcell8))
+       ),
+       
+       fixedRow(style = "background-color:#ffffff;",
+                useShinyjs(),
+                extendShinyjs(text = jsDrawCircle),
+                extendShinyjs(text = jsClearCircle),
+                column(1,
+                       tags$canvas(id = 'xstarcell1js',
+                                   width = canvas_width,
+                                   height = canvas_height
+                       )
+                ),                                             
+                column(1,
+                       tags$canvas(id = 'xstarcell2js',
+                                   width = canvas_width,
+                                   height = canvas_height
+                       )
+                ),                                                                    
+                column(1,
+                       tags$canvas(id = 'xstarcell3js',
+                                   width = canvas_width,
+                                   height = canvas_height
+                       )
+                ),  
+                column(1,
+                       tags$canvas(id = 'xstarcell4js',
+                                   width = canvas_width,
+                                   height = canvas_height
+                       )
+                ), 
+                
+                column(1,
+                       tags$canvas(id = 'xstarcell5js',
+                                   width = canvas_width,
+                                   height = canvas_height
+                       )
+                ), 
+                column(1,
+                       tags$canvas(id = 'xstarcell6js',
+                                   width = canvas_width,
+                                   height = canvas_height
+                       )
+                ),
+                column(1,
+                       tags$canvas(id = 'xstarcell7js',
+                                   width = canvas_width,
+                                   height = canvas_height
+                       )
+                ),                         
+                column(1,
+                       tags$canvas(id = 'xstarcell8js',
+                                   width = canvas_width,
+                                   height = canvas_height
+                       )
+                )
+       ),
+       
+       ### fin boules   1
+       
+       
+       
+       )
 )
                                                            
                                                   ),

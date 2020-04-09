@@ -21,7 +21,7 @@ library(gtools) #pour générer les permutations
 
 set.seed(1) # la seed
 
-colors <- c("#0000FF","#00FF00","#FF3232","#FFFF00","#CF00CF","#FFCFFF","#00FFFF","#008F00","#FF4F4F","#000000") # 10 couleurs max
+colors <- c("#0000FF","#00FF00","#FF3232","#FFFF00","#CF00CF","#FFCFFF","#00FFFF","#008F00","#CECECE","#000000") # 10 couleurs max
 
 # C est le paramètre multiplicateur utilisé pour calculer le nombre N
 C = 5 #non paramétrable dans shiny

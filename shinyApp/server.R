@@ -55,7 +55,7 @@ function(input, output, session) {
     for (i in 1:8){
       requete <- sprintf("
                    output$xstarcell%i <- renderText({
-                        if(n>=%i){
+                        if(n>=%i & input$methode=='q3'){
               js$drawCircle('xstarcell%ijs', colorsXstarInput()[%i])
     }else{
                          js$clearCircle('xstarcell%ijs')
@@ -184,74 +184,74 @@ function(input, output, session) {
       br(),
       h4("lambda : "),
       p(round((modeleInput()$lambda_hat_liste)[[input$iter2]],4)),
-      h4("x* : "),
-      
-      fixedRow(style = "background-color:#ffffff;padding-top:10px;",
-               
-               column(1, htmlOutput(xstarcell1)),
-               column(1, htmlOutput(xstarcell2)),
-               column(1, htmlOutput(xstarcell3)),
-               column(1, htmlOutput(xstarcell4)),
-               column(1, htmlOutput(xstarcell5)),  
-               column(1, htmlOutput(xstarcell6)),
-               column(1, htmlOutput(xstarcell7)),
-               column(1, htmlOutput(xstarcell8))
-      ),
-      
-      fixedRow(style = "background-color:#ffffff;",
-               useShinyjs(),
-               extendShinyjs(text = jsDrawCircle),
-               extendShinyjs(text = jsClearCircle),
-               column(1,
-                      tags$canvas(id = 'xstarcell1js',
-                                  width = canvas_width,
-                                  height = canvas_height
-                      )
-               ),                                             
-               column(1,
-                      tags$canvas(id = 'xstarcell2js',
-                                  width = canvas_width,
-                                  height = canvas_height
-                      )
-               ),                                                                    
-               column(1,
-                      tags$canvas(id = 'xstarcell3js',
-                                  width = canvas_width,
-                                  height = canvas_height
-                      )
-               ),  
-               column(1,
-                      tags$canvas(id = 'xstarcell4js',
-                                  width = canvas_width,
-                                  height = canvas_height
-                      )
-               ), 
-               
-               column(1,
-                      tags$canvas(id = 'xstarcell5js',
-                                  width = canvas_width,
-                                  height = canvas_height
-                      )
-               ), 
-               column(1,
-                      tags$canvas(id = 'xstarcell6js',
-                                  width = canvas_width,
-                                  height = canvas_height
-                      )
-               ),
-               column(1,
-                      tags$canvas(id = 'xstarcell7js',
-                                  width = canvas_width,
-                                  height = canvas_height
-                      )
-               ),                         
-               column(1,
-                      tags$canvas(id = 'xstarcell8js',
-                                  width = canvas_width,
-                                  height = canvas_height
-                      )
-               )
-      )
+      h4("x* : ")#,
+      # 
+      # fixedRow(style = "background-color:#ffffff;padding-top:10px;",
+      #          
+      #          column(1, htmlOutput(xstarcell1)),
+      #          column(1, htmlOutput(xstarcell2)),
+      #          column(1, htmlOutput(xstarcell3)),
+      #          column(1, htmlOutput(xstarcell4)),
+      #          column(1, htmlOutput(xstarcell5)),  
+      #          column(1, htmlOutput(xstarcell6)),
+      #          column(1, htmlOutput(xstarcell7)),
+      #          column(1, htmlOutput(xstarcell8))
+      # ),
+      # 
+      # fixedRow(style = "background-color:#ffffff;",
+      #          useShinyjs(),
+      #          extendShinyjs(text = jsDrawCircle),
+      #          extendShinyjs(text = jsClearCircle),
+      #          column(1,
+      #                 tags$canvas(id = 'xstarcell1js',
+      #                             width = canvas_width,
+      #                             height = canvas_height
+      #                 )
+      #          ),                                             
+      #          column(1,
+      #                 tags$canvas(id = 'xstarcell2js',
+      #                             width = canvas_width,
+      #                             height = canvas_height
+      #                 )
+      #          ),                                                                    
+      #          column(1,
+      #                 tags$canvas(id = 'xstarcell3js',
+      #                             width = canvas_width,
+      #                             height = canvas_height
+      #                 )
+      #          ),  
+      #          column(1,
+      #                 tags$canvas(id = 'xstarcell4js',
+      #                             width = canvas_width,
+      #                             height = canvas_height
+      #                 )
+      #          ), 
+      #          
+      #          column(1,
+      #                 tags$canvas(id = 'xstarcell5js',
+      #                             width = canvas_width,
+      #                             height = canvas_height
+      #                 )
+      #          ), 
+      #          column(1,
+      #                 tags$canvas(id = 'xstarcell6js',
+      #                             width = canvas_width,
+      #                             height = canvas_height
+      #                 )
+      #          ),
+      #          column(1,
+      #                 tags$canvas(id = 'xstarcell7js',
+      #                             width = canvas_width,
+      #                             height = canvas_height
+      #                 )
+      #          ),                         
+      #          column(1,
+      #                 tags$canvas(id = 'xstarcell8js',
+      #                             width = canvas_width,
+      #                             height = canvas_height
+      #                 )
+      #          )
+      # )
       
     )
     
