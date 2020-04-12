@@ -74,16 +74,7 @@ function(input, output, session) {
     y <- initialiser_y(m=input$m,n=input$n, avec_remise = remiseInput())
     return(y)
   }, ignoreNULL = FALSE)
-  
-  # xstarInput <-reactive({
-  #   xstar <- (modeleInput()$x_star_hat_liste)[[input$iter2]]
-  #   return(xster)
-  # })
-  # 
-  # iterBoulesInput <-reactive({
-  #   xstar <- (modeleInput()$x_star_hat_liste)[[input$iter2]]
-  #   return(xster)
-  # })
+ 
   
 #  colorsIterInput <- eventReactive(c(input$tirage,input$iter2), {
   colorsIterInput <-reactive({
@@ -98,7 +89,7 @@ function(input, output, session) {
   
   colorsXstarInput <- reactive({
     if(!is.null(input$iter2)){
-    prop <- (modeleInput()$x_star_hat_liste)[[input$iter2]]
+    prop <- ((modeleInput()$param_liste)[[input$iter2]])$x_star
     couleurs <- colors[prop]
     return(couleurs)
     }
@@ -115,13 +106,29 @@ function(input, output, session) {
     # Si on veut commencer par défaut à la simulation de convergence
     # if(!is.null(modeleInput()$indice_stop))
     #   default_value <- modeleInput()$indice_stop
-    sliderInput("iter2", label=NULL,min = 1, max = input$maxIters, value = default_value,step = 1,animate = animationOptions(interval = 700,playButton = icon('play', "fa-1x"),pauseButton = icon('pause', "fa-1x"))) 
+    
+    if(input$methode=="q3" & !is.null(modeleInput()$indice_stop)){
+      max <- modeleInput()$indice_stop
+    } else{
+      max <- input$maxIters
+    }
+    
+    sliderInput("iter2", label=NULL,min = 1, max = max, value = default_value,step = 1,animate = animationOptions(interval = 700,playButton = icon('play', "fa-1x"),pauseButton = icon('pause', "fa-1x"))) 
+    
+    
   })
   
   output$N0 <- renderUI({
-    numericInput("N", "N", value = C*input$n*input$m, 
+    if(input$methode!="q3"){
+      valeur <-  C*input$n*input$m
+    } else{
+      valeur <-  C*(input$n+1)
+    }
+
+    numericInput("N", "N", value = valeur, 
                  step=10, 
-                 min = 0, max = 2*C*input$n*input$m)
+                 min = 0, max = 2*valeur)
+    
   })
   
   
@@ -136,10 +143,11 @@ function(input, output, session) {
                                   poids_blanc = 1, poids_noir = 2,
                                   smoothing = input$smoothing, C=C, d=input$d, avec_remise = remiseInput(),stop_d=FALSE)
     } else{
-      modele <-  lancer_algorithme_hamming(y=yInput(), n=input$n, m=input$m, N = input$N, maxIters = input$maxIters,rho = input$rho, alpha = input$alpha,poids_blanc = 1, poids_noir = 2, smoothing = TRUE, C=C, d=input$d, stop_d=FALSE)
+      modele <-  lancer_algorithme_hamming(y=yInput(), n=input$n, m=input$m, N = input$N, maxIters = input$maxIters,rho = input$rho, alpha = input$alpha,poids_blanc = 1, poids_noir = 2, C=C, d=input$d, stop_d=TRUE)
+      
     }
-
-    modele <<- modele 
+    
+    modele <<- modele
     
     return(modele)
     
@@ -183,7 +191,7 @@ function(input, output, session) {
       br(),
       br(),
       h4("lambda : "),
-      p(round((modeleInput()$lambda_hat_liste)[[input$iter2]],4)),
+      p(round(((modeleInput()$param_liste)[[input$iter2]])$lambda,4)),
       h4("x* : ")#,
       # 
       # fixedRow(style = "background-color:#ffffff;padding-top:10px;",

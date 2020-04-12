@@ -37,9 +37,10 @@ tableau_bilan <- function(modele,matriciel=TRUE){
       t = 1:i,
       s_max = round(modele$s_max[1:i],3),
       gammas_hat = round(modele$gammas_hat[1:i],3),
-      lambda=unlist(lapply(1:i,function(k){modele$lambda_hat_liste[[k]]})),
-      score_xstar= unlist(lapply(1:i,function(k){score(modele$x_star_hat_liste[[k]], modele$parametres$y)}))
+      lambda=unlist(lapply(1:i,function(k){((modele$param_liste)[[k]])$lambda})),
+      score_xstar= unlist(lapply(1:i,function(k){score(((modele$param_liste)[[k]])$x_star, modele$parametres$y)}))
     )
+
   }
   
   
