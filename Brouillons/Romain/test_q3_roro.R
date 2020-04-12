@@ -42,32 +42,85 @@ pi_density_MCMC <- function(numSim, lambda, x_etoiles){
   }
   return(X)
 }
+# 
+# # Traiter le burn-in et les auto-corrélations (éventuellement à modif pour burn-in)
+# modif_metro <- function(x){
+#   # Burn-in : commence à 1000
+#   x_temp <- x[1000:dim(x)[1],]
+#   resultat <- acf(x_temp,plot=F)
+#   # On récupère le lag min pour être OK
+#   indice <- which.max(as.integer(abs(resultat$acf)<=1.95/sqrt(resultat$n.used)))-1
+#   x_temp_acf <- x_temp[seq(1,dim(x_temp)[1],indice),]
+#   return(x_temp_acf)
+# }
+# 
+# 
+# 
+# # Fonction à utiliser qui renvoie un échantillon indépendant de N X_i qui suivent la loi PI(X) pour lambda et x_etoiles donnés
+# # Param un liste avec lambda et x_star
+# simul_permutation <- function(N, param, numSim = 10000){
+#   out <- pi_density_MCMC(numSim, param$lambda, param$x_star)
+#   out_traite <- modif_metro(out)
+#   indices <- sample.int(nrow(out_traite), size =  N, replace = FALSE)
+#   return(out_traite[indices,])
+# }
+# 
 
-# Traiter le burn-in et les auto-corrélations (éventuellement à modif pour burn-in)
+# Amélioré
 modif_metro <- function(x){
   # Burn-in : commence à 1000
   x_temp <- x[1000:dim(x)[1],]
   resultat <- acf(x_temp,plot=F)
-  # On récupère le lag min pour être OK
-  indice <- which.max(as.integer(abs(resultat$acf)<=1.95/sqrt(resultat$n.used)))-1
-  x_temp_acf <- x_temp[seq(1,dim(x_temp)[1],indice),]
-  return(x_temp_acf)
+  indice_lag <- which.max(as.integer(abs(resultat$acf)<=1.95/sqrt(resultat$n.used)))-1
+  x_temp_acf <- x_temp[seq(1,(dim(x_temp)[1]),indice_lag),]
+  return(list(acf=x_temp_acf,indice_lag=indice_lag))
 }
 
-# Fonction à utiliser qui renvoie un échantillon indépendant de N X_i qui suivent la loi PI(X) pour lambda et x_etoiles donnés
-# Param un liste avec lambda et x_star
-simul_permutation <- function(N, param, numSim = 10000){
-  out <- pi_density_MCMC(numSim, param$lambda, param$x_star)
-  out_traite <- modif_metro(out)
-  indices <- sample.int(nrow(out_traite), size =  N, replace = FALSE)
+modif_metro_am <- function(x){
+  x_temp <- x
+  resultat <- acf(x_temp,plot=F)
+  indice_lag <- which.max(as.integer(abs(resultat$acf)<=1.95/sqrt(resultat$n.used)))-1
+  x_temp_acf <- x_temp[seq(1,(dim(x_temp)[1]),max(1,indice_lag)),]
+  return(list(acf=x_temp_acf,indice_lag=indice_lag))
+}
+
+pi_density_MCMC_continue <- function(numSim, lambda, x_etoiles,X0){
+  X <-matrix(rep(X0,numSim),numSim,n,byrow = T)
+  for (t in (1:(numSim-1))){
+    Xprop=inverse_deux_elements(X[t,])
+    if(runif(1) < min(1,pi_density(Xprop,lambda,x_etoiles)/pi_density(X[t,],lambda,x_etoiles))){
+      X[t+1,]=Xprop
+    }
+    else{
+      X[t+1,]=X[t,]
+    }
+  }
+  return(X)
+}
+
+simul_permutation <- function(N, param){
+  num <- 1000 + N*10
+  out <- pi_density_MCMC(num, param$lambda, param$x_star)
+  modif <- modif_metro(out)
+  out_traite <- modif$acf
+  indice_lag <- modif$indice_lag
+  taille <- dim(out_traite)[1]
+  while(taille<N){
+    out <- rbind(out,pi_density_MCMC_continue(indice_lag*(N - taille), param$lambda, param$x_star,out_traite[[taille]]))
+    modif <- modif_metro_am(out)
+    out_traite <- modif$acf
+    indice_lag <- modif$indice_lag
+    taille <- dim(out_traite)[1]
+  }
+  indices <- sample(1:dim(out_traite)[1],N)
   return(out_traite[indices,])
 }
 
 lancer_algorithme_perm <- function(y, n, m, N = C * (n + 1), maxIters = 100,
-                              rho = 0.1, alpha = 0.7,
-                              poids_blanc = 1, poids_noir = 2,
-                              smoothing = TRUE, C = 5, d = 10,
-                              stop_d = TRUE){
+                                   rho = 0.1, alpha = 0.7,
+                                   poids_blanc = 1, poids_noir = 2,
+                                   smoothing = TRUE, C = 5, d = 10,
+                                   stop_d = TRUE){
   
   duree = Sys.time()
   
@@ -93,7 +146,7 @@ lancer_algorithme_perm <- function(y, n, m, N = C * (n + 1), maxIters = 100,
   while(critere_arret & (iter+1)<= maxIters){
     iter <- iter + 1
     
-    X <- simul_permutation(N = N, param = param_liste[[iter]],numSim = 100000)
+    X <- simul_permutation(N = N, param = param_liste[[iter]])
     
     #### Calcul du score
     
@@ -128,7 +181,7 @@ lancer_algorithme_perm <- function(y, n, m, N = C * (n + 1), maxIters = 100,
     if(score(param_liste[[iter]]$x_star,y) >score(x_star,y)){
       x_star = param_liste[[iter]]$x_star
     }
-
+    
     min_loss <- sum(apply(X_top,1, function(x) sum(x != x_star)))
     
     # Pour lambda, on le fait peu à peu tendre vers 0
@@ -141,7 +194,7 @@ lancer_algorithme_perm <- function(y, n, m, N = C * (n + 1), maxIters = 100,
     gammas_hat[iter] = gamma
     s_max[iter] = s
     param_liste[[iter+1]] <- list(lambda = lambda,
-                                   x_star = x_star)
+                                  x_star = x_star)
     
     # Critère d'arrêt quand on trouve la bonne réponse
     if(isTRUE(all.equal(score(x = x_star,y = y, poids_noir = poids_noir, poids_blanc = poids_blanc), 1))){
@@ -163,6 +216,7 @@ lancer_algorithme_perm <- function(y, n, m, N = C * (n + 1), maxIters = 100,
   
   ### fin de try
   duree <- round(as.numeric(difftime(Sys.time(), duree),units="secs"),2)
+  print(duree)
   
   return(
     list(

@@ -18,7 +18,7 @@ fluidPage(
   
   navbarPage(title="Menu",
              selected = "Simulations", 
-             windowTitle="windowtitle", 
+             windowTitle="Mastermind et permutations", 
              includeCSS("www/template_mastermind.css"),
              tabPanel("Simulations",
                       sidebarLayout(position = "right",
