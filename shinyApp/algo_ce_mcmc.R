@@ -73,7 +73,7 @@ modif_metro_am <- function(x){
   return(list(acf=x_temp_acf,indice_lag=indice_lag))
 }
 
-pi_density_MCMC_continue <- function(numSim, lambda, x_etoiles,X0){
+pi_density_MCMC_continue <- function(numSim, lambda, x_etoiles,X0,n){
   X <-matrix(rep(X0,numSim),numSim,n,byrow = T)
   for (t in (1:(numSim-1))){
     Xprop=inverse_deux_elements(X[t,])
@@ -104,7 +104,7 @@ simul_permutation <- function(N, param,y,m,n){
   indice_lag <- modif$indice_lag
   taille <- dim(out_traite)[1]
   while(taille<N){
-    out <- rbind(out,pi_density_MCMC_continue(indice_lag*(N - taille), param$lambda, param$x_star,out_traite[[taille]]))
+    out <- rbind(out,pi_density_MCMC_continue(indice_lag*(N - taille), param$lambda, param$x_star,out_traite[[taille]],n))
     modif <- modif_metro_am(out)
     out_traite <- modif$acf
     indice_lag <- modif$indice_lag

@@ -242,7 +242,7 @@ lancer_algorithme_perm <- function(y, n, m, N = C * (n + 1), maxIters = 100,
 }
 
 
-m=10
+m=6
 n=6
 avec_remise = FALSE
 C = 10
@@ -250,10 +250,10 @@ rho = 0.1
 poids_blanc = 1
 poids_noir = 2
 smoothing = TRUE
-set.seed(1)
-y <- initialiser_y(m=m,n=n, avec_remise = avec_remise)
-N2=C*n*m
-resultat <- lancer_algorithme_perm(y,n,m,N = N2, stop_d = TRUE,maxIters = 300,d=10) # 13 itérations
+# set.seed(1)
+# y <- initialiser_y(m=m,n=n, avec_remise = avec_remise)
+# N2=C*n*m
+# resultat <- lancer_algorithme_perm(y,n,m,N = N2, stop_d = TRUE,maxIters = 300,d=10) # 13 itérations
 ###########
 N1=C*(n+1)
 set.seed(1)
