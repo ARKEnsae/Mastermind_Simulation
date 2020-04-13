@@ -25,8 +25,7 @@ fluidPage(
                                     fluidRow(column(width = 4,wellPanel(id="sidebar", 
                                                                         tags$div(id = "module_css",
                                                                                  fluidRow(
-                                                                                   column(6,numericInput("m", "Couleurs (m)", value = 6, 
-                                                                                                         min = 1, max = 10)),                            
+                                                                                   column(6,numericInput("m", "Couleurs (m)", value = 6,  min = 1, max = 10)),
                                                                                    column(6,numericInput("n", "Billes (n)", value = 4,                                         
                                                                                                          min = 1, max = 8))
                                                                                    ),

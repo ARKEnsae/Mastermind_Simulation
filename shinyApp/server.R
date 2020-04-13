@@ -104,11 +104,11 @@ function(input, output, session) {
   output$iter <- renderUI({
     default_value <- 1
     # Si on veut commencer par défaut à la simulation de convergence
-    # if(!is.null(modeleInput()$indice_stop))
-    #   default_value <- modeleInput()$indice_stop
+    # if(!is.null(modeleInput()$indices$indice_conv))
+    #   default_value <- modeleInput()$indices$indice_conv
     
-    if(input$methode=="q3" & !is.null(modeleInput()$indice_stop)){
-      max <- modeleInput()$indice_stop
+    if(input$methode=="q3" & (!is.null(modeleInput()$indices$indice_arret) | !is.null(modeleInput()$indices$indice_conv))){
+      max <- max(modeleInput()$indices$indice_arret,modeleInput()$indices$indice_conv)
     } else{
       max <- input$maxIters
     }
@@ -130,6 +130,7 @@ function(input, output, session) {
                  min = 0, max = 2*valeur)
     
   })
+  
   
   
   # modeleInput <- eventReactive(c(input$lancer_modele,input$tirage,input$n,input$m), {
@@ -279,11 +280,17 @@ function(input, output, session) {
   output$titre_iter <- renderText({
     texte <- paste0(
         "</br>",
-      ifelse(!is.null(modeleInput()$indice_stop),
-             paste0("Convergence à l'itération n°", modeleInput()$indice_stop),
+      ifelse(!is.null(modeleInput()$indices$indice_conv),
+             paste0("Convergence à l'itération n°", modeleInput()$indices$indice_conv),
              "Non convergence"),  
-      " (d=",input$d,")</br></br>",
-    "<b>Itération n°",input$iter2,"</b>"
+      " (d=",input$d,")</br>",
+      
+      
+      
+      ifelse(!is.null(modeleInput()$indices$indice_arret),
+             paste0("Critère d'arrêt à l'itération n°", modeleInput()$indices$indice_arret),
+             "Critère d'arrêt non atteint</br>"),  
+    "</br></br><b>Itération n°",input$iter2,"</b>"
     )
     return(texte)
   })
@@ -363,7 +370,25 @@ function(input, output, session) {
     updateBoulesXstar(input=input, output=output,n=input$n)
   })
   
-  
+  # gérer les cas m<n pour sans remise
+  observeEvent({
+    remiseInput()
+  }, {
+
+    min <- 1
+    if(remiseInput()){
+      updateNumericInput(session,"m", min = 1)  
+    } else{
+      if(input$m<input$n){
+        valeur <- input$n
+      } else{
+        valeur <- input$m
+      }
+      updateNumericInput(session,"m", min = input$n, value=valeur)   
+    }
+        
+       
+  })
   
   }
 

@@ -2,6 +2,11 @@
 initialiser_y <- function(m, n, avec_remise = TRUE){
   # Avec remise = Q1
   # Sans remise = Q2/3
+  if(!avec_remise & m<n){
+    return(NULL)
+    stop()
+  }
+  
   y <- sample(1:m, n, replace = avec_remise)
   return(y)
 }

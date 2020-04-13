@@ -16,8 +16,8 @@ dessiner_histo <- function(liste_matrice,indice,colors){
 
 tableau_bilan <- function(modele,matriciel=TRUE){
   
-  if(!is.null(modele$indice_stop)){
-    i <- modele$indice_stop
+  if(!is.null(modele$indices$indice_arret) | !is.null(modele$indices$indice_conv)){
+    i <- max(modele$indices$indice_arret,modele$indices$indice_conv)
   } else{
     i <- modele$parametres$maxIters
   }
@@ -55,20 +55,34 @@ mise_en_forme_tableau <- function(modele,matriciel=TRUE){
   
   tableau <- tableau_bilan(modele,matriciel)
   
+  type_modele <- ifelse(!matriciel,"Loi avec distance de Hamming",ifelse(modele$parametres$avec_remise,"Tirage avec remise","Tirage sans remise"))
+  
   parametres <- paste0(#" : ",
     "n = ", modele$parametres$n, " / ",
     "m = ", modele$parametres$m, " / ",
     "N = ", modele$parametres$N, " / ",
     "rho = ", modele$parametres$rho, " / ",
-    "alpha = ", modele$parametres$alpha, " / ",
     "smoothing = ", ifelse(modele$parametres$smoothing,"oui","non"), " / ",
-    "avec remise = ", ifelse(modele$parametres$avec_remise,"oui","non"), " / ",
+    ifelse(modele$parametres$smoothing, paste0("alpha = ", modele$parametres$alpha, " / "),""),
+  #  "avec remise = ", ifelse(modele$parametres$avec_remise,"oui","non"), " / ",
     "d = ", modele$parametres$d
+  )
+  
+  
+  
+  convergence <- paste0("Convergence : ",
+                        ifelse(!is.null(modele$indices$indice_conv),paste0("Etape n°", modele$indices$indice_conv, " (",modele$duree$duree_conv," sec.)"),"Non"),
+                        " / ",
+                        "Arrêt : ",
+                        ifelse(!is.null(modele$indices$indice_arret),paste0("Etape n°", modele$indices$indice_arret, " (",modele$duree$duree_arret," sec.)"),"Non")
   )
   
   tableau_joli <- kable(tableau, align = "c") %>%
     kable_styling(full_width = F) %>%
-    footnote(general = paste0("Parametres : ",parametres,"\nTemps de calcul : ", modele$duree, " sec."),
+    footnote(general = paste0(type_modele,"\n",
+             "Parametres : ",parametres,"\n",
+             convergence,'\n',
+             "Temps de calcul total : ", modele$duree$duree_totale, " sec."),
              general_title = "\nNote",
              title_format = c("italic", "underline")
     )

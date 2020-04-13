@@ -4,7 +4,14 @@ lancer_algorithme <- function(y, n, m, N = C * m * n, maxIters = 100,
                               smoothing = TRUE, C = 5, d = 5,
                               stop_d = FALSE, avec_remise = TRUE){
   
+  if(!avec_remise & m<n){
+    stop()
+  }
+  
   duree = Sys.time()
+  duree_arret = NULL
+  duree_conv = NULL
+  duree_totale= NULL
   
   # Création de la matrice P_hat initiale (n x m) 
   P_hat_tilde <- matrix(nrow = n, ncol = m)
@@ -15,7 +22,9 @@ lancer_algorithme <- function(y, n, m, N = C * m * n, maxIters = 100,
   #meilleur_scores = c()
   gammas_hat = c()
   s_max = c()
-  indice_stop = NULL
+  
+  indice_arret = NULL
+  indice_conv = NULL
   
   ###### Algo
   
@@ -41,6 +50,12 @@ lancer_algorithme <- function(y, n, m, N = C * m * n, maxIters = 100,
     
     # Mise à jour de Gamma 
     gamma = scores_tries[eidx]
+    
+    if(gamma==1 & is.null(duree_arret)){
+      indice_arret <- iter
+      duree_arret <- round(as.numeric(difftime(Sys.time(), duree),units="secs"),2)
+    }
+    
     s = scores_tries[N]
     #  meilleur_score = max(meilleur_score,  scores_tries[N]) #garder une trace du meilleur résultat
     gammas_hat[iter] = gamma
@@ -62,26 +77,32 @@ lancer_algorithme <- function(y, n, m, N = C * m * n, maxIters = 100,
     
     P_hat_liste[[iter+1]] <- P_hat
     
-    if(length(gammas_hat) > d & is.null(indice_stop)){
+    if(length(gammas_hat) > d & is.null(indice_conv)){
       gammas_d <- gammas_hat[(length(gammas_hat)-d):length(gammas_hat)]
       if(length(unique(gammas_d))==1){
-        indice_stop <- iter
+        indice_conv <- iter
+        duree_conv <- round(as.numeric(difftime(Sys.time(), duree),units="secs"),2)
         if(stop_d){
           critere_arret <- FALSE
         }
       }
     }
   }
-  
-  ### fin de try
-  duree <- round(as.numeric(difftime(Sys.time(), duree),units="secs"),2)
-  
+ 
   # On enlève la dernière P_hat non utile
   P_hat_liste <- P_hat_liste[-length(P_hat_liste)]
   
+  ### fin de try
+  duree_totale <- round(as.numeric(difftime(Sys.time(), duree),units="secs"),2)
+  
+   
   return(
     list(
-      duree = duree,
+      duree = list(
+        duree_totale=duree_totale,
+        duree_conv=duree_conv,
+        duree_arret=duree_arret
+        ),
       parametres=list(
         y=y,
         n=n,
@@ -100,7 +121,10 @@ lancer_algorithme <- function(y, n, m, N = C * m * n, maxIters = 100,
       P_hat_liste=P_hat_liste,
       s_max=s_max,
       gammas_hat=gammas_hat,
-      indice_stop=indice_stop
+      indices = list(
+        indice_arret = indice_arret,
+        indice_conv = indice_conv
+      )
     )
     
   )
