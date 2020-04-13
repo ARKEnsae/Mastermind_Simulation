@@ -15,9 +15,9 @@ source("../ShinyApp/global.R", encoding="UTF-8",chdir = TRUE)
 
 
 ```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
-#set.seed(1)
+set.seed(1)
 ```
-# m=6 n=4
+### m=6 n=4
 
 ```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
 m = 6
@@ -27,17 +27,76 @@ y=sample(1:m, n, replace = FALSE)
 
 ```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
 modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = FALSE)
-tableau <- mise_en_forme_tableau(modele)
+tableau <- mise_en_forme_tableau(modele, matriciel = TRUE)
 tableau
 ```
   
 ```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
 modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = TRUE)
-tableau <- mise_en_forme_tableau(modele)
+tableau <- mise_en_forme_tableau(modele, matriciel = TRUE)
 tableau
 ```
 
-# m=33 n=30
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme_hamming(y=y, n=n, m=m,maxIters=100,stop_d=TRUE)
+tableau <- mise_en_forme_tableau(modele,matriciel = FALSE)
+tableau
+```
+
+### m=6 n=6
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+m = 6
+n = 6
+y=sample(1:m, n, replace = FALSE)
+```
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = FALSE)
+tableau <- mise_en_forme_tableau(modele, matriciel = TRUE)
+tableau
+```
+  
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = TRUE)
+tableau <- mise_en_forme_tableau(modele, matriciel = TRUE)
+tableau
+```
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme_hamming(y=y, n=n, m=m,maxIters=100,stop_d=TRUE)
+tableau <- mise_en_forme_tableau(modele,matriciel = FALSE)
+tableau
+```
+
+### m=20 n=15
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+m = 20
+n = 15
+y=sample(1:m, n, replace = FALSE)
+```
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = FALSE)
+tableau <- mise_en_forme_tableau(modele, matriciel = TRUE)
+tableau
+```
+  
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = TRUE)
+tableau <- mise_en_forme_tableau(modele, matriciel = TRUE)
+tableau
+```
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme_hamming(y=y, n=n, m=m,maxIters=100,stop_d=TRUE)
+tableau <- mise_en_forme_tableau(modele,matriciel = FALSE)
+tableau
+```
+
+
+### m=33 n=30
 
 ```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
 m = 33
@@ -47,13 +106,50 @@ y=sample(1:m, n, replace = FALSE)
 
 ```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
 modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = FALSE)
-tableau <- mise_en_forme_tableau(modele)
+tableau <- mise_en_forme_tableau(modele, matriciel = TRUE)
 tableau
 ```
   
 ```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
 modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = TRUE)
-tableau <- mise_en_forme_tableau(modele)
+tableau <- mise_en_forme_tableau(modele, matriciel = TRUE)
 tableau
 ```
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme_hamming(y=y, n=n, m=m,maxIters=100,stop_d=TRUE)
+tableau <- mise_en_forme_tableau(modele,matriciel = FALSE)
+tableau
+```
+
+
+### m=33 n=33
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+m = 33
+n = 33
+y=sample(1:m, n, replace = FALSE)
+```
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = FALSE)
+tableau <- mise_en_forme_tableau(modele, matriciel = TRUE)
+tableau
+```
+  
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = TRUE)
+tableau <- mise_en_forme_tableau(modele, matriciel = TRUE)
+tableau
+```
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme_hamming(y=y, n=n, m=m,maxIters=100,stop_d=TRUE)
+tableau <- mise_en_forme_tableau(modele,matriciel = FALSE)
+tableau
+```
+
+
+
+
 

@@ -1,0 +1,18 @@
+---
+title: "Untitled"
+author: "Kim"
+date: "13 avril 2020"
+output: md_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+$$ \pi(x) \alpha exp{(− \lambda d(x, x*))} $$
+
+$\lambda > 0$
+
+$m \ge n$
+
+$d(x, x*)$

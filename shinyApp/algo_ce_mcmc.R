@@ -203,7 +203,7 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,r
                                   x_star = x_star)
     
     # Critère d'arrêt quand on trouve la bonne réponse
-    if(isTRUE(all.equal(score(x = x_star,y = y, poids_noir = poids_noir, poids_blanc = poids_blanc), 1))){
+    if(isTRUE(all.equal(score(x = x_star,y = y, poids_noir = poids_noir, poids_blanc = poids_blanc), 1)) & is.null(indice_arret)){
       indice_arret <- iter+1 # différent de l'autre fonction attention
       duree_arret <- round(as.numeric(difftime(Sys.time(), duree),units="secs"),2) #NEW
       if(stop_d){
@@ -211,7 +211,7 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,r
       }
     }
     # Critère de convergence
-    if(length(gammas_hat) > d & is.null(indice_arret)){
+    if(length(gammas_hat) > d & is.null(indice_conv)){
       gammas_d <- tail(gammas_hat,d)
       if(isTRUE(all.equal(tail(gammas_hat,1), 1))){
         indice_conv <- iter+1 # différent de l'autre fonction attention

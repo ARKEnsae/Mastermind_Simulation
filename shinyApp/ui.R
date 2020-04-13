@@ -301,7 +301,7 @@ column(6,
                                    height = canvas_height
                        )
                 )
-       ),
+       )#,
        
        ### fin boules   1
        
@@ -319,14 +319,16 @@ column(6,
                                       )
                                     ))),
 
-              tabPanel("Code",
+              tabPanel("Code"#,
          
-                       htmlOutput("TODO1")
+                       #includeHTML("../Resultats/Resultats.html")
          
               ),
              tabPanel("À propos",
                       
-                      htmlOutput("TODO2")
+                      includeMarkdown("www/a_propos.md") 
+                      
+                      
 
              )
   )

@@ -107,13 +107,14 @@ function(input, output, session) {
     # if(!is.null(modeleInput()$indices$indice_conv))
     #   default_value <- modeleInput()$indices$indice_conv
     
-    if(input$methode=="q3" & (!is.null(modeleInput()$indices$indice_arret) | !is.null(modeleInput()$indices$indice_conv))){
-      max <- max(modeleInput()$indices$indice_arret,modeleInput()$indices$indice_conv)
-    } else{
-      max <- input$maxIters
-    }
+    #Si on veut arrêter le film à maxiter
+    # if(input$methode=="q3" & (!is.null(modeleInput()$indices$indice_arret) | !is.null(modeleInput()$indices$indice_conv))){
+    #   max <- max(modeleInput()$indices$indice_arret,modeleInput()$indices$indice_conv)
+    # } else{
+    #   max <- input$maxIters
+    # }
     
-    sliderInput("iter2", label=NULL,min = 1, max = max, value = default_value,step = 1,animate = animationOptions(interval = 700,playButton = icon('play', "fa-1x"),pauseButton = icon('pause', "fa-1x"))) 
+    sliderInput("iter2", label=NULL,min = 1, max = input$maxIters, value = default_value,step = 1,animate = animationOptions(interval = 700,playButton = icon('play', "fa-1x"),pauseButton = icon('pause', "fa-1x"))) 
     
     
   })
@@ -144,7 +145,7 @@ function(input, output, session) {
                                   poids_blanc = 1, poids_noir = 2,
                                   smoothing = input$smoothing, C=C, d=input$d, avec_remise = remiseInput(),stop_d=FALSE)
     } else{
-      modele <-  lancer_algorithme_hamming(y=yInput(), n=input$n, m=input$m, N = input$N, maxIters = input$maxIters,rho = input$rho, alpha = input$alpha,poids_blanc = 1, poids_noir = 2, C=C, d=input$d, stop_d=TRUE)
+      modele <-  lancer_algorithme_hamming(y=yInput(), n=input$n, m=input$m, N = input$N, maxIters = input$maxIters,rho = input$rho, alpha = input$alpha,poids_blanc = 1, poids_noir = 2, C=C, d=input$d, stop_d=FALSE)
       
     }
     

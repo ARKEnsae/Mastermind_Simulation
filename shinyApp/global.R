@@ -38,14 +38,15 @@ C = 5 #non paramétrable dans shiny
 ########################## Fonctions  ###########################
 #################################################################
 
-
+#Fonctions d'initialisation
 source("fonctions_initialisation.R", encoding = "UTF-8")
-
-#Fonction pour faire les algo de CE classique avec ou sans remise
+#Fonctions pour faire les algo de CE classique avec ou sans remise
 source("algo_ce_classique.R", encoding = "UTF-8")
-#Fonction pour faire l'algo de la question 3
+#Fonctions pour faire l'algo de la question 3
 source("algo_ce_mcmc.R", encoding = "UTF-8")
-#Fonction pour faire les algo de CE classique avec ou sans remise
+#Fonctions pour faire graphiques et tableaux
+source("fonctions_graphiques.R", encoding = "UTF-8")
+
 
 
 # 
@@ -71,7 +72,5 @@ meilleure_proposition <- function(matrice){
   return(apply(matrice_ordre,2,function(x){which(x==max(x))[1]})) 
 }
 #meilleure_proposition(modele$P_hat_liste[[100]])
-
-source("fonctions_graphiques.R", encoding = "UTF-8")
 
 
