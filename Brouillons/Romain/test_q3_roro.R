@@ -242,8 +242,8 @@ lancer_algorithme_perm <- function(y, n, m, N = C * (n + 1), maxIters = 100,
 }
 
 
-m=6
-n=6
+m=35
+n=31
 avec_remise = FALSE
 C = 10
 rho = 0.1
@@ -258,7 +258,7 @@ smoothing = TRUE
 N1=C*(n+1)
 set.seed(1)
 y <- initialiser_y(m=m,n=n, avec_remise = avec_remise)
-resultat <- lancer_algorithme_perm(y,n,m,N = N1, stop_d = TRUE,maxIters = 300,d=10) # 56 itérations
+resultat <- lancer_algorithme_perm(y,n,m,N = N1, stop_d = TRUE,maxIters = 100,d=10) # 56 itérations
 ##########
 param_liste <- resultat$param_liste
 x_star <- sapply(param_liste,function(x)x$x_star)

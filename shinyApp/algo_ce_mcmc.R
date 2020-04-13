@@ -104,7 +104,7 @@ simul_permutation <- function(N, param,y,m,n){
   indice_lag <- modif$indice_lag
   taille <- dim(out_traite)[1]
   while(taille<N){
-    out <- rbind(out,pi_density_MCMC_continue(indice_lag*(N - taille), param$lambda, param$x_star,out_traite[[taille]],n))
+    out <- rbind(out,pi_density_MCMC_continue(indice_lag*(N - taille), param$lambda, param$x_star,out_traite[taille,],n))
     modif <- modif_metro_am(out)
     out_traite <- modif$acf
     indice_lag <- modif$indice_lag
