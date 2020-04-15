@@ -20,28 +20,44 @@ inverse_deux_elements <- function(X){
 
 # Fonction pour appliquer l'algo de Metropolis Hastings
 # On utilise le score du x*
+# pi_density_MCMC <- function(numSim, lambda, x_etoiles,y, m,n){
+#   nb <- nb_boules_noires(x_etoiles,y)
+#   ech1 <- sample(x_etoiles,nb)
+#   ech2 <- NULL
+#   for(i in 1:m){
+#     if(!(i %in% ech1)){
+#       ech2 <- c(ech2,i)
+#     }
+#   }
+#   ech2 <- sample(ech2,n-nb)
+#   ech <- c(ech1,ech2)
+#   X <-matrix(rep(ech,numSim),numSim,n,byrow = T)
+#   for (t in (1:(numSim-1))){
+#     Xprop=inverse_deux_elements(X[t,])
+#     if(runif(1) < min(1,pi_density(Xprop,lambda,x_etoiles)/pi_density(X[t,],lambda,x_etoiles))){
+#       X[t+1,]=Xprop
+#     }
+#     else{
+#       X[t+1,]=X[t,]
+#     }
+#   }
+#   return(X)
+# }
+
+
 pi_density_MCMC <- function(numSim, lambda, x_etoiles,y, m,n){
-  nb <- nb_boules_noires(x_etoiles,y)
-  ech1 <- sample(x_etoiles,nb)
-  ech2 <- NULL
-  for(i in 1:m){
-    if(!(i %in% ech1)){
-      ech2 <- c(ech2,i)
-    }
-  }
-  ech2 <- sample(ech2,n-nb)
-  ech <- c(ech1,ech2)
-  X <-matrix(rep(ech,numSim),numSim,n,byrow = T)
+  X0 <- sample(1:m,m,replace=FALSE)
+  X <-matrix(rep(X0,numSim),numSim,m,byrow = T)
   for (t in (1:(numSim-1))){
     Xprop=inverse_deux_elements(X[t,])
-    if(runif(1) < min(1,pi_density(Xprop,lambda,x_etoiles)/pi_density(X[t,],lambda,x_etoiles))){
+    if(runif(1) < min(1,pi_density(Xprop[1:n],lambda,x_etoiles)/pi_density(X[t,1:n],lambda,x_etoiles))){
       X[t+1,]=Xprop
     }
     else{
       X[t+1,]=X[t,]
     }
   }
-  return(X)
+  return(X[,1:n])
 }
 
 # Traiter le burn-in et les auto-corrélations (éventuellement à modif pour burn-in)
@@ -54,6 +70,23 @@ pi_density_MCMC <- function(numSim, lambda, x_etoiles,y, m,n){
 #   x_temp_acf <- x_temp[seq(1,dim(x_temp)[1],indice),]
 #   return(x_temp_acf)
 # }
+
+# Tracer trace d'une coordonée pour voir burn-in
+tracer_Trace <- function(nSim,lambda,x_etoiles,y,m,n,coord){
+  out<-pi_density_MCMC(nSim,lambda,x_etoiles,y,m,n)
+  ggplot(as.data.frame(out))+
+    geom_line(aes(x = (1:nSim),y=out[,1]))+
+    labs(title=paste('Trace plot'),x='',y='')
+}
+
+# Tracer ACF pour trouver lag
+tracer_ACF <- function(nSim,lambda,x_etoiles,y,m,n,coord,burn_in){
+  out<-pi_density_MCMC(nSim,lambda,x_etoiles,y,m,n)
+  ggAcf(out[burn_in:dim(out)[1],coord])+
+    labs(title=paste('ACF'))
+}
+
+
 
 # Amélioré
 modif_metro <- function(x){
@@ -193,9 +226,9 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,r
     # Pour lambda, on le fait peu à peu tendre vers 0
     lambda <- param_liste[[iter]]$lambda - param_liste[[1]]$lambda/(maxIters+1)
     
-    # print(sprintf("i %s - N_top %s - lambda %.3f - gamma %.3f - loss %.3f - prop %s",
-    #               iter,
-    #               nrow(X_top), lambda, gamma, min_loss, paste(x_star,collapse = " ")))
+    print(sprintf("i %s - N_top %s - lambda %.3f - gamma %.3f - loss %.3f - prop %s",
+                  iter,
+                  nrow(X_top), lambda, gamma, min_loss, paste(x_star,collapse = " ")))
     
     gammas_hat[iter] = gamma
     s_max[iter] = s

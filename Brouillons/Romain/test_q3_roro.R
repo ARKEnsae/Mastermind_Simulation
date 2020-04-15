@@ -18,7 +18,7 @@ inverse_deux_elements <- function(X){
 }
 
 # Fonction pour appliquer l'algo de Metropolis Hastings
-# On utilise le score du x*
+# # On utilise le score du x*
 pi_density_MCMC <- function(numSim, lambda, x_etoiles){
   nb <- nb_boules_noires(x_etoiles,y)
   ech1 <- sample(x_etoiles,nb)
@@ -42,6 +42,26 @@ pi_density_MCMC <- function(numSim, lambda, x_etoiles){
   }
   return(X)
 }
+
+# pi_density_MCMC <- function(numSim, lambda, x_etoiles){
+#   X0 <- sample(1:m,m,replace=FALSE)
+#   X <-matrix(rep(X0,numSim),numSim,m,byrow = T)
+#   for (t in (1:(numSim-1))){
+#     Xprop=inverse_deux_elements(X[t,])
+#     if(runif(1) < min(1,pi_density(Xprop[1:n],lambda,x_etoiles)/pi_density(X[t,1:n],lambda,x_etoiles))){
+#       X[t+1,]=Xprop
+#     }
+#     else{
+#       X[t+1,]=X[t,]
+#     }
+#   }
+#   return(X[,1:n])
+# }
+
+# m=6
+# n=4
+# pi_density_MCMC(10,1,1:n)
+
 # 
 # # Traiter le burn-in et les auto-corrélations (éventuellement à modif pour burn-in)
 # modif_metro <- function(x){
@@ -106,7 +126,7 @@ simul_permutation <- function(N, param){
   indice_lag <- modif$indice_lag
   taille <- dim(out_traite)[1]
   while(taille<N){
-    out <- rbind(out,pi_density_MCMC_continue(indice_lag*(N - taille), param$lambda, param$x_star,out_traite[[taille]]))
+    out <- rbind(out,pi_density_MCMC_continue(indice_lag*(N - taille), param$lambda, param$x_star,out_traite[taille,]))
     modif <- modif_metro_am(out)
     out_traite <- modif$acf
     indice_lag <- modif$indice_lag
@@ -242,24 +262,37 @@ lancer_algorithme_perm <- function(y, n, m, N = C * (n + 1), maxIters = 100,
 }
 
 
-m=35
-n=31
+
 avec_remise = FALSE
 C = 10
 rho = 0.1
 poids_blanc = 1
-poids_noir = 2
+poids_noir = 2.1
 smoothing = TRUE
+m=6
+n=4
+N1=C*(n+1)
+set.seed(1)
+y <- initialiser_y(m=m,n=n, avec_remise = avec_remise)
+resultat <- lancer_algorithme_perm(y,n,m,N = N1, stop_d = TRUE,maxIters = 100,d=10) # 56 itérations
+set.seed(10)
+y <- initialiser_y(m=m,n=n, avec_remise = avec_remise)
+resultat <- lancer_algorithme_perm(y,n,m,N = N1, stop_d = TRUE,maxIters = 100,d=10) # 56 itérations
+set.seed(100)
+y <- initialiser_y(m=m,n=n, avec_remise = avec_remise)
+resultat <- lancer_algorithme_perm(y,n,m,N = N1, stop_d = TRUE,maxIters = 100,d=10) # 56 itérations
+set.seed(1000)
+y <- initialiser_y(m=m,n=n, avec_remise = avec_remise)
+resultat <- lancer_algorithme_perm(y,n,m,N = N1, stop_d = TRUE,maxIters = 100,d=10) # 56 itérations
+set.seed(10000)
+y <- initialiser_y(m=m,n=n, avec_remise = avec_remise)
+resultat <- lancer_algorithme_perm(y,n,m,N = N1, stop_d = TRUE,maxIters = 100,d=10) # 56 itérations
+##########
 # set.seed(1)
 # y <- initialiser_y(m=m,n=n, avec_remise = avec_remise)
 # N2=C*n*m
 # resultat <- lancer_algorithme_perm(y,n,m,N = N2, stop_d = TRUE,maxIters = 300,d=10) # 13 itérations
 ###########
-N1=C*(n+1)
-set.seed(1)
-y <- initialiser_y(m=m,n=n, avec_remise = avec_remise)
-resultat <- lancer_algorithme_perm(y,n,m,N = N1, stop_d = TRUE,maxIters = 100,d=10) # 56 itérations
-##########
 param_liste <- resultat$param_liste
 x_star <- sapply(param_liste,function(x)x$x_star)
 tail(t(x_star))
