@@ -43,6 +43,31 @@ pi_density_MCMC <- function(numSim, lambda, x_etoiles,y, m,n){
   }
   return(X)
 }
+# pi_density_MCMC <- function(numSim, lambda, x_etoiles,y, m,n){
+#   X0 <- sample(1:m,m,replace=FALSE)
+#   X <-matrix(rep(X0,numSim),numSim,m,byrow = T)
+#   nb <- nb_boules_noires(x_etoiles,y)
+#   ech1 <- sample(x_etoiles,nb)
+#   ech2 <- NULL
+#   for(i in 1:m){
+#     if(!(i %in% ech1)){
+#       ech2 <- c(ech2,i)
+#     }
+#   }
+#   ech2 <- sample(ech2,n-nb)
+#   ech <- c(ech1,ech2)
+#   X <-matrix(rep(ech,numSim),numSim,n,byrow = T)
+#   for (t in (1:(numSim-1))){
+#     Xprop=inverse_deux_elements(X[t,])
+#     if(runif(1) < min(1,pi_density(Xprop[1:n],lambda,x_etoiles)/pi_density(X[t,1:n],lambda,x_etoiles))){
+#       X[t+1,]=Xprop
+#     }
+#     else{
+#       X[t+1,]=X[t,]
+#     }
+#   }
+#   return(X[,1:n])
+# }
 
 # Traiter le burn-in et les auto-corrélations (éventuellement à modif pour burn-in)
 # modif_metro <- function(x){
@@ -61,6 +86,8 @@ modif_metro <- function(x){
   x_temp <- x[1000:dim(x)[1],]
   resultat <- acf(x_temp,plot=F)
   indice_lag <- which.max(as.integer(abs(resultat$acf)<=1.95/sqrt(resultat$n.used)))-1
+  indice_lag <- 1
+  
   x_temp_acf <- x_temp[seq(1,(dim(x_temp)[1]),indice_lag),]
   return(list(acf=x_temp_acf,indice_lag=indice_lag))
 }
@@ -68,7 +95,8 @@ modif_metro <- function(x){
 modif_metro_am <- function(x){
   x_temp <- x
   resultat <- acf(x_temp,plot=F)
-  indice_lag <- which.max(as.integer(abs(resultat$acf)<=1.95/sqrt(resultat$n.used)))-1
+  # indice_lag <- which.max(as.integer(abs(resultat$acf)<=1.95/sqrt(resultat$n.used)))-1
+  indice_lag <- 100
   x_temp_acf <- x_temp[seq(1,(dim(x_temp)[1]),max(1,indice_lag)),]
   return(list(acf=x_temp_acf,indice_lag=indice_lag))
 }
@@ -84,6 +112,21 @@ pi_density_MCMC_continue <- function(numSim, lambda, x_etoiles,X0,n){
       X[t+1,]=X[t,]
     }
   }
+  return(X)
+}
+pi_density_MCMC_continue <- function(nombreSim, lag, lambda, x_etoiles,X0,n){
+  X <-matrix(rep(X0,nombreSim*lag+1),nombreSim*lag+1, n,byrow = T)
+  for (t in (1:(nombreSim*lag-1))){
+    Xprop=inverse_deux_elements(X[t,])
+    if(runif(1) < min(1,pi_density(Xprop,lambda,x_etoiles)/pi_density(X[t,],lambda,x_etoiles))){
+      X[t+1,]=Xprop
+    }
+    else{
+      X[t+1,]=X[t,]
+    }
+  }
+  X <- X[-1,]
+  X <- X[seq(1, nombreSim*lag, lag),]
   return(X)
 }
 
@@ -103,11 +146,11 @@ simul_permutation <- function(N, param,y,m,n){
   out_traite <- modif$acf
   indice_lag <- modif$indice_lag
   taille <- dim(out_traite)[1]
+  print(dim(out_traite))
   while(taille<N){
-    out <- rbind(out,pi_density_MCMC_continue(indice_lag*(N - taille), param$lambda, param$x_star,out_traite[taille,],n))
-    modif <- modif_metro_am(out)
-    out_traite <- modif$acf
-    indice_lag <- modif$indice_lag
+    out <- rbind(out,pi_density_MCMC_continue(N - taille, indice_lag, param$lambda, param$x_star,out_traite[taille,],n))
+    # modif <- modif_metro_am(out)
+    out_traite <- out
     taille <- dim(out_traite)[1]
   }
   indices <- sample(1:dim(out_traite)[1],N)
@@ -143,7 +186,7 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,r
   param_liste <- list()
   P_hat_tilde <- matrix(nrow = n, ncol = m)
   param_liste <- list()
-  param_liste[[1]] <- list (lambda = 1,
+  param_liste[[1]] <- list (lambda = 0.2,
                             x_star = initialisation_sample(m = m, n = n, N = 1,
                                                            avec_remise = FALSE))
   # Listes à agrémenter
@@ -191,11 +234,42 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,r
     min_loss <- sum(apply(X_top,1, function(x) sum(x != x_star)))
     
     # Pour lambda, on le fait peu à peu tendre vers 0
-    lambda <- param_liste[[iter]]$lambda - param_liste[[1]]$lambda/(maxIters+1)
     
-    # print(sprintf("i %s - N_top %s - lambda %.3f - gamma %.3f - loss %.3f - prop %s",
-    #               iter,
-    #               nrow(X_top), lambda, gamma, min_loss, paste(x_star,collapse = " ")))
+    lambda <- param_liste[[iter]]$lambda - param_liste[[1]]$lambda/(maxIters+1)
+    # Début modifs Alain
+    # mle <- function(lambda) {
+    #    N_top = nrow(X_top)
+    #    p1 <- lambda * N_top * m
+    #    sum_exp <- sum(sapply(seq(0,m),function(k){
+    #       (exp(lambda) - 1)^k / factorial(k)
+    #    }))
+    #    p2 <- -N_top * log(sum_exp)
+    #    p3 <- -lambda * min_loss
+    #    return(p1+p2+p3)
+    # }
+    # 
+    # max <- optimize(mle,c(0,2), maximum = TRUE)
+    # lambda_tilde <- max$maximum
+    # lambda <- alpha * lambda_tilde + (1-alpha)* param_liste[[iter]]$lambda
+    # lambda <- 
+    # Fin modifs Alain
+    
+    gradient <- function(lambda) {
+      N_top = nrow(X_top)
+      p1 <- N_top * m
+      sum_exp <- sapply(seq(0,m),function(k){
+        (exp(lambda) - 1)^k / factorial(k)
+      })
+      sum_exp_t <- sum(sum_exp)
+      sum_exp_tm1 <- sum(sum_exp[-length(sum_exp)])
+      (sum_exp_tm1 * exp(lambda) - m* sum_exp_t)/sum_exp_t + min_loss/N_top
+    }
+    lambda <- tryCatch(uniroot(gradient, c(0,5))$root, error = function(e) 1)
+    # lambda <- 1
+
+    print(sprintf("i %s - N_top %s - lambda %.3f - gamma %.3f - loss %.3f - prop %s",
+                  iter,
+                  nrow(X_top), lambda, gamma, min_loss, paste(x_star,collapse = " ")))
     
     gammas_hat[iter] = gamma
     s_max[iter] = s

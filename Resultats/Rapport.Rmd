@@ -1,0 +1,345 @@
+---
+title: "Mastermind et permutations"
+author: "Kim Antunez, Romain Lesauvage, Alain Quartier-la-Tente"
+output: 
+  bookdown::html_document2:
+    toc: true
+    number_sections: true
+header-includes:
+- \renewcommand{\P}{\mathbb{P}}
+- \newcommand\1{\mathbb{1}}
+- \newcommand\E{\mathbb{E}}
+- \DeclareMathOperator*{\argmax}{argmax}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      cache = TRUE)
+```
+
+
+```{r, include=FALSE}
+source("../ShinyApp/global.R", encoding="UTF-8",chdir = TRUE)
+set.seed(1)
+```
+
+# Introduction
+
+Ce rapport décrit le projet de Monte-Carlo de Kim Antunez, Romain Lesauvage et Alain Quartier-la-Tente (Ensae, 2A), dont l'objectif est d'étudier l'application de méthodes de Cross-Entropy à la résolution du Mastermind.
+
+Le Mastermind est un jeu à deux joueurs, où le premier joueur choisit un *code* (une séquence de $n$ boules de couleur, parmi $m$ couleurs possibles)
+^[Les valeurs standards sont $m = 6$ couleurs et $n=4$ boules],
+et le second joueur doit deviner ce code en un minimum de coups. 
+À chaque coup, le second joueur propose un code, et le premier joueur doit lui donner :
+
+a. le nombre de boules bien placées : c'est que ce nous appelons le *nombre de boules noires* ;  
+b. le nombre de boules de la bonne couleur, mais mal placées : c'est que ce nous appelons le *nombre de boules blanches*.
+
+Par exemple, si le code à décoder est "vert-bleu-rouge-violet" et que le second joueur propose "violet-rouge-rouge-jaune" alors il y a une boule noire (une des boules rouges est bien placée) et une boule blanche (il y a bien une boule violette mais elle est mal placée).
+
+L'objectif de ce projet est d'appliquer trois méthodes différentes pour résoudre ce problème :
+
+1. Mettre en oeuvre un algorithme basé sur la méthode Cross-Entropy (section \@ref(sec:q1)).
+
+2. Adapter la méthode précédente au cas où le premier joueur doit forcément choisir une permutation comme code (i.e. chaque couleur ne peut apparaître qu’une seule fois, donc $m \ge n$) (section \@ref(sec:q2)).
+
+3. En utilisant, au sein d'une approche de Cross-Entropy, la loi suivante sur l'ensemble des permutations (section \@ref(sec:q3)) :
+$$
+\pi_{\lambda, x^*}(x)\propto\exp{(−\lambda d(x, x^{*}))}
+$$
+Avec $\lambda > 0$ et $d(x, x^{*})$ la distance de Hamming entre $x$ et $x^{*}$ (i.e. : le nombre de où les deux permutations sont différentes).
+
+## Rappels sur la méthode de Cross-Entropy
+
+La méthode de Cross-Entropy est une méthode utilisée pour estimer des probabilités d'événements rares. Elle peut aussi être adaptée pour résoudre des problèmes d'optimisation combinatoire et c'est dans ce cadre que nous l'utiliserons dans notre projet.
+
+Le problème est le suivant : soit $\mathcal{X}$ un ensemble fini d'états et $S$ une fonction de performance. L'objectif est de trouver le maximum de $S$ sur $\mathcal{X}$ (noté $\gamma^{*}$) et les points pour lesquels ce maximum est atteint ($x^*$). Si on note $\gamma^{*}$ ce maximum, on cherche donc :
+\begin{equation} 
+S(x^{*})=\gamma^{*}=\underset{x\in\mathcal{X}}{{\max}}S(x)
+  (\#eq:defscore)
+\end{equation} 
+Pour le résoudre, on lui associe un problème stochastique d'estimation de probabilité d'événements rares. On définit :
+
+- un ensemble d'indicatrices $\1_{\left\{ S(x)\geq\gamma\right\}}$ sur $\mathcal{X}$ pour plusieurs seuils $\gamma\in\mathbb{R}$ ;  
+-  $\{f(\cdot;v),\,v\in\mathcal{V}\}$ une famille discrète de probabilités sur $\mathcal{X}$, paramétrée par un paramètre vectoriel $v$. 
+
+Pour $u\in\mathcal{V}$, le problème \@ref(eq:defscore) est équivalent au problème d'estimation de la probabilité :
+$$\mathbb{P}_{u}(S(X)\geq\gamma)=\sum_{x}\1_{\{S(x)\geq\gamma\}}f(x;u)=\mathbb{E}_{u}[\1_{\{S(x)\geq\gamma\}}]$$
+
+---
+
+L'algorithme utilisé est le suivant :
+
+1. Initialisation : on fixe arbitrairement $\hat{v}_{0}$, deux paramètres $N\in \mathbb N$ et $\rho\in]0,1[$. $t = 1$.  
+2. On génère un échantillon $X_{1},\dots,X_{N}$ de loi $f(\cdot,v_{t-1})$, on calcule le quantile $(1-\rho)$ de la fonction score qui donne $\hat{\gamma}_{t}$ :
+$$\hat{\gamma}_{t}=S_{\lceil(1-\rho)N\rceil}$$
+Si $\hat{\gamma}_{t}\geq\gamma^*$ on prend $\hat{\gamma}_{t}=\gamma^*$.  
+3. On utilise le même échantillon $X_{1},\dots,X_{N}$ pour trouver $\hat{v}_{t}$ :
+\begin{equation} 
+\DeclareMathOperator*{\argmax}{argmax}
+\hat{v}_{t}=\underset{v}{\argmax}\;\hat{D}(v)=\underset{v}{\argmax}\frac{1}{N}\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\ln f(X_{i};v)
+  (\#eq:maxopti)
+\end{equation} 
+4. Arrêt : si pour un certain $t\geq d$, (par exemple $d=5$), on a : 
+$$\hat{\gamma}_{t}=\hat{\gamma}_{t-1}=\dots=\hat{\gamma}_{t-d}$$
+alors on arrête l'algorithme.
+
+---
+
+### Smoothed updating
+
+Plutôt que de mettre à jour directement $\hat{v}_{t-1}$ l'équation \@ref(eq:maxopti), nous faisons une mise à jour lissée -- \emph{smoothed updating} :
+$$
+\hat{v}_{t}=\alpha\hat{w}_{t}+(1-\alpha)\hat{v}_{t-1}
+$$
+avec $\hat{w}_{t}$ la valeur obtenue en résolvant le problème \ref{eq:maxopti}. 
+Dans le cas où on a des problèmes d'optimisation avec des variables discrètes (ce qui est ici le cas), cela permet d'éviter l'occurence de 0 ou de 1 dans les paramètres des vecteurs. 
+En effet, le problème est que dès lors qu'il y a un 0 ou un 1, il le
+reste souvent pour toujours : cela évite d'avoir uen convergence vers la mauvaise valeur. XXXXX suggèrent de $0,4\leq\alpha\leq0,9$ : dans ce projet nous utilisons par défaut $\alpha = 0,7$
+
+## Paramètres utilisés dans le projet
+
+Dans ce projet  sur le Mastermind, la fonction $S$ de score correspond à la réponse du joueur 1 : plus il est grand plus le joueur 2 est proche de la bonne réponse. Pour toute proposition $x$ on a :
+$$
+S(x)=\frac{\omega_{noir}\times N_{\text{boules noires}}+\omega_{blanc}\times N_{\text{boules blanches}}
+}{
+\omega_{noir}\times n
+}
+$$
+Avec $n$ le nombre de boules à deviner, $\omega_{noir}>\omega_{blanc}$, habituellement $\omega_{noir}=2$ et $\omega_{blanc}=1$.
+
+Avec cette fonction de performance nous supposons qu'une boule noire compte plus qu'une boule blanche. La constante de normalisation $\omega_{noir}n$ permet de faciliter les comparaisons lorsque l'on fait changer le nombre de boules à deviner : dans tous les cas on cherche $x^*$ tel que $S(x^*) = 1$.
+
+Dans l'algorithme de Cross-Entropy nous utilisons $\rho = 0,01$ (à l'étape 3 la maximisation est donc fait sur les 10 \% meilleurs échantillons), $N = C\times\text{nombre de paramètres}$ (avec $C=5$ par défaut) et $d=5$.
+
+# Application de la méthode de Cross-entropy au Mastermind {#sec:q1}
+
+Dans le Mastermind il faut choisir $n$ boules parmi $m$ couleurs. En numérotant les couleurs de 1 à $m$ on a :
+
+- $\mathcal{X}=\left\{ 1,2,\dots,m\right\}^{n}$  
+
+-   Pour générer les échantillons, la famille de lois utilisée est :
+$$\mathcal{V} = \left\{ \left(p_{i,j}\right)_{i,j} \in\mathcal{M}_{n,m}([0,1])\::\:\forall i,\sum_{j=1}^mp_{i,j}=1\right\} $$
+Ainsi, les composantes du vecteur $X=(X_{1},\dots,X_{n})\in\mathcal{X}$ sont tirées aléatoirement de façons à ce que leur distribution soit
+déterminée par une suite $p_{1},\dots,p_{n}$ de vecteurs de probabilités.
+La $j$\ieme composante de $p_{i}$ étant égale à $p_{ij}=\P(X_{i}=j)$ : c'est la probabilité d'avoir une boule de couleur $j$ en $i$ème position.
+
+- L'initialisation est faite avec des vecteurs de probabilité uniformes pour chaque couleur : 
+$$
+\hat{v}_{0}=\left(\frac{1}{m}\right)_{i=1..n,j=1..m}
+$$
+Pour estimer de manière optimale on utilise la formule (voir démonstration section partie \@ref(sec:demmajparam)) :
+$$p_{k,l}=\frac{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{i,k}=l\right\} }}{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}$$
+- À chaque itération nous générons $N = C\times m\times n$ échantillons. Pour générer $X=(X_{1},\dots,X_{n})\in\mathcal{X}$, nous pouvons générer chaque composante $X_i$ de manière indépendante : il s'agit d'une loi discrète sur $\left\{ 1,2,\dots,m\right\}$ avec des probabilités $p_i=(p_{i,1},\dots,p_{i,m})$. Pour cela, sous R il suffit d'utiliser la fonction `sample` en utilisant l'option `prob` pour définir le vecteur de probabilités. Cette fonction peut être réécrite aisément à l'aide d'un tirage d'une loi uniforme discrète. Pour cela, prenons un nombre très grand, par exemple $k=$100 000, et créons un vecteur contenant des entiers de 1 à $m$, chaque élément $j$ étant répété $k\times p_{i,j}$ fois. En tirant une position au hasard dans ce vecteur (i.e. en tirant un entier au hasard entre 1 et $k$), l'entier associé sera égal à $j$ avec une probabilité environ égale à $p_{i,j}$. Sous R on peut coder cette fonction de la façon suivante :
+
+```{r}
+sample2 <- function(x, n, probas, replace = TRUE){
+  taille <- 10000*length(x)
+  choix <- sapply(seq_along(x), function(i){
+    rep(x[i], round(probas[i]*taille))
+  })
+  resultat = c()
+  if(replace){
+    for(k in 1:n){
+      indice = as.integer(runif(1,1,taille+1))
+      resultat = c(resultat,choix[indice])
+    } 
+  } else {
+    sous_choix = choix
+    for(k in 1:n){
+      taille_sc = length(sous_choix)
+      indice = as.integer(runif(1,1,taille_sc+1))
+      resultat = c(resultat,sous_choix[indice])
+      sous_choix = sous_choix[sous_choix != sous_choix[indice]]
+    } 
+  }
+  resultat
+}
+```
+
+## Résultats
+
+
+```{r, fig.width=4, fig.cap="Graphics test", fig.subcap=c("test1", "test2")}
+knitr::include_graphics(c("img/LOGO-ENSAE.png", "img/LOGO-ENSAE.png"))
+```
+
+Graphique pour représenter la convergence des probas dans un cas simple
+
+Tableaux sur plusieurs seeds et plusieurs paramètres m,n pour montrer le nombre d'itération moyen pour converger.
+
+
+
+
+## Démonstration mise à jour des paramètres {#sec:demmajparam}
+
+La densité s'écrit :
+$$
+f(X;p)=\prod_{i=1}^{n}\prod_{j=1}^{m}p_{i,j}^{\1_{\left\{ X_{i}=j\right\} }}
+$$
+
+Il vient :
+$$
+\ln f(X;p)=\sum_{i=1}^{n}\sum_{j=1}^{m}\1_{\left\{ X_{i}=j\right\} }\ln p_{i,j}
+$$
+Et :
+$$
+\frac{\partial}{\partial p_{k,l}}\ln f(X;p)=\frac{\partial}{\partial p_{k,l}}\sum_{j=1}^{m}\1_{\left\{ X_{k}=j\right\} }\ln p_{k,j}=\frac{\1_{\left\{ X_{k}=l\right\} }}{p_{k,l}}
+$$
+
+Soit maintenant un échantillon de taille $N$, $X_{1},\dots,X_{N}\overset{i.i.d}{\sim}X$. Notons$X_{i}=(X_{i,1},\dots,X_{i,n})\in\mathcal{X}$. Le programme
+de maximisation \ref{eq:maxopti} s'écrit comme un problème de maximisation sous
+contrainte :
+$$
+\begin{cases}
+\underset{p_{i,j}}{\max} & \sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\ln f(X_{i};v)\\
+s.c & \forall i\::\:\sum_{j=1}^{m}p_{i,j}=1
+\end{cases}
+$$
+Le Lagrangien s'écrit :
+$$
+\mathcal{L}=\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\ln f(X_{i};v)+\sum_{i=1}^{n}\lambda_{i}\left(\sum_{j=1}^{m}p_{i,j}-1\right)
+$$
+
+La condition d'optimalité en $p_{k,l}$ :
+$$
+\frac{\partial}{\partial p_{k,l}}\mathcal{L}=0\implies\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\frac{\1_{\left\{ X_{i,k}=l\right\} }}{p_{k,l}}-\lambda_{k}=0
+$$
+
+Soit : 
+$$
+\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{i,k}=l\right\} }=\lambda_{k}p_{k,l}
+$$
+
+En sommant sur $l$ et en utilisant la condition sur les $p_{i,j}$, il vient :
+$$
+\lambda_{k}=\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\underbrace{\sum_{l=1}^{m}\1_{\left\{ X_{i,k}=l\right\} }}_{=1}
+$$
+
+D'où la formule de mise à jour :
+
+$$
+p_{k,l}=\frac{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{i,k}=l\right\} }}{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}
+$$
+
+
+# Restriction aux permutations
+
+Dans cette partie nous supposons que le premier joueur doit forcément choisir comme code une permutation (chaque couleur ne peut apparaître plus d'une fois et $m\geq n$).
+
+## Adaptation de l'algorithme précédent {#sec:q2}
+
+L'énoncé suggère de garder le même algorithme de génération mais en adaptant le mécanisme de génération pour générer des permutations. En notant encore $P=(p_{i,j})$ la matrice des paramètres associée à $X=(X_{1},\dots,X_{n})\in\mathcal{X}$, $X$ est généré de la façon suivante :
+
+1. Initialisation : la première boule est générée de la même façon que précédemment en tirant un entier $x_1$ selon la loi de probabilité discrète donnée par $p_{1,\cdot} = (p_{1,1},\dots, p_{1,m})$. On pose $k=1$ et $P^{(1)} = P$.
+
+2. Itération : $P^{(k+1)}$ est obtenue en remplaçant la colonne $k$ de $P^{(k)}$ par 0 et en normalisant les lignes pour que leur somme valent 1. $x_{k+1}$ est alors obtenu en faisant un tirage d'une loi discrète donnée par la ligne $k+1$ de $P^{(k+1)}$.
+
+3. Si $k=n$ alors on arrête, sinon on pose $k=k+1$ et on répéte l'étape 2.
+
+
+Comme suggéré par l'énoncé, les autres étapes de l'algorithme restent les mêmes :
+
+- L'initialisation est faite avec des vecteurs de probabilité uniformes pour chaque couleur : 
+$$
+\hat{v}_{0}=\left(\frac{1}{m}\right)_{i=1..n,j=1..m}
+$$
+Pour estimer de manière optimale on utilise la formule :
+$$p_{k,l}=\frac{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{i,k}=l\right\} }}{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}$$  
+- À chaque itération nous générons $N = C\times m\times n$ échantillons.
+
+La méthode d'estimation utilisée dans la partie précédente pour mettre à jour les $p_{i,j}$ reste la même. En effet $P=(p_{i,j})$ s'interprète de la même façon que précédemment et, de la même façon que dans la partie \@ref(sec:demmajparam), la formule de mise à jour des paramètres s'écrit :
+$$p_{k,l}=\frac{
+\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{i,k}=l\right\} }
+\1_{\{X_{i}\text{ permutation}\}}
+}{
+\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}
+\1_{\{X_{i}\text{ permutation}\}}
+}$$
+
+Il est donc possible de mettre à jour les paramètres en appliquant la méthode de génération des échantillons de la partie \@ref(sec:q1). En revanche, dans ce cas, beaucoup d'échantillons ne serait plus pertinents. Le nouvel algorithme de génération permet juste d'améliorer le processus de génération en ne proposant que des candidats pertinents, et donc d'avoir une convergence plus rapide. Puisque l'on ne génère que des permutations, on a $\1_{\{X_{i}\text{ permutation}\}} = 1$ et on retrouve la formule précédente.
+
+### Résultats
+
+Idem qu'en question 1 +
+Comparaison q1/q2 sur cas similaires pour montrer que c'est plus rapide.
+
+## Utilisation d'une loi spécifique pour générer les permutations {#sec:q3}
+
+Dans cette partie on utilise la loi suivante sur l'ensemble des permutations :
+$$
+\pi_{\lambda, x^*}(x)\propto\exp{(−\lambda d(x, x^{*}))}
+$$
+Pour générer les échantillons on utilise l'algorithme de Metropolis-Hastings (voir partie \@ref(sec:q1)). Pour la mise en oeuvre de la méthode de Cross-entropy, on va mettre à jour $\lambda$ et $x^*$ à chaque itération. Le critère d'arrêt qui est utilisé est $x^*=y$ (i.e. $S(x^*)=1$). En 
+
+### Génération de l'échantillon {#sec:mh}
+
+Pour générer les échantillons $X_1,\dots,X_n\sim \pi_{\lambda, x^*}$ on utilise l'algorithme de Metropolis-Hastings où le mécanisme de proposition inverse deux éléments de la permutation. Pour $m=n$, les $X_i$ sont des vraies permutations sur $\{1,\dots,m\}$. Puisque le mécanisme de proposition est symétrique, l'algorithme de Metropolis-Hasting devient :
+
+L'algorithme de Metropolis-Hastings est le suivant :
+
+1. Initialisation : on choisit $x_0$ une permutation au hasard de $\{1,\dots,m\}$ et on fixe $t=0$.
+
+2. Itération :  
+
+  a. On permute au hasard deux éléments de $x_t$ et on note $x'$ la nouvelle permutation.
+  
+  b. On calcule la probabilité d'acceptation :
+$$
+r(x',x_t)=\min\left(1,\,\frac{\pi_{\lambda,x^*}(x')}{\pi_{\lambda,x^*}(x_{t})}\right)
+=\min\left(1,\,\mathrm{e^{-\lambda(d(x',x^{*})-d(x_{t},x^{*}))}}\right)
+$$  
+
+  c. Acceptation ou rejet : on génére une loi uniforme $u\in[0,1]$. Si $u\leq r(x',x_{t}) $ alors on accepte le nouvel état et on pose $x_{t+1}=x'$, sinon $x_{t+1}=x_{t}$.
+  
+  d. Incrémentation : $t=t+1$.
+
+Dans le cas où $m>n$, $x^*$ ne peut être une vraie permutation. Pour générer la loi on raisonne de la même façon mais en ne calculant la distance de Hamming que sur les $n$ premières coordonnées $x'$ et $x_t$ (comme $x^*$ est un vecteur de taille $n$).
+
+Comme $x'$ est une XXXXX de $x_t$, $d(x',x^{*})-d(x_{t},x^{*})\in\{-2,-1,0,1,2\}$. Donc si, par rapport à $x_t$ dans $x'$ ne diminue pas la distance de Hamming à $x^{*}$ alors on accepte le nouvel état. S'il y a nouvel élément mal placé alors on accepte $x'$ avec une probabilité de $e^{-\lambda}$ : pour $\lambda>2$ la probabilité d'accepter un nouvel état moins proche que $x_t$ de $x^*$ est donc inférieure à 14 % et pour $\lambda>3$ cette probabilité inférieure à 5 %. Pour $\lambda$ grand on converge donc vers $x^*$ et tous les échantillons seront égaux à $x^*$.
+
+### estimation des paramètres
+
+
+### Résultats
+
+# m=6 n=4
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+m = 6
+n = 4
+y=sample(1:m, n, replace = FALSE)
+```
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = FALSE)
+tableau <- mise_en_forme_tableau(modele)
+tableau
+```
+  
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = TRUE)
+tableau <- mise_en_forme_tableau(modele)
+tableau
+```
+
+# m=33 n=30
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+m = 33
+n = 30
+y=sample(1:m, n, replace = FALSE)
+```
+
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = FALSE)
+tableau <- mise_en_forme_tableau(modele)
+tableau
+```
+  
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = TRUE)
+tableau <- mise_en_forme_tableau(modele)
+tableau
+```
+
