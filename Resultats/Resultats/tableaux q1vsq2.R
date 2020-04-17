@@ -97,7 +97,7 @@ temps_conv <-format_ind(sapply(all_models, function(model_all_s){
 nb_non_conv <-format_ind(sapply(all_models, function(model_all_s){
   if(is.null(model_all_s))
     return(NA)
-  tps <- sapply(model_all_s,function(x) xOrNull(x$duree$duree_arret))
+  tps <- sapply(model_all_s,function(x) xOrNull(x$duree$duree_conv))
   sum(is.na(tps), na.rm = F)
 }))
 stats <- list(it_conv_min =it_conv_min,
