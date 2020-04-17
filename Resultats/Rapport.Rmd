@@ -20,20 +20,37 @@ knitr::opts_chunk$set(echo = TRUE,
                       cache = TRUE)
 ```
 
-
-```{r, include=FALSE}
+```{r firstProg, echo=FALSE}
 source("../ShinyApp/global.R", encoding="UTF-8",chdir = TRUE)
 set.seed(1)
+options(knitr.kable.NA = ' ')
+creation_tableau <- function(tab, titre = "", note_debut = NULL, note_fin = NULL){
+  tableau <- tab %>%
+    cbind(" " = "n", "  " = rownames(.), .)
+  rownames(tableau) <- NULL
+  note <- c("Statistiques sur 10 seeds",
+            "N = 5 x n x m simulations",
+            "Au maximum 100 itérations")
+  note <- c(note_debut, note, note_fin)
+  tableau %>% 
+    kable(caption = titre) %>%
+    kable_styling(full_width = F)%>%
+    column_spec(1:2, bold = T) %>% 
+    collapse_rows(columns = 1, valign = "middle") %>% 
+    add_header_above(c(" " = 2, "m" = 7)) %>% 
+    footnote(general = note, general_title = "Note : ")
+}
 ```
-
-# Introduction
-
-$\renewcommand{\P}{\mathbb{P}}
+$$\renewcommand{\P}{\mathbb{P}}
 \renewcommand{\R}{\mathbb{R}}
 \renewcommand{\N}{\mathbb{N}}
 \newcommand\1{\mathbb{1}}
 \newcommand\E{\mathbb{E}}
-\DeclareMathOperator*{\argmax}{argmax}$
+\DeclareMathOperator*{\argmax}{argmax}$$
+
+# Introduction
+
+
 
 Ce rapport décrit le projet de Monte-Carlo de Kim Antunez, Romain Lesauvage et Alain Quartier-la-Tente (Ensae, 2A), dont l'objectif est d'étudier l'application de méthodes de *Cross-Entropy* à la résolution du Mastermind.
 
@@ -147,7 +164,7 @@ Pour estimer de manière optimale on utilise la formule (voir démonstration par
 $$p_{k,l}=\frac{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{i,k}=l\right\} }}{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}$$
 - À chaque itération nous générons $N = C\times m\times n$ échantillons. Pour générer $X=(X_{1},\dots,X_{n})\in\mathcal{X}$, nous pouvons générer chaque composante $X_i$ de manière indépendante : il s'agit d'une loi discrète sur $\left\{ 1,2,\dots,m\right\}$ avec des probabilités $p_i=(p_{i,1},\dots,p_{i,m})$. Pour cela, sous R il suffit d'utiliser la fonction `sample` en utilisant l'option `prob` pour définir le vecteur de probabilités. Cette fonction peut être réécrite aisément à l'aide d'un tirage d'une loi uniforme discrète. Pour cela, prenons un nombre très grand, par exemple $k=$ 100 000, et créons un vecteur contenant des entiers de 1 à $m$, chaque élément $j$ étant répété $k\times p_{i,j}$ fois. En tirant une position au hasard dans ce vecteur (i.e. en tirant un entier au hasard entre 1 et $k$), l'entier associé sera égal à $j$ avec une probabilité environ égale à $p_{i,j}$. Sous R on peut coder cette fonction de la façon suivante :
 
-```{r}
+```{r sample2}
 sample2 <- function(x, size, prob, replace = TRUE){
   taille <- 10000*length(x)
   choix <- lapply(seq_along(x), function(i){
@@ -182,13 +199,36 @@ table(sample2(x=1:3,size = 100000, prob = prob, replace = T))/100000
 ## Résultats
 
 
-```{r, fig.width=4, fig.cap="Graphics test", fig.subcap=c("test1", "test2")}
+
+```{r test, fig.width=4, fig.cap="Graphics test", fig.subcap=c("test1", "test2")}
 knitr::include_graphics(c("img/LOGO-ENSAE.png", "img/LOGO-ENSAE.png"))
 ```
 
 Graphique pour représenter la convergence des probas dans un cas simple
 
-Tableaux sur plusieurs seeds et plusieurs paramètres m,n pour montrer le nombre d'itération moyen pour converger.
+Les tableaux \@ref(tab:tabq1convmed), \@ref(tab:tabq1erreur), \@ref(tab:tabq1tempsconv) et  \@ref(tab:tabq1nbnonconv) présentent les résultats sur plusieurs valeurs de $m$ et $n$ avec 10 simulations pour chaques paramètres (seed de 1 à 10). Pour toutes les simulations on a une convergence en moins de 100 itérations mais pas forcément vers la bonne valeur (voir tableaux  \@ref(tab:tabq1erreur) et \@ref(tab:tabq1nbnonconv)).
+
+
+```{r tabq1convmed, echo=FALSE}
+stats <- readRDS("Resultats/statsq1.RDS")
+creation_tableau(stats$it_conv_med, titre = "Médiane du numéro de simulation de convergence")
+```
+
+```{r tabq1erreur, echo=FALSE}
+creation_tableau(round(stats$erreur_finale,3), titre = "Moyenne de l'erreur à la simulation de convergence",
+                 note_debut = "L'erreur est définie comme 1 - gamma_T")
+```
+
+```{r tabq1nbnonconv, echo=FALSE}
+creation_tableau(stats$nb_non_conv,
+                 titre = "Nombre de simulations n'ayant pas convergé vers la bonne valeur")
+```
+
+```{r tabq1tempsconv, echo=FALSE}
+creation_tableau(stats$temps_conv,
+                 titre = "Mediane du temps de calcul jusqu'à la convergence")
+```
+
 
 
 ## Démonstration de la formule de mise à jour des paramètres {#sec:demmajparam}
@@ -281,8 +321,51 @@ Il est donc possible de mettre à jour les paramètres en appliquant la méthode
 
 ### Résultats
 
-Idem qu'en question 1 +
-Comparaison q1/q2 sur cas similaires pour montrer que c'est plus rapide.
+Les tableaux \@ref(tab:tabq2convmed), \@ref(tab:tabq2erreur), \@ref(tab:tabq2tempsconv) et  \@ref(tab:tabq2nbnonconv) présentent les résultats sur plusieurs valeurs de $m$ et $n$ avec 10 simulations pour chaques paramètres (seed de 1 à 10). Pour toutes les simulations on a une convergence en moins de 100 itérations vers la bonne valeur.
+
+
+```{r tabq2convmed, echo=FALSE}
+stats <- readRDS("Resultats/statsq2.RDS")
+creation_tableau(stats$it_conv_med, titre = "Médiane du numéro de simulation de convergence")
+```
+
+```{r tabq2erreur, echo=FALSE}
+creation_tableau(round(stats$erreur_finale,3), titre = "Moyenne de l'erreur à la simulation de convergence",
+                 note_debut = "L'erreur est définie comme 1 - gamma_T")
+```
+
+```{r tabq2nbnonconv, echo=FALSE}
+creation_tableau(stats$nb_non_conv,
+                 titre = "Nombre de simulations n'ayant pas convergé vers la bonne valeur")
+```
+
+```{r tabq2tempsconv, echo=FALSE}
+creation_tableau(stats$temps_conv,
+                 titre = "Mediane du temps de calcul jusqu'à la convergence")
+```
+
+Les tableaux \@ref(tab:tabq1vsq2convmed), \@ref(tab:tabq1vsq2erreur), \@ref(tab:tabq1vsq2nbnonconv) et \@ref(tab:tabq1vsq2tempsconv) présentent les résultats obtenus en utilisant l'algorithme de la partie \@ref(sec:q1), qui ne suppose pas que l'on ait des permutations, sur les mêmes codes à déchiffrer. Même si le nombre d'itérations nécessaires pour converger est plus faible en adaptant l'algorithme pour ne tirer que des permutations, l'algorithme est plus gourmand en temps de calcul. Cela vient du mécanisme utilisé pour tiré les échantillons qui a une complexité plus importante.
+
+```{r tabq1vsq2convmed, echo=FALSE}
+stats <- readRDS("Resultats/statsq1vsq2.RDS")
+creation_tableau(stats$it_conv_med, titre = "Médiane du numéro de simulation de convergence")
+```
+
+```{r tabq1vsq2erreur, echo=FALSE}
+creation_tableau(round(stats$erreur_finale,3), titre = "Moyenne de l'erreur à la simulation de convergence",
+                 note_debut = "L'erreur est définie comme 1 - gamma_T")
+```
+
+```{r tabq1vsq2nbnonconv, echo=FALSE}
+creation_tableau(stats$nb_non_conv,
+                 titre = "Nombre de simulations n'ayant pas convergé vers la bonne valeur")
+```
+
+```{r tabq1vsq2tempsconv, echo=FALSE}
+creation_tableau(stats$temps_conv,
+                 titre = "Mediane du temps de calcul jusqu'à la convergence")
+```
+
 
 ## Utilisation d'une loi spécifique pour générer les permutations {#sec:q3}
 
@@ -369,46 +452,6 @@ Dans notre cas, le problème est que nous observant une croissance rapide de $\l
 Nous avons testé plusieurs approches pour $\lambda$ : en le faisant croître linéaire, décroître, constant et maximum de vraisemblance. La solution qui donnait les meilleurs résultats est de prendre $\lambda = 1$.
 
 ### Résultats
-
-# m=6 n=4
-
-```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
-m = 6
-n = 4
-y=sample(1:m, n, replace = FALSE)
-```
-
-```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
-modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = FALSE)
-tableau <- mise_en_forme_tableau(modele)
-tableau
-```
-  
-```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
-modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = TRUE)
-tableau <- mise_en_forme_tableau(modele)
-tableau
-```
-
-# m=33 n=30
-
-```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
-m = 33
-n = 30
-y=sample(1:m, n, replace = FALSE)
-```
-
-```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
-modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = FALSE)
-tableau <- mise_en_forme_tableau(modele)
-tableau
-```
-  
-```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
-modele <- lancer_algorithme(y=y, n=n, m=m,maxIters=100,stop_d=TRUE,avec_remise = TRUE)
-tableau <- mise_en_forme_tableau(modele)
-tableau
-```
 
 
 # Code {#sec:enscode}
