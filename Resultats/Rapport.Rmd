@@ -5,8 +5,11 @@ output:
   bookdown::html_document2:
     toc: true
     number_sections: true
+bibliography: biblio.bib
 header-includes:
 - \renewcommand{\P}{\mathbb{P}}
+- \renewcommand{\R}{\mathbb{R}}
+- \renewcommand{\N}{\mathbb{N}}
 - \newcommand\1{\mathbb{1}}
 - \newcommand\E{\mathbb{E}}
 - \DeclareMathOperator*{\argmax}{argmax}
@@ -49,6 +52,8 @@ $$
 $$
 Avec $\lambda > 0$ et $d(x, x^{*})$ la distance de Hamming entre $x$ et $x^{*}$ (i.e. : le nombre de où les deux permutations sont différentes).
 
+Tous les codes utilisés sont disponibles dans la partie \@ref(sec:enscode).
+
 ## Rappels sur la méthode de Cross-Entropy
 
 La méthode de Cross-Entropy est une méthode utilisée pour estimer des probabilités d'événements rares. Elle peut aussi être adaptée pour résoudre des problèmes d'optimisation combinatoire et c'est dans ce cadre que nous l'utiliserons dans notre projet.
@@ -90,12 +95,15 @@ alors on arrête l'algorithme.
 
 Plutôt que de mettre à jour directement $\hat{v}_{t-1}$ l'équation \@ref(eq:maxopti), nous faisons une mise à jour lissée -- \emph{smoothed updating} :
 $$
-\hat{v}_{t}=\alpha\hat{w}_{t}+(1-\alpha)\hat{v}_{t-1}
+\hat{v}_{t}=\alpha\tilde{v}_{t}+(1-\alpha)\hat{v}_{t-1}
 $$
-avec $\hat{w}_{t}$ la valeur obtenue en résolvant le problème \ref{eq:maxopti}. 
+avec $\tilde{v}_{t}$ la valeur obtenue en résolvant le problème \ref{eq:maxopti}. 
 Dans le cas où on a des problèmes d'optimisation avec des variables discrètes (ce qui est ici le cas), cela permet d'éviter l'occurence de 0 ou de 1 dans les paramètres des vecteurs. 
 En effet, le problème est que dès lors qu'il y a un 0 ou un 1, il le
-reste souvent pour toujours : cela évite d'avoir uen convergence vers la mauvaise valeur. XXXXX suggèrent de $0,4\leq\alpha\leq0,9$ : dans ce projet nous utilisons par défaut $\alpha = 0,7$
+reste souvent pour toujours : cela évite d'avoir uen convergence vers la mauvaise valeur. @de2005tutorial suggèrent de prendre $0,4\leq\alpha\leq0,9$ : dans ce projet nous utilisons par défaut $\alpha = 0,7$.
+
+# Application de la méthode de Cross-entropy au Mastermind {#sec:q1}
+
 
 ## Paramètres utilisés dans le projet
 
@@ -110,9 +118,9 @@ Avec $n$ le nombre de boules à deviner, $\omega_{noir}>\omega_{blanc}$, habitue
 
 Avec cette fonction de performance nous supposons qu'une boule noire compte plus qu'une boule blanche. La constante de normalisation $\omega_{noir}n$ permet de faciliter les comparaisons lorsque l'on fait changer le nombre de boules à deviner : dans tous les cas on cherche $x^*$ tel que $S(x^*) = 1$.
 
-Dans l'algorithme de Cross-Entropy nous utilisons $\rho = 0,01$ (à l'étape 3 la maximisation est donc fait sur les 10 \% meilleurs échantillons), $N = C\times\text{nombre de paramètres}$ (avec $C=5$ par défaut) et $d=5$.
+Dans l'algorithme de Cross-Entropy nous utilisons $\rho = 0,1$ (à l'étape 3 la maximisation est donc faite sur les 10 \% meilleurs échantillons), $N = C\times\text{nombre de paramètres}$ (avec $C=5$ par défaut) et $d=5$.
 
-# Application de la méthode de Cross-entropy au Mastermind {#sec:q1}
+## Application de la méthode de Cross-Entropy
 
 Dans le Mastermind il faut choisir $n$ boules parmi $m$ couleurs. En numérotant les couleurs de 1 à $m$ on a :
 
@@ -128,33 +136,40 @@ La $j$\ieme composante de $p_{i}$ étant égale à $p_{ij}=\P(X_{i}=j)$ : c'est 
 $$
 \hat{v}_{0}=\left(\frac{1}{m}\right)_{i=1..n,j=1..m}
 $$
-Pour estimer de manière optimale on utilise la formule (voir démonstration section partie \@ref(sec:demmajparam)) :
+Pour estimer de manière optimale on utilise la formule (voir démonstration partie \@ref(sec:demmajparam)) :
 $$p_{k,l}=\frac{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{i,k}=l\right\} }}{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}$$
-- À chaque itération nous générons $N = C\times m\times n$ échantillons. Pour générer $X=(X_{1},\dots,X_{n})\in\mathcal{X}$, nous pouvons générer chaque composante $X_i$ de manière indépendante : il s'agit d'une loi discrète sur $\left\{ 1,2,\dots,m\right\}$ avec des probabilités $p_i=(p_{i,1},\dots,p_{i,m})$. Pour cela, sous R il suffit d'utiliser la fonction `sample` en utilisant l'option `prob` pour définir le vecteur de probabilités. Cette fonction peut être réécrite aisément à l'aide d'un tirage d'une loi uniforme discrète. Pour cela, prenons un nombre très grand, par exemple $k=$100 000, et créons un vecteur contenant des entiers de 1 à $m$, chaque élément $j$ étant répété $k\times p_{i,j}$ fois. En tirant une position au hasard dans ce vecteur (i.e. en tirant un entier au hasard entre 1 et $k$), l'entier associé sera égal à $j$ avec une probabilité environ égale à $p_{i,j}$. Sous R on peut coder cette fonction de la façon suivante :
+- À chaque itération nous générons $N = C\times m\times n$ échantillons. Pour générer $X=(X_{1},\dots,X_{n})\in\mathcal{X}$, nous pouvons générer chaque composante $X_i$ de manière indépendante : il s'agit d'une loi discrète sur $\left\{ 1,2,\dots,m\right\}$ avec des probabilités $p_i=(p_{i,1},\dots,p_{i,m})$. Pour cela, sous R il suffit d'utiliser la fonction `sample` en utilisant l'option `prob` pour définir le vecteur de probabilités. Cette fonction peut être réécrite aisément à l'aide d'un tirage d'une loi uniforme discrète. Pour cela, prenons un nombre très grand, par exemple $k=$ 100 000, et créons un vecteur contenant des entiers de 1 à $m$, chaque élément $j$ étant répété $k\times p_{i,j}$ fois. En tirant une position au hasard dans ce vecteur (i.e. en tirant un entier au hasard entre 1 et $k$), l'entier associé sera égal à $j$ avec une probabilité environ égale à $p_{i,j}$. Sous R on peut coder cette fonction de la façon suivante :
 
 ```{r}
-sample2 <- function(x, n, probas, replace = TRUE){
+sample2 <- function(x, size, prob, replace = TRUE){
   taille <- 10000*length(x)
-  choix <- sapply(seq_along(x), function(i){
-    rep(x[i], round(probas[i]*taille))
+  choix <- lapply(seq_along(x), function(i){
+    rep(x[i], round(prob[i]*taille))
   })
-  resultat = c()
+  choix <- unlist(choix)
   if(replace){
-    for(k in 1:n){
+    resultat = sapply(seq_len(size), function(i){
       indice = as.integer(runif(1,1,taille+1))
-      resultat = c(resultat,choix[indice])
-    } 
+      choix[indice]
+    })
+    
   } else {
+    resultat = vector(mode = mode(x),
+                      length = size)
     sous_choix = choix
-    for(k in 1:n){
+    for(k in 1:size){
       taille_sc = length(sous_choix)
       indice = as.integer(runif(1,1,taille_sc+1))
-      resultat = c(resultat,sous_choix[indice])
+      resultat[k] = sous_choix[indice]
       sous_choix = sous_choix[sous_choix != sous_choix[indice]]
     } 
   }
   resultat
 }
+set.seed(1)
+prob = c(1/4, 1/3, 5/12) # soit : 0.250, 0.333 et 0.417
+# On retrouve les proportions :
+table(sample2(x=1:3,size = 100000, prob = prob, replace = T))/100000
 ```
 
 ## Résultats
@@ -167,8 +182,6 @@ knitr::include_graphics(c("img/LOGO-ENSAE.png", "img/LOGO-ENSAE.png"))
 Graphique pour représenter la convergence des probas dans un cas simple
 
 Tableaux sur plusieurs seeds et plusieurs paramètres m,n pour montrer le nombre d'itération moyen pour converger.
-
-
 
 
 ## Démonstration mise à jour des paramètres {#sec:demmajparam}
@@ -233,7 +246,7 @@ L'énoncé suggère de garder le même algorithme de génération mais en adapta
 
 1. Initialisation : la première boule est générée de la même façon que précédemment en tirant un entier $x_1$ selon la loi de probabilité discrète donnée par $p_{1,\cdot} = (p_{1,1},\dots, p_{1,m})$. On pose $k=1$ et $P^{(1)} = P$.
 
-2. Itération : $P^{(k+1)}$ est obtenue en remplaçant la colonne $k$ de $P^{(k)}$ par 0 et en normalisant les lignes pour que leur somme valent 1. $x_{k+1}$ est alors obtenu en faisant un tirage d'une loi discrète donnée par la ligne $k+1$ de $P^{(k+1)}$.
+2. Itération : $P^{(k+1)}$ est obtenue en remplaçant la colonne $k$ de $P^{(k)}$ par 0 et en normalisant les lignes pour que leur somme valent 1. $x_{k+1}$ est alors obtenu en faisant un tirage d'une loi discrète donnée par la ligne $k+1$ de $P^{(k+1)}$. Sous R, il n'est pas nécessaire de renormaliser ses lignes, c'est pris en compte par le paramètre `prob` de la fonction `sample`.
 
 3. Si $k=n$ alors on arrête, sinon on pose $k=k+1$ et on répéte l'étape 2.
 
@@ -248,7 +261,7 @@ Pour estimer de manière optimale on utilise la formule :
 $$p_{k,l}=\frac{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{i,k}=l\right\} }}{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}$$  
 - À chaque itération nous générons $N = C\times m\times n$ échantillons.
 
-La méthode d'estimation utilisée dans la partie précédente pour mettre à jour les $p_{i,j}$ reste la même. En effet $P=(p_{i,j})$ s'interprète de la même façon que précédemment et, de la même façon que dans la partie \@ref(sec:demmajparam), la formule de mise à jour des paramètres s'écrit :
+La méthode d'estimation utilisée dans la partie précédente pour mettre à jour les $p_{i,j}$ reste la même. En effet $P=(p_{i,j})$ s'interprète de la même façon que précédemment : la loi des $X_i$ est la même que précédemment. De la même façon que dans la partie \@ref(sec:demmajparam), on peut montrer que la formule de mise à jour des paramètres s'écrit :
 $$p_{k,l}=\frac{
 \sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{i,k}=l\right\} }
 \1_{\{X_{i}\text{ permutation}\}}
@@ -270,9 +283,13 @@ Dans cette partie on utilise la loi suivante sur l'ensemble des permutations :
 $$
 \pi_{\lambda, x^*}(x)\propto\exp{(−\lambda d(x, x^{*}))}
 $$
-Pour générer les échantillons on utilise l'algorithme de Metropolis-Hastings (voir partie \@ref(sec:q1)). Pour la mise en oeuvre de la méthode de Cross-entropy, on va mettre à jour $\lambda$ et $x^*$ à chaque itération. Le critère d'arrêt qui est utilisé est $x^*=y$ (i.e. $S(x^*)=1$). En 
+Pour générer les échantillons on utilise l'algorithme de Metropolis-Hastings (voir partie \@ref(sec:mh)). Pour la mise en oeuvre de la méthode de Cross-entropy, on va mettre à jour $\lambda$ et $x^*$ à chaque itération. Le critère d'arrêt qui est utilisé est $x^*=y$ (i.e. $S(x^*)=1$).
+
+Nous avons ici $n+1$ paramètres à estimer ($n$ pour $x^*$ et 1 pour $\lambda$). Nous générons donc $N = C\times (n+1)$ échantillons à chaque itération de la Cross-Entropy.
 
 ### Génération de l'échantillon {#sec:mh}
+
+#### Algorithme de Metropolis-Hastings
 
 Pour générer les échantillons $X_1,\dots,X_n\sim \pi_{\lambda, x^*}$ on utilise l'algorithme de Metropolis-Hastings où le mécanisme de proposition inverse deux éléments de la permutation. Pour $m=n$, les $X_i$ sont des vraies permutations sur $\{1,\dots,m\}$. Puisque le mécanisme de proposition est symétrique, l'algorithme de Metropolis-Hasting devient :
 
@@ -282,7 +299,7 @@ L'algorithme de Metropolis-Hastings est le suivant :
 
 2. Itération :  
 
-  a. On permute au hasard deux éléments de $x_t$ et on note $x'$ la nouvelle permutation.
+  a. On permute au hasard deux éléments de $x_t$ et on note $x'$ la nouvelle permutation (on fait donc une transposition de $x'$).
   
   b. On calcule la probabilité d'acceptation :
 $$
@@ -296,10 +313,51 @@ $$
 
 Dans le cas où $m>n$, $x^*$ ne peut être une vraie permutation. Pour générer la loi on raisonne de la même façon mais en ne calculant la distance de Hamming que sur les $n$ premières coordonnées $x'$ et $x_t$ (comme $x^*$ est un vecteur de taille $n$).
 
-Comme $x'$ est une XXXXX de $x_t$, $d(x',x^{*})-d(x_{t},x^{*})\in\{-2,-1,0,1,2\}$. Donc si, par rapport à $x_t$ dans $x'$ ne diminue pas la distance de Hamming à $x^{*}$ alors on accepte le nouvel état. S'il y a nouvel élément mal placé alors on accepte $x'$ avec une probabilité de $e^{-\lambda}$ : pour $\lambda>2$ la probabilité d'accepter un nouvel état moins proche que $x_t$ de $x^*$ est donc inférieure à 14 % et pour $\lambda>3$ cette probabilité inférieure à 5 %. Pour $\lambda$ grand on converge donc vers $x^*$ et tous les échantillons seront égaux à $x^*$.
+Comme $x'$ est une transposition de $x_t$, $d(x',x^{*})-d(x_{t},x^{*})\in\{-2,-1,0,1,2\}$. Donc si, par rapport à $x_t$ dans $x'$ ne diminue pas la distance de Hamming à $x^{*}$ alors on accepte le nouvel état. S'il y a nouvel élément mal placé alors on accepte $x'$ avec une probabilité de $e^{-\lambda}$ : pour $\lambda>2$ la probabilité d'accepter un nouvel état moins proche que $x_t$ de $x^*$ est donc inférieure à 14 % et pour $\lambda>3$ cette probabilité inférieure à 5 %. Pour $\lambda$ grand on converge donc vers $x^*$ et tous les échantillons seront égaux à $x^*$.
 
-### estimation des paramètres
+#### Traitement supplémentaires
 
+
+L'algorithme de Metropolis-Hastings a deux désavantages :
+
+1. Il générer la loi cible, il construit itérativement une chaîne de Markov qui converge vers cette loi cible. Les échantillons initiaux peuvent donc suivre une distribution très différente de celle recherché. Il est donc nécessaire de rejetter une partie importante des échantillons initiaux (*burn-in*).
+
+2. Les échantillons proches sont généralement autocorrélés. Pour générer des échantillons indépendants il faut donc rejeter la majorité d'entre eux et ne garder que les $n$^ièmes^ échantillons. Ce $n$ est trouvé en calculant l'autocorrélation entre les échantillons et en prenant l'entier tel que $X_t$ ne soit plus corrélé à $X_(t+n)$. Cette autocorrélation peut-être calculée avec la fonction `portes::LjungBox` (la fonction `acf` ne calculant les autocorrélations que pour les séries univariées).
+
+
+### Estimation des paramètres
+
+@hongrois montre le problème de maximisation de la vraisemblance d'une loi de Mallow (qui est celle ici utilisée) peut se décomposer en deux étapes :
+
+1. Estimation de $x^*$ qui minimise la somme des distances de Hamming.
+
+2. Estimation de $\lambda$ par un algorithme de type Newton-Raphston.
+
+L'estimation des paramètres dans l'algorithme de Cross-Entropy est équivalent à calculer l'estimateur de vraisemblance sur les 10 % meilleurs échantillons en terme de score. Intuitivement, le $x^*$ qui minimise la somme :
+$$
+\sum_{i=1}^N\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}d(X_i,x^*)
+$$
+est le $x^*=(x_1^*,\dots,x_n^*)$ tel que $x_j^*$ correspond au chiffre le plus fréquent dans la $j$^ème^ coordonnée des 10 % meilleurs échantillons. L'algorithme décrit par @hongrois, et que nous utilisons dans notre projet, pat de ce principe mais en imposant que $x^*$ soit bien une permutation :
+
+1. On crée une matrice $F=(f_{i,j})\in\mathcal M_{n,m}(\N)$ telle $f_{i,j}$ soit égal au nombre de fois que l'entier $j$ apparait en $i$^ème^ position parmi les 10 % meilleurs échantillon.
+
+2. On sélectionne une composante par ligne et par colonne de $F$ de façon à ce que leur somme soit maximale. Cette étape est faite avec la fonction `clue::solve_LSAP`.
+
+@hongrois montre que la constante de normalisation de $\pi_{\lambda,x^*}$ est en fait connue est égale à :
+$$
+m!\exp(-\lambda m)\sum_{k=0}^{m}\frac{(\exp(\lambda)-1)^{k}}{k!}
+$$
+Le maximum de vraisemblance est alors obtenu en prenant $\lambda$ tel que :
+$$
+\frac{
+\exp(\lambda)\sum_{k=0}^{m-1}\frac{(\exp(\lambda)-1)^{k}}{k!} - 
+m\sum_{k=0}^{m}\frac{(\exp(\lambda)-1)^{k}}{k!}
+}{
+\sum_{k=0}^{m}\frac{(\exp(\lambda)-1)^{k}}{k!}
+} +
+\frac{1}{\sum_{i=1}^N\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}\sum_{i=1}^N\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}d(X_i,x^*) = 0
+$$
+Dans notre cas, le problème est que nous observant une croissance rapide de $\lambda$ à chaque itération de la méthode de Cross-Entropy. Ainsi, si $y$ n'est pas décodé dans les premières itérations, les échantillons $X_i$ générés seront très proches de $x^*$ (voir partie \@ref(sec:mh)) et on ne trouvera pas $y$.
 
 ### Résultats
 
@@ -343,3 +401,13 @@ tableau <- mise_en_forme_tableau(modele)
 tableau
 ```
 
+
+# Code {#sec:enscode}
+
+## Question 1 {#sec:codeq1}
+
+## Question 2 {#sec:codeq2}
+
+## Question 3 {#sec:codeq3}
+
+# Bilbiographie
