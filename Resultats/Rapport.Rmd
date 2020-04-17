@@ -364,7 +364,9 @@ m\sum_{k=0}^{m}\frac{(\exp(\lambda)-1)^{k}}{k!}
 } +
 \frac{1}{\sum_{i=1}^N\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}\sum_{i=1}^N\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}d(X_i,x^*) = 0
 $$
-Dans notre cas, le problème est que nous observant une croissance rapide de $\lambda$ à chaque itération de la méthode de *Cross-Entropy*. Ainsi, si $y$ n'est pas décodé dans les premières itérations, les échantillons $X_i$ générés seront très proches de $x^*$ (voir partie \@ref(sec:mh)) et on ne trouvera pas $y$.
+Dans notre cas, le problème est que nous observant une croissance rapide de $\lambda$ à chaque itération de la méthode de *Cross-Entropy*. Ainsi, si $y$ n'est pas décodé dans les premières itérations (ce qui est souvent le cas pour $m$ et $n$ grands), les échantillons $X_i$ générés seront très proches de $x^*$ (voir partie \@ref(sec:mh)) et on ne trouvera pas $y$. 
+
+Nous avons testé plusieurs approches pour $\lambda$ : en le faisant croître linéaire, décroître, constant et maximum de vraisemblance. La solution qui donnait les meilleurs résultats est de prendre $\lambda = 1$.
 
 ### Résultats
 
@@ -410,6 +412,7 @@ tableau
 
 
 # Code {#sec:enscode}
+
 
 ## Question 1 {#sec:codeq1}
 
