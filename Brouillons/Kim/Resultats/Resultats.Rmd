@@ -5,7 +5,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 ```
 
 
@@ -43,6 +43,12 @@ tableau <- mise_en_forme_tableau(modele,matriciel = FALSE)
 tableau
 ```
 
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme_hamming(y=y, n=n, m=m,maxIters=100,stop_d=TRUE)
+tableau <- mise_en_forme_tableau(modele,matriciel = FALSE, N=5*n*m)
+tableau
+```
+
 ### m=6 n=6
 
 ```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
@@ -69,6 +75,11 @@ tableau <- mise_en_forme_tableau(modele,matriciel = FALSE)
 tableau
 ```
 
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme_hamming(y=y, n=n, m=m,maxIters=100,stop_d=TRUE)
+tableau <- mise_en_forme_tableau(modele,matriciel = FALSE, N=5*n*m)
+tableau
+```
 ### m=20 n=15
 
 ```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
@@ -95,6 +106,11 @@ tableau <- mise_en_forme_tableau(modele,matriciel = FALSE)
 tableau
 ```
 
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme_hamming(y=y, n=n, m=m,maxIters=100,stop_d=TRUE)
+tableau <- mise_en_forme_tableau(modele,matriciel = FALSE, N=5*n*m)
+tableau
+```
 
 ### m=33 n=30
 
@@ -122,6 +138,11 @@ tableau <- mise_en_forme_tableau(modele,matriciel = FALSE)
 tableau
 ```
 
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme_hamming(y=y, n=n, m=m,maxIters=100,stop_d=TRUE)
+tableau <- mise_en_forme_tableau(modele,matriciel = FALSE, N=5*n*m)
+tableau
+```
 
 ### m=33 n=33
 
@@ -149,7 +170,10 @@ tableau <- mise_en_forme_tableau(modele,matriciel = FALSE)
 tableau
 ```
 
-
-
+```{r, error=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+modele <- lancer_algorithme_hamming(y=y, n=n, m=m,maxIters=100,stop_d=TRUE)
+tableau <- mise_en_forme_tableau(modele,matriciel = FALSE, N=5*n*m)
+tableau
+```
 
 
