@@ -20,6 +20,13 @@ knitr::opts_chunk$set(echo = TRUE,
                       cache = TRUE)
 library(knitr)
 library(kableExtra)
+library(clue)
+library(mvtnorm)
+library(plot3D)
+library(portes)
+library(shiny)
+library(shinyjs)
+library(shinyWidgets)
 ```
 
 ```{r firstProg, echo=FALSE}
@@ -200,11 +207,6 @@ table(sample2(x=1:3,size = 100000, prob = prob, replace = T))/100000
 
 ## Résultats
 
-
-
-```{r test, fig.width=4, fig.cap="Graphics test", fig.subcap=c("test1", "test2")}
-knitr::include_graphics(c("img/LOGO-ENSAE.png", "img/LOGO-ENSAE.png"))
-```
 
 Graphique pour représenter la convergence des probas dans un cas simple
 
@@ -580,8 +582,8 @@ creation_tableau(round(stats$temps_arret),
 Les packages nécessaires pour faire tourner l'ensemble des programmes sont : 
 
 ```{r installpackages, eval=FALSE}
-install.packages(c("clue", "kableExtra", "mvtnorm", "plot3D", "portes", "shiny", 
-                   "shinyjs", "shinyWidgets"))
+# install.packages(c("clue", "kableExtra", "mvtnorm", "plot3D", "portes", "shiny", 
+#                    "shinyjs", "shinyWidgets"))
 library(clue)
 library(kableExtra)
 library(mvtnorm)
@@ -665,7 +667,6 @@ dessiner_histo <- function(liste_matrice,indice,colors){
     
   }
 }
-
 tableau_bilan <- function(modele,matriciel=TRUE){
   
   if(!is.null(modele$indices$indice_arret) | !is.null(modele$indices$indice_conv)){
@@ -690,14 +691,16 @@ tableau_bilan <- function(modele,matriciel=TRUE){
       s_max = round(modele$s_max[1:i],3),
       gammas_hat = round(modele$gammas_hat[1:i],3),
       lambda=round(unlist(lapply(1:i,function(k){((modele$param_liste)[[k]])$lambda})),2),
-      score_xstar= unlist(lapply(1:i,function(k){score(((modele$param_liste)[[k]])$x_star, modele$parametres$y)}))
+      score_x_star= unlist(lapply(1:i,function(k){score(((modele$param_liste)[[k]])$x_star, modele$parametres$y)})),
+      x_star = unlist(lapply(1:i,function(k){paste(modele$param_liste[[k]]$x_star,collapse = "-")}))
     )
-
   }
-  
+
   return(tableau)
   
 }
+
+#tab <- tableau_bilan(modele)
 
 mise_en_forme_tableau <- function(modele,matriciel=TRUE){
   
@@ -725,12 +728,17 @@ mise_en_forme_tableau <- function(modele,matriciel=TRUE){
                         ifelse(!is.null(modele$indices$indice_arret),paste0("Etape n°", modele$indices$indice_arret, " (",modele$duree$duree_arret," sec.)"),"Non")
   )
   
+  texty = NULL
+  if(!matriciel){
+    texty <- paste("\ny =",paste(modele$parametres$y,collapse = "-"))
+  }
   tableau_joli <- kable(tableau, align = "c") %>%
     kable_styling(full_width = F) %>%
     footnote(general = paste0(type_modele,"\n",
              "Parametres : ",parametres,"\n",
              convergence,'\n',
-             "Temps de calcul total : ", modele$duree$duree_totale, " sec."),
+             "Temps de calcul total : ", modele$duree$duree_totale, " sec.",
+             texty),
              general_title = "\nNote",
              title_format = c("italic", "underline")
     )
@@ -953,5 +961,238 @@ dessiner_histo(resultat$P_hat_liste,
 
 
 ## Question 3 {#sec:codeq3}
+
+Les programmes utilisés pour créer les échantillons sont les suivants :
+```{r}
+
+# Définition de la densité PI(X)
+pi_density <- function(x,lambda,x_etoiles){
+  return(exp(-lambda*sum(x != x_etoiles)))
+}
+
+
+# Fonction qui permet d'inverser deux éléments d'une permutation
+inverse_deux_elements <- function(X, n){
+  i1 <- sample(1:n, 1)
+  i2 <- sample((1:length(X))[-i1],1)
+  temp = X[i1]
+  X[i1] <- X[i2]
+  X[i2] <- temp
+  return(X)
+}
+
+
+pi_density_MCMC <- function(numSim, lambda, x_etoiles, m,n){
+  X0 <- sample(1:m,m,replace=FALSE)
+  X <-matrix(rep(X0,numSim),numSim,m,byrow = T)
+  for (t in (1:(numSim-1))){
+    Xprop=inverse_deux_elements(X[t,], n)
+    if(runif(1) < min(1,pi_density(Xprop[1:n],lambda,x_etoiles)/pi_density(X[t,1:n],lambda,x_etoiles))){
+      X[t+1,]=Xprop
+    }
+    else{
+      X[t+1,]=X[t,]
+    }
+  }
+  return(X[,1:n])
+}
+
+modif_metro <- function(x, m, burn_in = TRUE, lag = 80){
+  # Burn-in : commence à 1000
+  if(burn_in){
+    x <- x[(250*m):dim(x)[1],]
+  }
+  x <- x[seq(1, nrow(x), lag),]
+  return(x)
+}
+
+simul_permutation <- function(N, param, m,n, lag = 80){
+  num <- 250*m + N * lag
+  out <- pi_density_MCMC(numSim = num, lambda =  param$lambda,
+                         x_etoiles = param$x_star, m = m, n = n)
+  out_traite <- modif_metro(x = out, m = m, burn_in = TRUE, lag = lag)
+  return(out_traite)
+}
+
+
+# Détermination du x* par l'algorithme hongrois #
+creer_matriceF <- function(X_top,n,m){
+  matriceF <- matrix(rep(0,n*m),nrow = n, ncol = m)
+  for(i in 1:dim(X_top)[1]){
+    x <- X_top[i,]
+    for(i in 1:length(x)){
+      matriceF[i,x[i]] <- matriceF[i,x[i]] + 1
+    }
+  }
+  return(matriceF)
+}
+
+
+```
+
+Et l'algorithme est ci-dessous. L'option `mle = TRUE` peut-être utilisée si l'on souhaite comparer les résultats
+
+```{r algohamming}
+lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,
+                                      rho = 0.1, alpha = 0.7, poids_blanc = 1, 
+                                      poids_noir = 2, C = 5, d = 10, stop_d = TRUE,
+                                      mle = FALSE){
+  
+  duree = Sys.time()
+  duree_totale = NULL
+  duree_arret = NULL
+  duree_conv = NULL
+  
+  if(m<n){
+    stop()
+  }
+  
+  # Création des paramètres initiaux
+  param_liste <- list()
+  P_hat_tilde <- matrix(nrow = n, ncol = m)
+  param_liste <- list()
+  param_liste[[1]] <- list (lambda = 1,
+                            x_star = initialisation_sample(m = m, n = n, N = 1,
+                                                           avec_remise = FALSE))
+  # Listes à agrémenter
+  gammas_hat = c()
+  s_max = c()
+  indice_arret = NULL
+  indice_conv = NULL
+  ###### Algo
+  
+  #### début du try
+  iter <- 0
+  critere_arret <- TRUE
+  #ceils = rounds each element of X to the nearest integer greater than or equal to that element.
+  eidx = ceiling((1-rho)*N) #plus petit indice du meilleur Score.
+  while(critere_arret & (iter+1)<= maxIters){
+     iter <- iter + 1
+
+    # X <- simul_permutation(N = N, param = param_liste[[iter]],numSim = 100000, y,m,n)
+    X <- simul_permutation(N = N, param = param_liste[[iter]],m = m,n = n)
+ 
+    #### Calcul du score
+    
+    scores <- apply(X, 1, score,
+                    y = y, poids_noir = poids_noir, poids_blanc = poids_blanc)
+    
+    scores_tries <- sort(scores)
+    
+    # Mise à jour de Gamma 
+    gamma = scores_tries[eidx]
+    s = scores_tries[N]
+    X_top = X[scores>=gamma,]
+    
+    # Détermination du x* par l'algorithme hongrois #
+    matriceF <- creer_matriceF(X_top,n,m)
+    hongarian <- solve_LSAP(matriceF,maximum=TRUE)
+    res <- cbind(seq_along(hongarian), hongarian)
+    x_star <- 1:n
+    for(i in 1:n){
+      x_star[i] <- as.numeric(res[i,"hongarian"])
+    }
+    if(score(param_liste[[iter]]$x_star,y) >= score(x_star,y)){
+      x_star = param_liste[[iter]]$x_star
+    }
+    
+    min_loss <- sum(apply(X_top,1, function(x) sum(x != x_star)))
+    
+    # Pour lambda, on le fait peu à peu tendre vers 0
+    # lambda <- param_liste[[iter]]$lambda + 3*param_liste[[1]]$lambda/(maxIters+1)
+    
+    lambda = 1
+    # Si on veut tester estimation par maximum de vraisemblance
+    if(mle){
+      gradient <- function(lambda) {
+        N_top = nrow(X_top)
+        p1 <- N_top * m
+        sum_exp <- sapply(seq(0,m),function(k){
+          (exp(lambda) - 1)^k / factorial(k)
+        })
+        sum_exp_t <- sum(sum_exp)
+        sum_exp_tm1 <- sum(sum_exp[-length(sum_exp)])
+        (sum_exp_tm1 * exp(lambda) - m* sum_exp_t)/sum_exp_t + min_loss/N_top
+      }
+      lambda <- tryCatch(uniroot(gradient, c(0,10))$root, error = function(e){
+        print("error")
+        1})
+      lambda <- alpha * lambda + (1-alpha)* param_liste[[iter]]$lambda
+    }
+    
+    # print(sprintf("i %s - N_top %s - lambda %.3f - gamma %.3f - loss %.3f - prop %s",
+    #               iter,
+    #               nrow(X_top), lambda, gamma, min_loss, paste(x_star,collapse = " ")))
+    
+    gammas_hat[iter] = gamma
+    s_max[iter] = s
+    param_liste[[iter+1]] <- list(lambda = lambda,
+                                  x_star = x_star)
+    
+    # Critère d'arrêt quand on trouve la bonne réponse
+    if(isTRUE(all.equal(score(x = x_star,y = y, poids_noir = poids_noir, poids_blanc = poids_blanc), 1)) & is.null(indice_arret)){
+      indice_arret <- iter+1 # différent de l'autre fonction attention
+      duree_arret <- round(as.numeric(difftime(Sys.time(), duree),units="secs"),2) #NEW
+      if(stop_d){
+        critere_arret <- FALSE
+      }
+    }
+    # Critère de convergence
+    if(length(gammas_hat) > d & is.null(indice_conv)){
+      gammas_d <- tail(gammas_hat,d)
+      if(isTRUE(all.equal(tail(gammas_hat,1), 1))){
+        indice_conv <- iter+1 # différent de l'autre fonction attention
+        duree_conv <- round(as.numeric(difftime(Sys.time(), duree),units="secs"),2) #NEW
+        if(stop_d){
+          critere_arret <- FALSE
+        }
+      }
+    }
+  }
+  
+  ### fin de try
+  duree_totale <- round(as.numeric(difftime(Sys.time(), duree),units="secs"),2)
+  
+  return(
+    list(
+      duree = list(
+        duree_totale=duree_totale,
+        duree_conv=duree_conv,
+        duree_arret=duree_arret
+      ),
+      parametres=list(
+        y=y,
+        n=n,
+        m=m,
+        N=N,
+        maxIters= maxIters,
+        rho = rho,
+        alpha = alpha,
+        smoothing = FALSE,
+        d=d,
+        avec_remise = TRUE
+      ),
+      param_liste=param_liste,
+      s_max=s_max,
+      gammas_hat=gammas_hat,
+      indices = list(
+        indice_arret = indice_arret,
+        indice_conv = indice_conv
+      )
+    )
+    
+  )
+}
+m = 6
+n = 4
+set.seed(1)
+y <- initialiser_y(m = m, n = n, avec_remise = FALSE)
+y
+resultat <- lancer_algorithme_hamming(y = y, n = n, m = m,
+                              stop_d = TRUE) # Pour s'arrêter si convergence
+mise_en_forme_tableau(resultat, matriciel = FALSE)
+```
+
+
 
 # Bilbiographie
