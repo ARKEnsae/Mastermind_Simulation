@@ -94,7 +94,7 @@ tracer_ACF <- function(nSim,lambda,x_etoiles,m,n,coord,burn_in){
 modif_metro <- function(x, burn_in = TRUE, lag = 80){
   # Burn-in : commence à 1000
   if(burn_in){
-    x <- x[1000:dim(x)[1],]
+    x <- x[(250*m):dim(x)[1],]
   }
   x <- x[seq(1, nrow(x), lag),]
   return(x)
@@ -110,19 +110,19 @@ modif_metro <- function(x, burn_in = TRUE, lag = 80){
 #   return(list(acf=x_temp_acf,indice_lag=indice_lag))
 # }
 
-pi_density_MCMC_continue <- function(numSim, lambda, x_etoiles,X0,n){
-  X <-matrix(rep(X0,numSim),numSim,n,byrow = T)
-  for (t in (1:(numSim-1))){
-    Xprop=inverse_deux_elements(X[t,], n )
-    if(runif(1) < min(1,pi_density(Xprop,lambda,x_etoiles)/pi_density(X[t,],lambda,x_etoiles))){
-      X[t+1,]=Xprop
-    }
-    else{
-      X[t+1,]=X[t,]
-    }
-  }
-  return(X)
-}
+# pi_density_MCMC_continue <- function(numSim, lambda, x_etoiles,X0,n){
+#   X <-matrix(rep(X0,numSim),numSim,n,byrow = T)
+#   for (t in (1:(numSim-1))){
+#     Xprop=inverse_deux_elements(X[t,], n )
+#     if(runif(1) < min(1,pi_density(Xprop,lambda,x_etoiles)/pi_density(X[t,],lambda,x_etoiles))){
+#       X[t+1,]=Xprop
+#     }
+#     else{
+#       X[t+1,]=X[t,]
+#     }
+#   }
+#   return(X)
+# }
 
 # Fonction à utiliser qui renvoie un échantillon indépendant de N X_i qui suivent la loi PI(X) pour lambda et x_etoiles donnés
 # Param un liste avec lambda et x_star
@@ -134,7 +134,7 @@ pi_density_MCMC_continue <- function(numSim, lambda, x_etoiles,X0,n){
 # }
 
 simul_permutation <- function(N, param, m,n, lag = 80){
-  num <- 1000 + N * lag
+  num <- 250*m + N * lag
   out <- pi_density_MCMC(num, param$lambda, param$x_star, m, n)
   out_traite <- modif_metro(out, burn_in = TRUE, lag = lag)
   return(out_traite)
