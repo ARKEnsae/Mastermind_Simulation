@@ -139,15 +139,16 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,r
     for(i in 1:n){
       x_star[i] <- as.numeric(res[i,"hongarian"])
     }
-    if(score(param_liste[[iter]]$x_star,y) >score(x_star,y)){
+    if(score(param_liste[[iter]]$x_star,y) >= score(x_star,y)){
       x_star = param_liste[[iter]]$x_star
     }
     
     min_loss <- sum(apply(X_top,1, function(x) sum(x != x_star)))
     
     # Pour lambda, on le fait peu à peu tendre vers 0
-    # lambda <- param_liste[[iter]]$lambda - param_liste[[1]]$lambda/(maxIters+1)
-    # 
+    # lambda <- param_liste[[iter]]$lambda + 3*param_liste[[1]]$lambda/(maxIters+1)
+    
+    # Si on veut tester estimation par maximum de vraisemblance
     # gradient <- function(lambda) {
     #   N_top = nrow(X_top)
     #   p1 <- N_top * m
@@ -158,12 +159,14 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,r
     #   sum_exp_tm1 <- sum(sum_exp[-length(sum_exp)])
     #   (sum_exp_tm1 * exp(lambda) - m* sum_exp_t)/sum_exp_t + min_loss/N_top
     # }
-    # lambda <- tryCatch(uniroot(gradient, c(0,4))$root, error = function(e) 1)
+    # lambda <- tryCatch(uniroot(gradient, c(0,10))$root, error = function(e){
+    #   print("error")
+    #   1})
     # lambda <- alpha * lambda + (1-alpha)* param_liste[[iter]]$lambda
     lambda = 1
-    print(sprintf("i %s - N_top %s - lambda %.3f - gamma %.3f - loss %.3f - prop %s",
-                  iter,
-                  nrow(X_top), lambda, gamma, min_loss, paste(x_star,collapse = " ")))
+    # print(sprintf("i %s - N_top %s - lambda %.3f - gamma %.3f - loss %.3f - prop %s",
+    #               iter,
+    #               nrow(X_top), lambda, gamma, min_loss, paste(x_star,collapse = " ")))
     
     gammas_hat[iter] = gamma
     s_max[iter] = s
