@@ -1,0 +1,57 @@
+---
+title: "Mastermind et permutations"
+subtitle: "Projet Monte-Carlo, Ensae"
+author: "Kim Antunez, Romain Lesauvage et Alain Quartier-la-Tente"
+division: "25/04/2020 "
+departement: "Ensae --- 2019-2020"
+logo: "img/LOGO-ENSAE.png"
+automaticcontents: true
+output:
+    beamer_presentation:
+        template: template.tex
+        keep_tex: yes
+        theme: TorinoTh
+        slide_level: 3
+header-includes:
+- \usepackage{wrapfig}
+- \usepackage{booktabs}
+- \usepackage{longtable}
+- \usepackage{array}
+- \usepackage{multirow}
+- \usepackage[table]{xcolor}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \usepackage{animate}
+- \usepackage{fontawesome5}
+themeoptions: "coding=utf8,language=french"
+classoption: 'usepdftitle=false,french'
+fontsize: 10pt
+---
+
+# Section
+
+## Sous-Section
+
+### Description des classes \bcloupe
+
+
+
+
+### Merci pour votre attention
+
+L'ensemble du projet est disponible sous : https://github.com/ARKEnsae/Mastermind_Simulatio
+
+
+\includegraphics[width = 5cm]{img/LOGO-ENSAE.png}
+
+
+
+
+
