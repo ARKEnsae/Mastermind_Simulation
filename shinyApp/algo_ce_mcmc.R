@@ -10,11 +10,12 @@ pi_density <- function(x,lambda,x_etoiles){
 
 
 # Fonction qui permet d'inverser deux éléments d'une permutation
-inverse_deux_elements <- function(X){
-  indices = sample(1:length(X),2)
-  temp = X[indices[1]]
-  X[indices[1]] <- X[indices[2]]
-  X[indices[2]] <- temp
+inverse_deux_elements <- function(X, n){
+  i1 <- sample(1:n, 1)
+  i2 <- sample((1:length(X))[-i1],1)
+  temp = X[i1]
+  X[i1] <- X[i2]
+  X[i2] <- temp
   return(X)
 }
 
@@ -45,11 +46,11 @@ inverse_deux_elements <- function(X){
 # }
 
 
-pi_density_MCMC <- function(numSim, lambda, x_etoiles,y, m,n){
+pi_density_MCMC <- function(numSim, lambda, x_etoiles, m,n){
   X0 <- sample(1:m,m,replace=FALSE)
   X <-matrix(rep(X0,numSim),numSim,m,byrow = T)
   for (t in (1:(numSim-1))){
-    Xprop=inverse_deux_elements(X[t,])
+    Xprop=inverse_deux_elements(X[t,], n)
     if(runif(1) < min(1,pi_density(Xprop[1:n],lambda,x_etoiles)/pi_density(X[t,1:n],lambda,x_etoiles))){
       X[t+1,]=Xprop
     }
@@ -72,16 +73,17 @@ pi_density_MCMC <- function(numSim, lambda, x_etoiles,y, m,n){
 # }
 
 # Tracer trace d'une coordonée pour voir burn-in
-tracer_Trace <- function(nSim,lambda,x_etoiles,y,m,n,coord){
-  out<-pi_density_MCMC(nSim,lambda,x_etoiles,y,m,n)
+tracer_Trace <- function(nSim,lambda,x_etoiles,m,n,coord){
+  out<-pi_density_MCMC(nSim,lambda,x_etoiles,m,n)
   ggplot(as.data.frame(out))+
     geom_line(aes(x = (1:nSim),y=out[,1]))+
     labs(title=paste('Trace plot'),x='',y='')
 }
 
 # Tracer ACF pour trouver lag
-tracer_ACF <- function(nSim,lambda,x_etoiles,y,m,n,coord,burn_in){
-  out<-pi_density_MCMC(nSim,lambda,x_etoiles,y,m,n)
+tracer_ACF <- function(nSim,lambda,x_etoiles,m,n,coord,burn_in){
+  out<-pi_density_MCMC(nSim,lambda,x_etoiles,m,n)
+  library(forecast)
   ggAcf(out[burn_in:dim(out)[1],coord])+
     labs(title=paste('ACF'))
 }
@@ -89,27 +91,29 @@ tracer_ACF <- function(nSim,lambda,x_etoiles,y,m,n,coord,burn_in){
 
 
 # Amélioré
-modif_metro <- function(x){
+modif_metro <- function(x, burn_in = TRUE, lag = 80){
   # Burn-in : commence à 1000
-  x_temp <- x[1000:dim(x)[1],]
-  resultat <- acf(x_temp,plot=F)
-  indice_lag <- which.max(as.integer(abs(resultat$acf)<=1.95/sqrt(resultat$n.used)))-1
-  x_temp_acf <- x_temp[seq(1,(dim(x_temp)[1]),indice_lag),]
-  return(list(acf=x_temp_acf,indice_lag=indice_lag))
+  if(burn_in){
+    x <- x[1000:dim(x)[1],]
+  }
+  x <- x[seq(1, nrow(x), lag),]
+  return(x)
 }
 
-modif_metro_am <- function(x){
-  x_temp <- x
-  resultat <- acf(x_temp,plot=F)
-  indice_lag <- which.max(as.integer(abs(resultat$acf)<=1.95/sqrt(resultat$n.used)))-1
-  x_temp_acf <- x_temp[seq(1,(dim(x_temp)[1]),max(1,indice_lag)),]
-  return(list(acf=x_temp_acf,indice_lag=indice_lag))
-}
+# modif_metro_am <- function(x){
+#   x_temp <- x
+#   resultat <- acf(x_temp,plot=F)
+#   resultat_acf <- 
+#   indice_lag <- which.min(as.integer(abs(resultat$acf)<=1.95/sqrt(resultat$n.used)))-1
+#   indice_lag <- max(1,indice_lag)
+#   x_temp_acf <- x_temp[seq(1,(dim(x_temp)[1]),indice_lag),]
+#   return(list(acf=x_temp_acf,indice_lag=indice_lag))
+# }
 
 pi_density_MCMC_continue <- function(numSim, lambda, x_etoiles,X0,n){
   X <-matrix(rep(X0,numSim),numSim,n,byrow = T)
   for (t in (1:(numSim-1))){
-    Xprop=inverse_deux_elements(X[t,])
+    Xprop=inverse_deux_elements(X[t,], n )
     if(runif(1) < min(1,pi_density(Xprop,lambda,x_etoiles)/pi_density(X[t,],lambda,x_etoiles))){
       X[t+1,]=Xprop
     }
@@ -129,22 +133,11 @@ pi_density_MCMC_continue <- function(numSim, lambda, x_etoiles,X0,n){
 #   return(out_traite[indices,])
 # }
 
-simul_permutation <- function(N, param,y,m,n){
-  num <- 1000 + N*10
-  out <- pi_density_MCMC(num, param$lambda, param$x_star,y,m,n)
-  modif <- modif_metro(out)
-  out_traite <- modif$acf
-  indice_lag <- modif$indice_lag
-  taille <- dim(out_traite)[1]
-  while(taille<N){
-    out <- rbind(out,pi_density_MCMC_continue(indice_lag*(N - taille), param$lambda, param$x_star,out_traite[taille,],n))
-    modif <- modif_metro_am(out)
-    out_traite <- modif$acf
-    indice_lag <- modif$indice_lag
-    taille <- dim(out_traite)[1]
-  }
-  indices <- sample(1:dim(out_traite)[1],N)
-  return(out_traite[indices,])
+simul_permutation <- function(N, param, m,n, lag = 80){
+  num <- 1000 + N * lag
+  out <- pi_density_MCMC(num, param$lambda, param$x_star, m, n)
+  out_traite <- modif_metro(out, burn_in = TRUE, lag = lag)
+  return(out_traite)
 }
 
 
@@ -195,7 +188,7 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,r
      iter <- iter + 1
 
     # X <- simul_permutation(N = N, param = param_liste[[iter]],numSim = 100000, y,m,n)
-    X <- simul_permutation(N = N, param = param_liste[[iter]], y,m,n)
+    X <- simul_permutation(N = N, param = param_liste[[iter]],m = m,n = n)
  
     #### Calcul du score
     
@@ -224,8 +217,21 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,r
     min_loss <- sum(apply(X_top,1, function(x) sum(x != x_star)))
     
     # Pour lambda, on le fait peu à peu tendre vers 0
-    lambda <- param_liste[[iter]]$lambda - param_liste[[1]]$lambda/(maxIters+1)
-    
+    # lambda <- param_liste[[iter]]$lambda - param_liste[[1]]$lambda/(maxIters+1)
+    # 
+    # gradient <- function(lambda) {
+    #   N_top = nrow(X_top)
+    #   p1 <- N_top * m
+    #   sum_exp <- sapply(seq(0,m),function(k){
+    #     (exp(lambda) - 1)^k / factorial(k)
+    #   })
+    #   sum_exp_t <- sum(sum_exp)
+    #   sum_exp_tm1 <- sum(sum_exp[-length(sum_exp)])
+    #   (sum_exp_tm1 * exp(lambda) - m* sum_exp_t)/sum_exp_t + min_loss/N_top
+    # }
+    # lambda <- tryCatch(uniroot(gradient, c(0,4))$root, error = function(e) 1)
+    # lambda <- alpha * lambda + (1-alpha)* param_liste[[iter]]$lambda
+    lambda = 1
     print(sprintf("i %s - N_top %s - lambda %.3f - gamma %.3f - loss %.3f - prop %s",
                   iter,
                   nrow(X_top), lambda, gamma, min_loss, paste(x_star,collapse = " ")))
