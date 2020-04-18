@@ -424,9 +424,9 @@ L'algorithme de Metropolis-Hastings a deux désavantages :
 
 #### Gestion des autocorrélations {#subsec:acf}
 
-Par construction, du fait du mécansime de proposition utilisé, les échantillons proches sont corrélés. Cette autocorrélation peut-être calculée avec la fonction `portes::LjungBox` (la fonction `acf` ne calculant les autocorrélations que pour les séries univariées). En revanche, intégrer ce test dans le mécanisme de proposition est très couteux en temps. Garder tous les 80^ièmes^ écorrige ce problème : on ne rejette pas les tests de LjungBox d'indépendance des échantillons au seuil de 10 % pour tous les paramètres testés.
+Par construction, du fait du mécansime de proposition utilisé, les échantillons proches sont corrélés. Cette autocorrélation peut-être calculée avec la fonction `portes::LjungBox` (la fonction `acf` ne calculant les autocorrélations que pour les séries univariées). En revanche, intégrer ce test dans le mécanisme de proposition est très couteux en temps. Garder tous les 80^ièmes^ observations corrige ce problème : on ne rejette pas les tests de LjungBox d'indépendance des échantillons au seuil de 10 % pour tous les paramètres testés (à $\lambda = 1$). Pour $\lambda$ grand ces tests n'ont plus de sens puisque la majorité des échantillons tirés doivent être proches de $x*$ et on concluerait donc qu'ils sont corrélés.
 
-Les graphiques \@ref(fig:acfn10m40) à \@ref(fig:acfn20m40corr) montrent les autocorrélogrammes des 4 premières composantes (i.e. : 4 premières boules) pour $n=10$ et $m=40$ et $n=20$ et $m=40$. Le tableau \@ref(tab:tabcorrlb) montre qu'avec ce pas de 80 les échantillons générés sont bien indépendants.
+Les graphiques \@ref(fig:acfn10m40) à \@ref(fig:acfn20m40corr) montrent les autocorrélogrammes des 4 premières composantes (i.e. : 4 premières boules) pour $n=10$ et $m=40$ et $n=20$ et $m=40$ et $\lambda =1$. Le tableau \@ref(tab:tabcorrlb) montre qu'avec ce pas de 80 les échantillons générés sont bien indépendants. 
 
 ```{r acfn10m40, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec lambda = 1, n = 10 et m = 40"}
 knitr::include_graphics("img/acfn10m40.png")
