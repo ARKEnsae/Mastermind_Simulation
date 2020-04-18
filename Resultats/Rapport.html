@@ -395,7 +395,7 @@ summary {
 </ul></li>
 <li><a href="#sec:q3"><span class="toc-section-number">3.2</span> Utilisation d’une loi spécifique pour générer les permutations</a><ul>
 <li><a href="#sec:mh"><span class="toc-section-number">3.2.1</span> Génération de l’échantillon</a></li>
-<li><a href="#estimation-des-paramètres"><span class="toc-section-number">3.2.2</span> Estimation des paramètres</a></li>
+<li><a href="#sec:estparamhamming"><span class="toc-section-number">3.2.2</span> Estimation des paramètres</a></li>
 <li><a href="#résultats-2"><span class="toc-section-number">3.2.3</span> Résultats</a></li>
 </ul></li>
 </ul></li>
@@ -3526,7 +3526,14 @@ n
 \pi_{\lambda, x^*}(x)\propto\exp{(−\lambda d(x, x^{*}))}
 \]</span>
 Pour générer les échantillons on utilise l’algorithme de Metropolis-Hastings (voir partie <a href="#sec:mh">3.2.1</a>). Pour la mise en oeuvre de la méthode de <em>Cross-Entropy</em>, on va mettre à jour <span class="math inline">\(\lambda\)</span> et <span class="math inline">\(x^*\)</span> à chaque itération. Le critère d’arrêt qui est utilisé est <span class="math inline">\(x^*=y\)</span> (i.e. <span class="math inline">\(S(x^*)=1\)</span>).</p>
-<p>Nous avons ici <span class="math inline">\(n+1\)</span> paramètres à estimer (<span class="math inline">\(n\)</span> pour <span class="math inline">\(x^*\)</span> et 1 pour <span class="math inline">\(\lambda\)</span>). Nous générons donc <span class="math inline">\(N = C\times (n+1)\)</span> échantillons à chaque itération de la <em>Cross-Entropy</em>.</p>
+<p>Nous avons ici <span class="math inline">\(n+1\)</span> paramètres à estimer (<span class="math inline">\(n\)</span> pour <span class="math inline">\(x^*\)</span> et 1 pour <span class="math inline">\(\lambda\)</span>). Nous générons donc <span class="math inline">\(N = C\times (n+1)\)</span> échantillons à chaque itération de la <em>Cross-Entropy</em>. L’algorithme que nous utilisons est le suivant :</p>
+<ol style="list-style-type: decimal">
+<li><p>Initialisation : tire aléatoire <span class="math inline">\(x^*_0\)</span> et on prend <span class="math inline">\(\lambda_0=1\)</span>.</p></li>
+<li>On génère un échantillon <span class="math inline">\(X_{1},\dots,X_{N}\)</span>, <span class="math inline">\(N=5\times (n+1)\)</span>, de loi <span class="math inline">\(\pi_{\lambda_t,x^*_t}\)</span> selon l’algorithme décrit dans la partie <a href="#sec:mh">3.2.1</a>. On calcule le quantile 0,90 de la fonction score qui donne <span class="math inline">\(\hat{\gamma}_{t}\)</span> :
+<span class="math display">\[\hat{\gamma}_{t}=S_{\lceil0.9N\rceil}\]</span></li>
+<li>On utilise le même échantillon <span class="math inline">\(X_{1},\dots,X_{N}\)</span> pour trouver <span class="math inline">\(\tilde x_{t+1}\)</span> comme décrit dans la partie <a href="#sec:estparamhamming">3.2.2</a>. Si <span class="math inline">\(S(\tilde x_{t+1})\geq S(x^*_t)\)</span> alors <span class="math inline">\(x^*_{t+1} = \tilde x_{t+1\)</span>, sinon <span class="math inline">\(x^*_{t+1}=x^*_{t}\)</span>. On fixe <span class="math inline">\(\lambda_{t+1}=1\)</span></li>
+<li><p>Arrêt : si pour un certain <span class="math inline">\(t\)</span>, <span class="math inline">\(S(x^*_{t)=1\)</span> alors on arrête l’algorithme.</p></li>
+</ol>
 <div id="sec:mh" class="section level3">
 <h3><span class="header-section-number">3.2.1</span> Génération de l’échantillon</h3>
 <div id="algorithme-de-metropolis-hastings" class="section level4">
@@ -4160,7 +4167,7 @@ p-value
 </table>
 </div>
 </div>
-<div id="estimation-des-paramètres" class="section level3">
+<div id="sec:estparamhamming" class="section level3">
 <h3><span class="header-section-number">3.2.2</span> Estimation des paramètres</h3>
 <p><span class="citation">Arrieta (2014)</span> montre le problème de maximisation de la vraisemblance d’une loi de Mallow (qui est celle ici utilisée) peut se décomposer en deux étapes :</p>
 <ol style="list-style-type: decimal">
@@ -4195,6 +4202,7 @@ Dans notre cas, le problème est que nous observant une croissance rapide de <sp
 </div>
 <div id="résultats-2" class="section level3">
 <h3><span class="header-section-number">3.2.3</span> Résultats</h3>
+<p>Les tableaux XXX XXX montrent une convergence</p>
 </div>
 </div>
 </div>

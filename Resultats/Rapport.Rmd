@@ -377,7 +377,14 @@ $$
 $$
 Pour générer les échantillons on utilise l'algorithme de Metropolis-Hastings (voir partie \@ref(sec:mh)). Pour la mise en oeuvre de la méthode de *Cross-Entropy*, on va mettre à jour $\lambda$ et $x^*$ à chaque itération. Le critère d'arrêt qui est utilisé est $x^*=y$ (i.e. $S(x^*)=1$).
 
-Nous avons ici $n+1$ paramètres à estimer ($n$ pour $x^*$ et 1 pour $\lambda$). Nous générons donc $N = C\times (n+1)$ échantillons à chaque itération de la *Cross-Entropy*.
+Nous avons ici $n+1$ paramètres à estimer ($n$ pour $x^*$ et 1 pour $\lambda$). Nous générons donc $N = C\times (n+1)$ échantillons à chaque itération de la *Cross-Entropy*. L'algorithme que nous utilisons est le suivant :
+
+1. Initialisation : tire aléatoire $x^*_0$ et on prend $\lambda_0=1$.
+
+2. On génère un échantillon $X_{1},\dots,X_{N}$, $N=5\times (n+1)$, de loi $\pi_{\lambda_t,x^*_t}$ selon l'algorithme décrit dans la partie \@ref(sec:mh). On calcule le quantile 0,90 de la fonction score qui donne $\hat{\gamma}_{t}$ :
+$$\hat{\gamma}_{t}=S_{\lceil0.9N\rceil}$$
+3. On utilise le même échantillon $X_{1},\dots,X_{N}$ pour trouver $\tilde x_{t+1}$ comme décrit dans la partie \@ref(sec:estparamhamming). Si $S(\tilde x_{t+1})\geq S(x^*_t)$ alors $x^*_{t+1} = \tilde x_{t+1$, sinon $x^*_{t+1}=x^*_{t}$. On fixe $\lambda_{t+1}=1$
+4. Arrêt : si pour un certain $t$, $S(x^*_{t)=1$ alors on arrête l'algorithme.
 
 ### Génération de l'échantillon {#sec:mh}
 
@@ -457,7 +464,7 @@ kable_styling(full_width = F)%>%
 ```
 
 
-### Estimation des paramètres
+### Estimation des paramètres {#sec:estparamhamming}
 
 @hongrois montre le problème de maximisation de la vraisemblance d'une loi de Mallow (qui est celle ici utilisée) peut se décomposer en deux étapes :
 
@@ -494,6 +501,8 @@ Dans notre cas, le problème est que nous observant une croissance rapide de $\l
 Nous avons testé plusieurs approches pour $\lambda$ : en le faisant croître linéaire, décroître, constant et maximum de vraisemblance. La solution qui donnait les meilleurs résultats est de prendre $\lambda = 1$.
 
 ### Résultats
+
+Les tableaux XXX XXX montrent une convergence
 
 
 # Code {#sec:enscode}
