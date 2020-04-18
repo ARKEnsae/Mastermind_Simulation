@@ -37,7 +37,7 @@ Quand $n$ et $m$ sont petits, il est inévitable qu'une coordonnée puisse garde
 knitr::include_graphics("img/n_4_m_6.png")
 ```
 
-Quand $m$ passe à 6, le *burn-in* semble légèrement augmenter par rapport au cas précédent, avec l'apparition d'un plateau après 1000 pour la première coordonnée, nous pourrions donc plutôt envisager un *burn-in* de 1 500 dans ce cas.
+Quand $m$ passe à 6, le *burn-in* semble légèrement augmenter par rapport au cas précédent, avec l'apparition d'un plateau après 1000 pour la quatrième coordonnée, nous pourrions donc plutôt envisager un *burn-in* de 1 500 dans ce cas.
 
 # Avec n = 10 et m = 20
 
@@ -45,7 +45,7 @@ Quand $m$ passe à 6, le *burn-in* semble légèrement augmenter par rapport au 
 knitr::include_graphics("img/n_10_m_20.png")
 ```
 
-Pour $m = 20$, on remarque sur la trace de la première coordonnée un long moment entre 4 000 et 5 000 où l'on ne semble plus atteindre des valeurs au-dessus de 15, on peut donc conseiller un *burn-in* de 5 000 ici.
+Pour $m = 20$, on remarque sur la trace de la première coordonnée un long moment entre 3 000 et 4 000 où l'on ne semble plus atteindre des valeurs au-dessus de 4 et un autre moment autour de 5 000 où les valeurs faibles ne sont pas atteintes, on peut donc conseiller un *burn-in* de 5 000 ici.
 
 # Avec n = 20 et m = 20
 
@@ -53,7 +53,7 @@ Pour $m = 20$, on remarque sur la trace de la première coordonnée un long mome
 knitr::include_graphics("img/n_20_m_20.png")
 ```
 
-L'augmentation de $n$ par rapport au cas précédent ne semble pas avoir modifié l'allure des traces outre mesure, le *burn-in* de 5 000 reste donc toujours acceptable.
+L'augmentation de $n$ par rapport au cas précédent a modifié légèrement les traces mais le *burn-in* de 5 000 reste toujours acceptable.
 
 # Avec n = 10 et m = 40
 
@@ -61,7 +61,7 @@ L'augmentation de $n$ par rapport au cas précédent ne semble pas avoir modifi�
 knitr::include_graphics("img/n_10_m_40.png")
 ```
 
-Une nouvelle augmentation de $m$ à 50 allonge de nouveau le *burn-in*. En effet, on remarque que l'ensemble est valeurs est parcouru à partir de l'itération 7 500 environ, on peut donc prendre cette valeur comme burn-in.
+Une nouvelle augmentation de $m$ à 50 allonge de nouveau le *burn-in*. En effet, on remarque que l'ensemble est valeurs est parcouru à partir de l'itération 7 500 environ (notamment sur la deuxième coordonnée), on peut donc prendre cette valeur comme burn-in.
 
 # Avec n = 40 et m = 40
 
@@ -69,7 +69,7 @@ Une nouvelle augmentation de $m$ à 50 allonge de nouveau le *burn-in*. En effet
 knitr::include_graphics("img/n_40_m_40.png")
 ```
 
-L'augmentation de $n$ semble cette fois-ci avoir un peu modifié les traces, notamment pour la 1ère coordonnée, on a plutôt envie d'estimer le *burn-in* aux alentours de 10 000.
+L'augmentation de $n$ semble cette fois-ci avoir un peu modifié les traces, notamment pour la 2ème coordonnée, on a plutôt envie d'estimer le *burn-in* aux alentours de 10 000.
 
 # Conclusions
 
