@@ -70,7 +70,7 @@ function(input, output, session) {
   
   
   
-  yInput <- eventReactive(c(input$tirage,input$m,input$n,remiseInput(),input$methode), {
+  yInput <- eventReactive(c(input$tirage,input$m,input$n,input$methode,remiseInput()), { 
     y <- initialiser_y(m=input$m,n=input$n, avec_remise = remiseInput())
     return(y)
   }, ignoreNULL = FALSE)
@@ -149,7 +149,7 @@ function(input, output, session) {
       
     }
     
-    modele <<- modele
+    #modele3 <<- modele
     
     return(modele)
     

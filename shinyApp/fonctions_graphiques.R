@@ -1,6 +1,6 @@
 ### Dessiner histogramme
 
-dessiner_histo <- function(liste_matrice,indice,colors){
+dessiner_histo <- function(liste_matrice,indice,colors,main=NULL){
   if(!is.null(indice)){
     matrice=liste_matrice[[indice]]
     n = c(1:nrow(matrice))
@@ -9,7 +9,7 @@ dessiner_histo <- function(liste_matrice,indice,colors){
     
     par(mar = c(0,0,0,0))
     hist3D(m, n, t(matrice), zlim=c(0,1), colvar = couleurs_graphe,
-           col = colors[1:ncol(matrice)],theta=50, phi=40, axes=TRUE,label=TRUE, ticktype="detailed", space=0.5, lighting=TRUE, light="diffuse", shade=0.5, alpha=0.6, xlab="",ylab="billes",zlab="",colkey=list(plot=FALSE))
+           col = colors[1:ncol(matrice)],theta=50, phi=40, axes=TRUE,label=TRUE, ticktype="detailed", space=0.5, lighting=TRUE, light="diffuse", shade=0.5, alpha=0.6, xlab="",ylab="billes",zlab="",colkey=list(plot=FALSE), main=main)
     
   }
 }
