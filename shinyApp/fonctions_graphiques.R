@@ -38,13 +38,11 @@ tableau_bilan <- function(modele,matriciel=TRUE){
       s_max = round(modele$s_max[1:i],3),
       gammas_hat = round(modele$gammas_hat[1:i],3),
       lambda=round(unlist(lapply(1:i,function(k){((modele$param_liste)[[k]])$lambda})),2),
-      score_xstar= unlist(lapply(1:i,function(k){score(((modele$param_liste)[[k]])$x_star, modele$parametres$y)}))
+      score_x_star= unlist(lapply(1:i,function(k){score(((modele$param_liste)[[k]])$x_star, modele$parametres$y)})),
+      x_star = unlist(lapply(1:i,function(k){paste(modele$param_liste[[k]]$x_star,collapse = "-")}))
     )
-
   }
-  
-  
-  
+
   return(tableau)
   
 }
@@ -77,12 +75,17 @@ mise_en_forme_tableau <- function(modele,matriciel=TRUE){
                         ifelse(!is.null(modele$indices$indice_arret),paste0("Etape n°", modele$indices$indice_arret, " (",modele$duree$duree_arret," sec.)"),"Non")
   )
   
+  texty = NULL
+  if(!matriciel){
+    texty <- paste("\ny =",paste(modele$parametres$y,collapse = "-"))
+  }
   tableau_joli <- kable(tableau, align = "c") %>%
     kable_styling(full_width = F) %>%
     footnote(general = paste0(type_modele,"\n",
              "Parametres : ",parametres,"\n",
              convergence,'\n',
-             "Temps de calcul total : ", modele$duree$duree_totale, " sec."),
+             "Temps de calcul total : ", modele$duree$duree_totale, " sec.",
+             texty),
              general_title = "\nNote",
              title_format = c("italic", "underline")
     )

@@ -83,7 +83,10 @@ creer_matriceF <- function(X_top,n,m){
 }
 
 
-lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,rho = 0.1, alpha = 0.7, poids_blanc = 1, poids_noir = 2, C = 5, d = 10, stop_d = TRUE){
+lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,
+                                      rho = 0.1, alpha = 0.7, poids_blanc = 1, 
+                                      poids_noir = 2, C = 5, d = 10, stop_d = TRUE,
+                                      mle = FALSE){
   
   duree = Sys.time()
   duree_totale = NULL
@@ -148,22 +151,25 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,r
     # Pour lambda, on le fait peu à peu tendre vers 0
     # lambda <- param_liste[[iter]]$lambda + 3*param_liste[[1]]$lambda/(maxIters+1)
     
-    # Si on veut tester estimation par maximum de vraisemblance
-    # gradient <- function(lambda) {
-    #   N_top = nrow(X_top)
-    #   p1 <- N_top * m
-    #   sum_exp <- sapply(seq(0,m),function(k){
-    #     (exp(lambda) - 1)^k / factorial(k)
-    #   })
-    #   sum_exp_t <- sum(sum_exp)
-    #   sum_exp_tm1 <- sum(sum_exp[-length(sum_exp)])
-    #   (sum_exp_tm1 * exp(lambda) - m* sum_exp_t)/sum_exp_t + min_loss/N_top
-    # }
-    # lambda <- tryCatch(uniroot(gradient, c(0,10))$root, error = function(e){
-    #   print("error")
-    #   1})
-    # lambda <- alpha * lambda + (1-alpha)* param_liste[[iter]]$lambda
     lambda = 1
+    # Si on veut tester estimation par maximum de vraisemblance
+    if(mle){
+      gradient <- function(lambda) {
+        N_top = nrow(X_top)
+        p1 <- N_top * m
+        sum_exp <- sapply(seq(0,m),function(k){
+          (exp(lambda) - 1)^k / factorial(k)
+        })
+        sum_exp_t <- sum(sum_exp)
+        sum_exp_tm1 <- sum(sum_exp[-length(sum_exp)])
+        (sum_exp_tm1 * exp(lambda) - m* sum_exp_t)/sum_exp_t + min_loss/N_top
+      }
+      lambda <- tryCatch(uniroot(gradient, c(0,10))$root, error = function(e){
+        print("error")
+        1})
+      lambda <- alpha * lambda + (1-alpha)* param_liste[[iter]]$lambda
+    }
+    
     # print(sprintf("i %s - N_top %s - lambda %.3f - gamma %.3f - loss %.3f - prop %s",
     #               iter,
     #               nrow(X_top), lambda, gamma, min_loss, paste(x_star,collapse = " ")))
