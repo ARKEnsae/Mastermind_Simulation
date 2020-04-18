@@ -428,25 +428,26 @@ Par construction, du fait du mécansime de proposition utilisé, les échantillo
 
 Les graphiques \@ref(fig:acfn10m40) à \@ref(fig:acfn20m40corr) montrent les autocorrélogrammes des 4 premières composantes (i.e. : 4 premières boules) pour $n=10$ et $m=40$ et $n=20$ et $m=40$. Le tableau \@ref(tab:tabcorrlb) montre qu'avec ce pas de 80 les échantillons générés sont bien indépendants.
 
-```{r acfn10m40, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec n = 10 et m = 40"}
+```{r acfn10m40, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec lambda = 1, n = 10 et m = 40"}
 knitr::include_graphics("img/acfn10m40.png")
 ```
 
-```{r acfn10m40corr, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec un pas de 80, n = 10 et m = 40"}
+```{r acfn10m40corr, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec un pas de 80, lambda = 1, n = 10 et m = 40"}
 knitr::include_graphics("img/acfn10m40corr.png")
 ```
 
-```{r acfn20m40, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec n = 20 et m = 40"}
+```{r acfn20m40, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec lambda = 1, n = 20 et m = 40"}
 knitr::include_graphics("img/acfn20m40.png")
 ```
 
-```{r acfn20m40corr, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec un pas de 80, n = 20 et m = 40"}
+```{r acfn20m40corr, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec un pas de 80, lambda = 1, n = 20 et m = 40"}
 knitr::include_graphics("img/acfn20m40corr.png")
 ```
 
 ```{r tabcorrlb, echo=FALSE}
 data_corr <- readRDS("Resultats/corr_n10m40n20m40.RDS")
-note <- "(H0) : échantillons indépendants contre (H1) ils sont corrélés."
+note <- c("(H0) : échantillons indépendants contre (H1) ils sont corrélés.",
+          "lambda = 1, x* tiré au hasard")
 data_corr %>% 
   kable(caption = "Test de LjungBox en ne gardant qu'un échantillon sur 80") %>% 
 kable_styling(full_width = F)%>%
