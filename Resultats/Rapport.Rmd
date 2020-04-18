@@ -403,7 +403,11 @@ $$
   
   d. Incrémentation : $t=t+1$.
 
-Dans le cas où $m>n$, $x^*$ ne peut être une vraie permutation. Pour générer la loi on raisonne de la même façon mais en ne calculant la distance de Hamming que sur les $n$ premières coordonnées $x'$ et $x_t$ (comme $x^*$ est un vecteur de taille $n$).
+Dans le cas où $m>n$, $x^*$ ne peut être une vraie permutation. Pour générer la loi dans ce cas, nous raisonnons de la même façon en modifiant deux étapes :
+
+ - dans le mécanisme de proposition nous inversons deux coordonnées mais en imposant qu'au moins une des deux soit plus petite que $n$ ;
+ 
+ - dans le calcule de la probabilité d'acceptation nous ne calculons la distance de Hamming que sur les $n$ premières coordonnées $x'$ et $x_t$ (comme $x^*$ est un vecteur de taille $n$) ;
 
 Comme $x'$ est une transposition de $x_t$, $d(x',x^{*})-d(x_{t},x^{*})\in\{-2,-1,0,1,2\}$. Donc si, par rapport à $x_t$ dans $x'$ ne diminue pas la distance de Hamming à $x^{*}$ alors on accepte le nouvel état. S'il y a nouvel élément mal placé alors on accepte $x'$ avec une probabilité de $e^{-\lambda}$ : pour $\lambda>2$ la probabilité d'accepter un nouvel état moins proche que $x_t$ de $x^*$ est donc inférieure à 14 % et pour $\lambda>3$ cette probabilité inférieure à 5 %. Pour $\lambda$ grand on converge donc vers $x^*$ et tous les échantillons seront égaux à $x^*$.
 
@@ -412,9 +416,44 @@ Comme $x'$ est une transposition de $x_t$, $d(x',x^{*})-d(x_{t},x^{*})\in\{-2,-1
 
 L'algorithme de Metropolis-Hastings a deux désavantages :
 
-1. Il générer la loi cible, il construit itérativement une chaîne de Markov qui converge vers cette loi cible. Les échantillons initiaux peuvent donc suivre une distribution très différente de celle recherché. Il est donc nécessaire de rejetter une partie importante des échantillons initiaux (*burn-in*).
+1. Il générer la loi cible, il construit itérativement une chaîne de Markov qui converge vers cette loi cible. Les échantillons initiaux peuvent donc suivre une distribution très différente de celle recherché. Il est donc nécessaire de rejetter une partie importante des échantillons initiaux (*burn-in*). C'est corrigé en enlevant les $250\times m$ premières observations (voir partie \@ref(subsec:burnin)).
 
-2. Les échantillons proches sont généralement autocorrélés. Pour générer des échantillons indépendants il faut donc rejeter la majorité d'entre eux et ne garder que les $n$^ièmes^ échantillons. Ce $n$ est trouvé en calculant l'autocorrélation entre les échantillons et en prenant l'entier tel que $X_t$ ne soit plus corrélé à $X_{t+n}$. Cette autocorrélation peut-être calculée avec la fonction `portes::LjungBox` (la fonction `acf` ne calculant les autocorrélations que pour les séries univariées).
+2. Par construction, les échantillons proches sont corrélés entre eux. Pour générer des échantillons indépendants il faut donc en rejeter et ne garder que les $n$^ièmes^ échantillons. Dans notre cas nous prenons $n=100$ pour toutes les simulations  (voir partie \@ref(subsec:acf)).
+
+#### Gestion du burn-in {#subsec:burnin}
+
+#### Gestion des autocorrélations {#subsec:acf}
+
+Par construction, du fait du mécansime de proposition utilisé, les échantillons proches sont corrélés. Cette autocorrélation peut-être calculée avec la fonction `portes::LjungBox` (la fonction `acf` ne calculant les autocorrélations que pour les séries univariées). En revanche, intégrer ce test dans le mécanisme de proposition est très couteux en temps. Garder tous les 80^ièmes^ écorrige ce problème : on ne rejette pas les tests de LjungBox d'indépendance des échantillons au seuil de 10 % pour tous les paramètres testés.
+
+Les graphiques \@ref(fig:acfn10m40) à \@ref(fig:acfn20m40corr) montrent les autocorrélogrammes des 4 premières composantes (i.e. : 4 premières boules) pour $n=10$ et $m=40$ et $n=20$ et $m=40$. Le tableau \@ref(tab:tabcorrlb) montre qu'avec ce pas de 80 les échantillons générés sont bien indépendants.
+
+```{r acfn10m40, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec n = 10 et m = 40"}
+knitr::include_graphics("img/acfn10m40.png")
+```
+
+```{r acfn10m40corr, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec un pas de 80, n = 10 et m = 40"}
+knitr::include_graphics("img/acfn10m40corr.png")
+```
+
+```{r acfn20m40, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec n = 20 et m = 40"}
+knitr::include_graphics("img/acfn20m40.png")
+```
+
+```{r acfn20m40corr, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec un pas de 80, n = 20 et m = 40"}
+knitr::include_graphics("img/acfn20m40corr.png")
+```
+
+```{r tabcorrlb, echo=FALSE}
+data_corr <- readRDS("Resultats/corr_n10m40n20m40.RDS")
+note <- "(H0) : échantillons indépendants contre (H1) ils sont corrélés."
+data_corr %>% 
+  kable(caption = "Test de LjungBox en ne gardant qu'un échantillon sur 80") %>% 
+kable_styling(full_width = F)%>%
+  column_spec(1, bold = T) %>% 
+  add_header_above(c(" " = 2,"n = 10, m = 40" = 3 ,"n = 20, m = 40" = 3)) %>% 
+  footnote(general = note, general_title = "Note : ")
+```
 
 
 ### Estimation des paramètres
