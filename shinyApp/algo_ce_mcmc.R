@@ -1,7 +1,3 @@
-library(mvtnorm)
-library(clue)
-
-#source("ShinyApp/fonctions_initialisation.R", encoding = "UTF-8")
 
 # Définition de la densité PI(X)
 pi_density <- function(x,lambda,x_etoiles){
@@ -18,32 +14,6 @@ inverse_deux_elements <- function(X, n){
   X[i2] <- temp
   return(X)
 }
-
-# Fonction pour appliquer l'algo de Metropolis Hastings
-# On utilise le score du x*
-# pi_density_MCMC <- function(numSim, lambda, x_etoiles,y, m,n){
-#   nb <- nb_boules_noires(x_etoiles,y)
-#   ech1 <- sample(x_etoiles,nb)
-#   ech2 <- NULL
-#   for(i in 1:m){
-#     if(!(i %in% ech1)){
-#       ech2 <- c(ech2,i)
-#     }
-#   }
-#   ech2 <- sample(ech2,n-nb)
-#   ech <- c(ech1,ech2)
-#   X <-matrix(rep(ech,numSim),numSim,n,byrow = T)
-#   for (t in (1:(numSim-1))){
-#     Xprop=inverse_deux_elements(X[t,])
-#     if(runif(1) < min(1,pi_density(Xprop,lambda,x_etoiles)/pi_density(X[t,],lambda,x_etoiles))){
-#       X[t+1,]=Xprop
-#     }
-#     else{
-#       X[t+1,]=X[t,]
-#     }
-#   }
-#   return(X)
-# }
 
 
 pi_density_MCMC <- function(numSim, lambda, x_etoiles, m,n){
@@ -62,15 +32,6 @@ pi_density_MCMC <- function(numSim, lambda, x_etoiles, m,n){
 }
 
 # Traiter le burn-in et les auto-corrélations (éventuellement à modif pour burn-in)
-# modif_metro <- function(x){
-#   # Burn-in : commence à 1000
-#   x_temp <- x[1000:dim(x)[1],]
-#   resultat <- acf(x_temp,plot=F)
-#   # On récupère le lag min pour être OK
-#   indice <- which.max(as.integer(abs(resultat$acf)<=1.95/sqrt(resultat$n.used)))-1
-#   x_temp_acf <- x_temp[seq(1,dim(x_temp)[1],indice),]
-#   return(x_temp_acf)
-# }
 
 # Tracer trace d'une coordonée pour voir burn-in
 tracer_Trace <- function(nSim,lambda,x_etoiles,m,n,coord){
@@ -91,7 +52,7 @@ tracer_ACF <- function(nSim,lambda,x_etoiles,m,n,coord,burn_in){
 
 
 # Amélioré
-modif_metro <- function(x, burn_in = TRUE, lag = 80){
+modif_metro <- function(x, m, burn_in = TRUE, lag = 80){
   # Burn-in : commence à 1000
   if(burn_in){
     x <- x[(250*m):dim(x)[1],]
@@ -100,43 +61,11 @@ modif_metro <- function(x, burn_in = TRUE, lag = 80){
   return(x)
 }
 
-# modif_metro_am <- function(x){
-#   x_temp <- x
-#   resultat <- acf(x_temp,plot=F)
-#   resultat_acf <- 
-#   indice_lag <- which.min(as.integer(abs(resultat$acf)<=1.95/sqrt(resultat$n.used)))-1
-#   indice_lag <- max(1,indice_lag)
-#   x_temp_acf <- x_temp[seq(1,(dim(x_temp)[1]),indice_lag),]
-#   return(list(acf=x_temp_acf,indice_lag=indice_lag))
-# }
-
-# pi_density_MCMC_continue <- function(numSim, lambda, x_etoiles,X0,n){
-#   X <-matrix(rep(X0,numSim),numSim,n,byrow = T)
-#   for (t in (1:(numSim-1))){
-#     Xprop=inverse_deux_elements(X[t,], n )
-#     if(runif(1) < min(1,pi_density(Xprop,lambda,x_etoiles)/pi_density(X[t,],lambda,x_etoiles))){
-#       X[t+1,]=Xprop
-#     }
-#     else{
-#       X[t+1,]=X[t,]
-#     }
-#   }
-#   return(X)
-# }
-
-# Fonction à utiliser qui renvoie un échantillon indépendant de N X_i qui suivent la loi PI(X) pour lambda et x_etoiles donnés
-# Param un liste avec lambda et x_star
-# simul_permutation <- function(N, param, numSim = 10000,y,m,n){
-#   out <- pi_density_MCMC(numSim, param$lambda, param$x_star,y,m,n)
-#   out_traite <- modif_metro(out)
-#   indices <- sample.int(nrow(out_traite), size =  N, replace = FALSE)
-#   return(out_traite[indices,])
-# }
-
 simul_permutation <- function(N, param, m,n, lag = 80){
   num <- 250*m + N * lag
-  out <- pi_density_MCMC(num, param$lambda, param$x_star, m, n)
-  out_traite <- modif_metro(out, burn_in = TRUE, lag = lag)
+  out <- pi_density_MCMC(numSim = num, lambda =  param$lambda,
+                         x_etoiles = param$x_star, m = m, n = n)
+  out_traite <- modif_metro(x = out, m = m, burn_in = TRUE, lag = lag)
   return(out_traite)
 }
 

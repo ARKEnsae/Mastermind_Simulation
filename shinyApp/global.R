@@ -4,6 +4,8 @@ library(shinyWidgets)
 library(kableExtra)
 library(shinyjs)
 library(gtools) #pour générer les permutations
+library(mvtnorm)
+library(clue)
 
 #################################################################
 ##################### Paramètres du globaux  #####################
