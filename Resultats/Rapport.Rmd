@@ -26,12 +26,12 @@ library(kableExtra)
 # source("../ShinyApp/global.R", encoding="UTF-8",chdir = TRUE)
 set.seed(1)
 options(knitr.kable.NA = ' ')
-creation_tableau <- function(tab, titre = "", note_debut = NULL, note_fin = NULL){
+creation_tableau <- function(tab, titre = "", note_debut = NULL, note_fin = NULL, nb_simuls = "5 x n x m"){
   tableau <- tab %>%
     cbind(" " = "n", "  " = rownames(.), .)
   rownames(tableau) <- NULL
   note <- c("Statistiques sur 10 seeds",
-            "N = 5 x n x m simulations",
+            sprintf("N = %s simulations", nb_simuls),
             "Au maximum 100 itérations")
   note <- c(note_debut, note, note_fin)
   tableau %>% 
@@ -227,8 +227,8 @@ creation_tableau(stats$nb_non_conv,
 ```
 
 ```{r tabq1tempsconv, echo=FALSE}
-creation_tableau(stats$temps_conv,
-                 titre = "Mediane du temps de calcul jusqu'à la convergence")
+creation_tableau(round(stats$temps_conv),
+                 titre = "Moyenne du temps de calcul jusqu'à la convergence (en secondes)")
 ```
 
 
@@ -328,12 +328,14 @@ Les tableaux \@ref(tab:tabq2convmed), \@ref(tab:tabq2erreur), \@ref(tab:tabq2tem
 
 ```{r tabq2convmed, echo=FALSE}
 stats <- readRDS("Resultats/statsq2.RDS")
-creation_tableau(stats$it_conv_med, titre = "Médiane du numéro de simulation de convergence")
+note_debut <- "S'il n'y a pas convergence les statistiques ne sont pas calculées"
+creation_tableau(stats$it_conv_med, titre = "Médiane du numéro de simulation de convergence",
+                 note_debut = note_debut)
 ```
 
 ```{r tabq2erreur, echo=FALSE}
 creation_tableau(round(stats$erreur_finale,3), titre = "Moyenne de l'erreur à la simulation de convergence",
-                 note_debut = "L'erreur est définie comme 1 - gamma_T")
+                 note_debut = c(note_debut, "L'erreur est définie comme 1 - gamma_T"))
 ```
 
 ```{r tabq2nbnonconv, echo=FALSE}
@@ -342,8 +344,9 @@ creation_tableau(stats$nb_non_conv,
 ```
 
 ```{r tabq2tempsconv, echo=FALSE}
-creation_tableau(stats$temps_conv,
-                 titre = "Mediane du temps de calcul jusqu'à la convergence")
+creation_tableau(round(stats$temps_conv),
+                 titre = "Moyenne du temps de calcul jusqu'à la convergence (en secondes)",
+                 note_debut = note_debut)
 ```
 
 Les tableaux \@ref(tab:tabq1vsq2convmed), \@ref(tab:tabq1vsq2erreur), \@ref(tab:tabq1vsq2nbnonconv) et \@ref(tab:tabq1vsq2tempsconv) présentent les résultats obtenus en utilisant l'algorithme de la partie \@ref(sec:q1), qui ne suppose pas que l'on ait des permutations, sur les mêmes codes à déchiffrer. Même si le nombre d'itérations nécessaires pour converger est plus faible en adaptant l'algorithme pour ne tirer que des permutations, l'algorithme est plus gourmand en temps de calcul. Cela vient du mécanisme utilisé pour tiré les échantillons qui a une complexité plus importante.
@@ -364,8 +367,8 @@ creation_tableau(stats$nb_non_conv,
 ```
 
 ```{r tabq1vsq2tempsconv, echo=FALSE}
-creation_tableau(stats$temps_conv,
-                 titre = "Mediane du temps de calcul jusqu'à la convergence")
+creation_tableau(round(stats$temps_conv),
+                 titre = "Moyenne du temps de calcul jusqu'à la convergence (en secondes)")
 ```
 
 
@@ -502,7 +505,74 @@ Nous avons testé plusieurs approches pour $\lambda$ : en le faisant croître li
 
 ### Résultats
 
-Les tableaux XXX XXX montrent une convergence
+Les tableaux  \@ref(tab:tabq3convmed) à \&ref(tab:tabq3tempsconv) montrent qu'il n'y a pas toujours convergence de $x^*$ vers $y$ en 100 itérations. Pour comparer cette algorithme au précédent, les tableaux \@ref(tab:tabq3vsq1convmed) à \&ref(tab:tabq3vsq1convmed)
+
+
+```{r tabq3convmed, echo=FALSE}
+stats <- readRDS("Resultats/statsq3.RDS")
+note_debut <- "S'il n'y a pas convergence les statistiques ne sont pas calculées"
+creation_tableau(stats$it_arret_med, titre = "Médiane du numéro de simulation de convergence",
+                 note_debut = note_debut)
+```
+
+```{r tabq3erreur, echo=FALSE}
+creation_tableau(round(stats$erreur_finale,3), titre = "Moyenne de l'erreur à la simulation de convergence",
+                 note_debut = c(note_debut, "L'erreur est définie comme 1 - gamma_T"),
+                 nb_simuls = "5 x (n + 1)")
+```
+
+```{r tabq3score, echo=FALSE}
+creation_tableau(round(stats$erreur_score,3), titre = "Moyenne du score de x* à la simulation de convergence",
+                 note_debut = note_debut,
+                 nb_simuls = "5 x (n + 1)")
+```
+
+```{r tabq3nbnonconv, echo=FALSE}
+creation_tableau(stats$nb_non_conv,
+                 titre = "Nombre de simulations n'ayant pas convergé vers la bonne valeur",
+                 nb_simuls = "5 x (n + 1)")
+```
+
+```{r tabq3tempsconv, echo=FALSE}
+creation_tableau(round(stats$temps_arret),
+                 titre = "Moyenne du temps de calcul jusqu'à la convergence (en secondes)",
+                 nb_simuls = "5 x (n + 1)",
+                 note_debut = note_debut)
+```
+
+
+
+```{r tabq3vsq1convmed, echo=FALSE}
+stats <- readRDS("Resultats/statsq3vsq1.RDS")
+note_debut <- "S'il n'y a pas convergence les statistiques ne sont pas calculées"
+creation_tableau(stats$it_arret_med, titre = "Médiane du numéro de simulation de convergence",
+                 note_debut = note_debut)
+```
+
+```{r tabq3vsq1erreur, echo=FALSE}
+creation_tableau(round(stats$erreur_finale,3), titre = "Moyenne de l'erreur à la simulation de convergence",
+                 note_debut = c(note_debut, "L'erreur est définie comme 1 - gamma_T"),
+                 nb_simuls = "5 x (n + 1)")
+```
+
+```{r tabq3vsq1score, echo=FALSE}
+creation_tableau(round(stats$erreur_score,3), titre = "Moyenne du score de x* à la simulation de convergence",
+                 note_debut = note_debut,
+                 nb_simuls = "5 x (n + 1)")
+```
+
+```{r tabq3vsq1nbnonconv, echo=FALSE}
+creation_tableau(stats$nb_non_conv,
+                 titre = "Nombre de simulations n'ayant pas convergé vers la bonne valeur",
+                 nb_simuls = "5 x (n + 1)")
+```
+
+```{r tabq3vsq1tempsconv, echo=FALSE}
+creation_tableau(round(stats$temps_arret),
+                 titre = "Moyenne du temps de calcul jusqu'à la convergence (en secondes)",
+                 nb_simuls = "5 x (n + 1)",
+                 note_debut = note_debut)
+```
 
 
 # Code {#sec:enscode}
