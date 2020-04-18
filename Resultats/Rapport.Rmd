@@ -17,7 +17,7 @@ bibliography: biblio.bib
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,
-                      cache = TRUE)
+                      cache = FALSE)
 library(knitr)
 library(kableExtra)
 library(clue)
@@ -30,7 +30,7 @@ library(shinyWidgets)
 ```
 
 ```{r firstProg, echo=FALSE}
-# source("../ShinyApp/global.R", encoding="UTF-8",chdir = TRUE)
+ source("../ShinyApp/global.R", encoding="UTF-8",chdir = TRUE)
 set.seed(1)
 options(knitr.kable.NA = ' ')
 creation_tableau <- function(tab, titre = "", note_debut = NULL, note_fin = NULL, nb_simuls = "5 x n x m"){
@@ -63,9 +63,8 @@ $$\renewcommand{\P}{\mathbb{P}}
 
 Ce rapport décrit le projet de Monte-Carlo de Kim Antunez, Romain Lesauvage et Alain Quartier-la-Tente (Ensae, 2A), dont l'objectif est d'étudier l'application de méthodes de *Cross-Entropy* à la résolution du Mastermind.
 
-Le Mastermind est un jeu à deux joueurs, où le premier joueur choisit un *code* (une séquence de $n$ boules de couleur, parmi $m$ couleurs possibles)
-^[Les valeurs standards sont $m = 6$ couleurs et $n=4$ boules],
-et le second joueur doit deviner ce code en un minimum de coups. 
+Le Mastermind est un jeu à deux joueurs. Le premier joueur choisit un *code* : une séquence de $n$ boules de couleur (valeur standard $n = 4$), parmi $m$ couleurs possibles (valeur standard $m = 6$).
+Puis, le second joueur doit deviner ce code en un minimum de coups. 
 À chaque coup, le second joueur propose un code, et le premier joueur doit lui donner :
 
 a. le nombre de boules bien placées : c'est que ce nous appelons le *nombre de boules noires* ;  
@@ -83,9 +82,10 @@ L'objectif de ce projet est d'appliquer trois méthodes différentes pour résou
 $$
 \pi_{\lambda, x^*}(x)\propto\exp{(−\lambda d(x, x^{*}))}
 $$
-Avec $\lambda > 0$ et $d(x, x^{*})$ la distance de Hamming entre $x$ et $x^{*}$ (i.e. : le nombre de où les deux permutations sont différentes).
+Avec $\lambda > 0$ et $d(x, x^{*})$ la distance de Hamming entre $x$ et $x^{*}$ (i.e. : le nombre d'emplacements pour lesquels les deux permutations sont différentes).
 
-Tous les codes utilisés sont disponibles dans la partie \@ref(sec:enscode).
+Tous les codes utilisés (langage `R`) sont disponibles dans la partie \@ref(sec:enscode). 
+Une application web de démonstration faite également à l'aide de `R` (package `shiny`) est disponible à l'adresse suivante : http://arkensae.shinyapps.io/mastermind. 
 
 ## Rappels sur la méthode de *Cross-Entropy*
 
@@ -118,6 +118,8 @@ Si $\hat{\gamma}_{t}\geq\gamma^*$ on prend $\hat{\gamma}_{t}=\gamma^*$.
 \hat{v}_{t}=\underset{v}{\argmax}\;\hat{D}(v)=\underset{v}{\argmax}\frac{1}{N}\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\ln f(X_{i};v)
   (\#eq:maxopti)
 \end{equation} 
+En d’autres termes, $\hat{v}_{t}$ correspond à l’estimateur du maximum de vraisemblance de $\hat{v}_{t-1}$ basé sur les $\rho$ meilleures réalisations en termes de score.
+
 4. Arrêt : si pour un certain $t\geq d$, (par exemple $d=5$), on a : 
 $$\hat{\gamma}_{t}=\hat{\gamma}_{t-1}=\dots=\hat{\gamma}_{t-d}$$
 alors on arrête l'algorithme.
@@ -126,14 +128,14 @@ alors on arrête l'algorithme.
 
 ### Smoothed updating
 
-Plutôt que de mettre à jour directement $\hat{v}_{t-1}$ l'équation \@ref(eq:maxopti), nous faisons une mise à jour lissée -- \emph{smoothed updating} :
+Plutôt que de mettre à jour directement $\hat{v}_{t-1}$ l'équation \@ref(eq:maxopti), nous faisons une mise à jour lissée -- *smoothed updating* :
 $$
 \hat{v}_{t}=\alpha\tilde{v}_{t}+(1-\alpha)\hat{v}_{t-1}
 $$
 avec $\tilde{v}_{t}$ la valeur obtenue en résolvant le problème \ref{eq:maxopti}. 
-Dans le cas où on a des problèmes d'optimisation avec des variables discrètes (ce qui est ici le cas), cela permet d'éviter l'occurence de 0 ou de 1 dans les paramètres des vecteurs. 
-En effet, dès lors qu'il y a un 0 ou un 1, le problème est qu'il le
-reste souvent pour toujours : cela évite d'avoir uen convergence vers la mauvaise valeur. @de2005tutorial suggèrent de prendre $0,4\leq\alpha\leq0,9$ : dans ce projet nous utilisons par défaut $\alpha = 0,7$.
+Dans le cas de problèmes d'optimisation avec des variables discrètes (comme ici), cela permet d'éviter l'occurence de 0 ou de 1 dans les paramètres des vecteurs. 
+En effet, dès lors que les valeurs 0 ou 1 apparaissent, elles restent souvent fixées à ces valeurs dans les itérations suivantes, ce qui peut amener à converger vers la mauvaise valeur. Le *smoothed updating* permet alors d'éviter cela.
+@de2005tutorial suggèrent de prendre $0,4\leq\alpha\leq0,9$ : dans ce projet nous utilisons par défaut $\alpha = 0,7$.
 
 # Application de la méthode de *Cross-Entropy* au Mastermind {#sec:q1}
 
@@ -147,7 +149,7 @@ S(x)=\frac{\omega_{noir}\times N_{\text{boules noires}}+\omega_{blanc}\times N_{
 \omega_{noir}\times n
 }
 $$
-Avec $n$ le nombre de boules à deviner, $\omega_{noir}>\omega_{blanc}$, habituellement $\omega_{noir}=2$ et $\omega_{blanc}=1$.
+Avec $n$ le nombre de boules à deviner, $\omega_{noir}>\omega_{blanc}$, nous choisissons $\omega_{noir}=2$ et $\omega_{blanc}=1$.
 
 Avec cette fonction de score nous supposons qu'une boule noire compte plus qu'une boule blanche. La constante de normalisation $\omega_{noir}\times n$ permet de faciliter les comparaisons lorsque l'on fait changer le nombre de boules à deviner : dans tous les cas on cherche $x^*$ tel que $S(x^*) = 1$.
 
@@ -161,21 +163,25 @@ Dans le Mastermind il faut choisir $n$ boules parmi $m$ couleurs. En numérotant
 
 -   Pour générer les échantillons, la famille de lois utilisée est :
 $$\mathcal{V} = \left\{ \left(p_{i,j}\right)_{i,j} \in\mathcal{M}_{n,m}([0,1])\::\:\forall i,\sum_{j=1}^mp_{i,j}=1\right\} $$
-Ainsi, les composantes du vecteur $X=(X_{1},\dots,X_{n})\in\mathcal{X}$ sont tirées aléatoirement de façons à ce que leur distribution soit
+Ainsi, les composantes du vecteur $X=(X_{1},\dots,X_{n})\in\mathcal{X}$ (une proposition) sont tirées aléatoirement de façons à ce que leur distribution soit
 déterminée par une suite $p_{1},\dots,p_{n}$ de vecteurs de probabilités.
 La $j$ \ieme composante de $p_{i}$ étant égale à $p_{ij}=\P(X_{i}=j)$ : c'est la probabilité d'avoir une boule de couleur $j$ en $i$ème position.
 
-- L'initialisation est faite avec des vecteurs de probabilité uniformes pour chaque couleur : 
+- L'initialisation est telle que les vecteurs de probabilité sont uniformes pour chaque couleur : 
 $$
 \hat{v}_{0}=\left(\frac{1}{m}\right)_{i=1..n,j=1..m}
 $$
-Pour estimer de manière optimale on utilise la formule (voir démonstration partie \@ref(sec:demmajparam)) :
+La maximisation de la vraisemblance nous permet d'obtenir cette formule pour le calcul des paramètres optimaux (voir démonstration partie \@ref(sec:demmajparam)) :
+
+
 $$p_{k,l}=\frac{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{i,k}=l\right\} }}{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}$$
-- À chaque itération nous générons $N = C\times m\times n$ échantillons. Pour générer $X=(X_{1},\dots,X_{n})\in\mathcal{X}$, nous pouvons générer chaque composante $X_i$ de manière indépendante : il s'agit d'une loi discrète sur $\left\{ 1,2,\dots,m\right\}$ avec des probabilités $p_i=(p_{i,1},\dots,p_{i,m})$. Pour cela, sous R il suffit d'utiliser la fonction `sample` en utilisant l'option `prob` pour définir le vecteur de probabilités. Cette fonction peut être réécrite aisément à l'aide d'un tirage d'une loi uniforme discrète. Pour cela, prenons un nombre très grand, par exemple $k=$ 100 000, et créons un vecteur contenant des entiers de 1 à $m$, chaque élément $j$ étant répété $k\times p_{i,j}$ fois. En tirant une position au hasard dans ce vecteur (i.e. en tirant un entier au hasard entre 1 et $k$), l'entier associé sera égal à $j$ avec une probabilité environ égale à $p_{i,j}$. Sous R on peut coder cette fonction de la façon suivante :
+
+
+- À chaque itération nous générons $N = C\times m\times n$ échantillons. Pour générer $X=(X_{1},\dots,X_{n})\in\mathcal{X}$, nous pouvons générer chaque composante $X_i$ de manière indépendante : il s'agit d'une loi discrète sur $\left\{ 1,2,\dots,m\right\}$ avec des probabilités $p_i=(p_{i,1},\dots,p_{i,m})$. Pour cela, sous R il suffit d'utiliser la fonction `sample` en utilisant l'option `prob` pour définir le vecteur de probabilités. Cette fonction peut être réécrite aisément à l'aide d'un tirage d'une loi uniforme discrète. Pour cela, prenons un nombre très grand, par exemple $taille =$ 100 000, et créons un vecteur contenant des entiers de 1 à $m$, chaque entier $j$ étant répété $taille\times p_{i,j}$ fois. En tirant une position au hasard dans ce vecteur (i.e. en tirant un entier au hasard via une loi uniforme entre 1 et $taille$), l'entier associé sera égal à $j$ avec une probabilité environ égale à $p_{i,j}$. Sous R on peut coder cette fonction de la façon suivante :
 
 ```{r sample2}
 sample2 <- function(x, size, prob, replace = TRUE){
-  taille <- 10000*length(x)
+  taille <- 100000
   choix <- lapply(seq_along(x), function(i){
     rep(x[i], round(prob[i]*taille))
   })
@@ -202,17 +208,86 @@ sample2 <- function(x, size, prob, replace = TRUE){
 set.seed(1)
 prob = c(1/4, 1/3, 5/12) # soit : 0.250, 0.333 et 0.417
 # On retrouve les proportions :
-table(sample2(x=1:3,size = 100000, prob = prob, replace = T))/100000
+table(sample2(x=1:3,size = 100000, prob = prob, replace = TRUE))/100000
 ```
 
 ## Résultats
 
+Voici un exemple simple de combinaison $y$ à deviner ($n = 4$, $m = 5$) :
 
-Graphique pour représenter la convergence des probas dans un cas simple
+<canvas id="myCanvas1" width="25" height="25"></canvas><canvas id="myCanvas2" width="25" height="25"></canvas><canvas id="myCanvas3" width="25" height="25"></canvas><canvas id="myCanvas4" width="25" height="25"></canvas>
 
-Les tableaux \@ref(tab:tabq1convmed), \@ref(tab:tabq1erreur), \@ref(tab:tabq1tempsconv) et  \@ref(tab:tabq1nbnonconv) présentent les résultats sur plusieurs valeurs de $m$ et $n$ avec 10 simulations pour chaques paramètres (seed de 1 à 10). Pour toutes les simulations on a une convergence en moins de 100 itérations mais pas forcément vers la bonne valeur (voir tableaux  \@ref(tab:tabq1erreur) et \@ref(tab:tabq1nbnonconv)).
+<script>
+var canvas = document.getElementById('myCanvas1');
+var context = canvas.getContext('2d');
+context.beginPath();
+context.arc(10, 10, 10, 0, 2 * Math.PI, true);
+context.fillStyle = '#0000FF';
+context.fill();
+context.stroke();
+
+var canvas = document.getElementById('myCanvas2');
+var context = canvas.getContext('2d');
+context.beginPath();
+context.arc(10, 10, 10, 0, 2 * Math.PI, true);
+context.fillStyle = '#FFFF00';
+context.fill();
+context.stroke();
+
+var canvas = document.getElementById('myCanvas3');
+var context = canvas.getContext('2d');
+context.beginPath();
+context.arc(10, 10, 10, 0, 2 * Math.PI, true);
+context.fillStyle = '#FF3232';
+context.fill();
+context.stroke();
+
+var canvas = document.getElementById('myCanvas4');
+var context = canvas.getContext('2d');
+context.beginPath();
+context.arc(10, 10, 10, 0, 2 * Math.PI, true);
+context.fillStyle = '#FFCFFF';
+context.fill();
+context.stroke();
+
+</script>
+
+L'algorithme appliqué à cet exemple converge à la 9ème étape (temps d’exécution : 0,05 seconde), et vers la bonne valeur de y. 
+
+```{r modeleq1, echo=FALSE,fig.align='center'}
+modele <- readRDS("Resultats/q1vs2.RDS")
+modele <- modele[[8]][[1]]
+mise_en_forme_tableau(modele,matriciel=TRUE)
+```
 
 
+Voici une représentation graphique de la matrice de probabilités à chaque itération : 
+
+
+```{r modeleq1bis, echo=FALSE,fig.align='center'}
+par(mfrow=c(2,4))
+for(i in 1:8){
+  dessiner_histo(modele$P_hat_liste,i, c("#0000FF","#00FF00","#FF3232","#FFFF00","#CF00CF","#FFCFFF"),main=paste0("\n\nItération ",i)) 
+} 
+```
+
+Les tableaux \@ref(tab:tabq1convmed), \@ref(tab:tabq1erreur), \@ref(tab:tabq1tempsconv) et  \@ref(tab:tabq1nbnonconv) présentent les résultats sur plusieurs valeurs de $m$ et $n$ avec 10 simulations pour chaque paramètre (seed de 1 à 10).
+Pour toutes les simulations, la convergence se fait en moins de 100 itérations, mais pas toujours vers la bonne valeur (voir tableaux  \@ref(tab:tabq1erreur) et \@ref(tab:tabq1nbnonconv)).
+
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+  .col3 {
+    columns: 3 100px;
+    -webkit-columns: 3 100px;
+    -moz-columns: 3 100px;
+  }
+</style>
+
+<div class="col2">
 ```{r tabq1convmed, echo=FALSE}
 stats <- readRDS("Resultats/statsq1.RDS")
 creation_tableau(stats$it_conv_med, titre = "Médiane du numéro de simulation de convergence")
@@ -222,7 +297,9 @@ creation_tableau(stats$it_conv_med, titre = "Médiane du numéro de simulation d
 creation_tableau(round(stats$erreur_finale,3), titre = "Moyenne de l'erreur à la simulation de convergence",
                  note_debut = "L'erreur est définie comme 1 - gamma_T")
 ```
+</div>
 
+<div class="col2">
 ```{r tabq1nbnonconv, echo=FALSE}
 creation_tableau(stats$nb_non_conv,
                  titre = "Nombre de simulations n'ayant pas convergé vers la bonne valeur")
@@ -232,6 +309,13 @@ creation_tableau(stats$nb_non_conv,
 creation_tableau(round(stats$temps_conv),
                  titre = "Moyenne du temps de calcul jusqu'à la convergence (en secondes)")
 ```
+
+</div>
+
+
+
+
+
 
 
 
@@ -289,11 +373,11 @@ $$
 
 # Restriction aux permutations
 
-Dans cette partie nous supposons que le premier joueur doit forcément choisir comme code une permutation (chaque couleur ne peut apparaître plus d'une fois et $m\geq n$).
+Dans cette partie nous supposons que le premier joueur doit forcément choisir comme code une permutation (chaque couleur apparaît au plus une fois et donc $m\geq n$).
 
 ## Adaptation de l'algorithme précédent {#sec:q2}
 
-L'énoncé suggère de garder le même algorithme de génération mais en adaptant le mécanisme de génération pour générer des permutations. En notant encore $P=(p_{i,j})$ la matrice des paramètres associée à $X=(X_{1},\dots,X_{n})\in\mathcal{X}$, $X$ est généré de la façon suivante :
+L'énoncé suggère de garder le même algorithme mais en adaptant le mécanisme de génération pour générer des « permutations ». En notant toujours $P=(p_{i,j})$ la matrice des paramètres associée à $X=(X_{1},\dots,X_{n})\in\mathcal{X}$, $X$ est généré de la façon suivante :
 
 1. Initialisation : la première boule est générée de la même façon que précédemment en tirant un entier $x_1$ selon la loi de probabilité discrète donnée par $p_{1,\cdot} = (p_{1,1},\dots, p_{1,m})$. On pose $k=1$ et $P^{(1)} = P$.
 
@@ -304,15 +388,15 @@ L'énoncé suggère de garder le même algorithme de génération mais en adapta
 
 Comme suggéré par l'énoncé, les autres étapes de l'algorithme restent les mêmes :
 
-- L'initialisation est faite avec des vecteurs de probabilité uniformes pour chaque couleur : 
+- L'initialisation est telle que les vecteurs de probabilité sont uniformes pour chaque couleur : 
 $$
 \hat{v}_{0}=\left(\frac{1}{m}\right)_{i=1..n,j=1..m}
 $$
-Pour estimer de manière optimale on utilise la formule :
-$$p_{k,l}=\frac{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{i,k}=l\right\} }}{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}$$  
-- À chaque itération nous générons $N = C\times m\times n$ échantillons.
+et la formule pour le calcul des paramètres optimaux est : $$p_{k,l}=\frac{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{i,k}=l\right\} }}{\sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}$$  
 
-La méthode d'estimation utilisée dans la partie précédente pour mettre à jour les $p_{i,j}$ reste la même. En effet $P=(p_{i,j})$ s'interprète de la même façon que précédemment : la loi des $X_i$ est la même. De la même façon que dans la partie \@ref(sec:demmajparam), on peut montrer que la formule de mise à jour des paramètres s'écrit :
+- À chaque itération nous générons $N = C\times m\times n$ échantillons. La méthode d'estimation utilisée dans la partie précédente pour mettre à jour les $p_{i,j}$ reste la même.
+
+En effet $P=(p_{i,j})$ s'interprète de la même façon que précédemment : la loi des $X_i$ reste la même. De la même façon que dans la partie \@ref(sec:demmajparam), on peut montrer que la formule de mise à jour des paramètres s'écrit :
 $$p_{k,l}=\frac{
 \sum_{i=1}^{N}\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\1_{\left\{ X_{i,k}=l\right\} }
 \1_{\{X_{i}\text{ permutation}\}}
@@ -321,13 +405,73 @@ $$p_{k,l}=\frac{
 \1_{\{X_{i}\text{ permutation}\}}
 }$$
 
-Il est donc possible de mettre à jour les paramètres en appliquant la méthode de génération des échantillons de la partie \@ref(sec:q1). En revanche, dans ce cas, beaucoup d'échantillons ne seraient plus pertinents. Le nouvel algorithme de génération permet juste d'améliorer le processus de génération en ne proposant que des candidats pertinents, et donc d'avoir une convergence plus rapide. Puisque l'on ne génère que des permutations, on a $\1_{\{X_{i}\text{ permutation}\}} = 1$ et on retrouve la formule précédente.
+Il est donc possible de mettre à jour les paramètres en appliquant la méthode de génération des échantillons de la partie \@ref(sec:q1). En revanche, dans ce cas, beaucoup d'échantillons (tous ceux pour lesquels une couleur est proposée à deux emplacements différents) ne seraient plus pertinents.
+
+Le nouvel algorithme de génération permet d'améliorer le processus de génération en ne proposant que des candidats pertinents, et donc d'avoir une convergence plus rapide. Puisque l'on ne génère que des permutations, on a $\1_{\{X_{i}\text{ permutation}\}} = 1$, ce qui nous fait retrouver la formule de la partie précédente.
 
 ### Résultats
 
+Revenons à notre exemple de combinaison $y$ à deviner ($n = 4$, $m = 5$) :
+
+<canvas id="myCanvasA" width="25" height="25"></canvas><canvas id="myCanvasB" width="25" height="25"></canvas><canvas id="myCanvasC" width="25" height="25"></canvas><canvas id="myCanvasD" width="25" height="25"></canvas>
+
+<script>
+var canvas = document.getElementById('myCanvasA');
+var context = canvas.getContext('2d');
+context.beginPath();
+context.arc(10, 10, 10, 0, 2 * Math.PI, true);
+context.fillStyle = '#0000FF';
+context.fill();
+context.stroke();
+
+var canvas = document.getElementById('myCanvasB');
+var context = canvas.getContext('2d');
+context.beginPath();
+context.arc(10, 10, 10, 0, 2 * Math.PI, true);
+context.fillStyle = '#FFFF00';
+context.fill();
+context.stroke();
+
+var canvas = document.getElementById('myCanvasC');
+var context = canvas.getContext('2d');
+context.beginPath();
+context.arc(10, 10, 10, 0, 2 * Math.PI, true);
+context.fillStyle = '#FF3232';
+context.fill();
+context.stroke();
+
+var canvas = document.getElementById('myCanvasD');
+var context = canvas.getContext('2d');
+context.beginPath();
+context.arc(10, 10, 10, 0, 2 * Math.PI, true);
+context.fillStyle = '#FFCFFF';
+context.fill();
+context.stroke();
+
+</script>
+
+Le nouvel algorithme appliqué à cet exemple converge cette fois-ci plus tôt, à la 8ème étape, toujours vers la bonne valeur de y. Le temps d'exécution (0,1 seconde) est supérieur à précédemment car la loi de génération des échantillons sans remise est plus chronophage.
+
+```{r modeleq2, echo=FALSE,fig.align='center'}
+modele <- readRDS("Resultats/q2.RDS")
+modele <- modele[[8]][[1]]
+mise_en_forme_tableau(modele,matriciel=TRUE)
+```
+
+Voici une représentation graphique de la matrice de probabilités à chaque itération : 
+
+
+```{r modeleq2bis, echo=FALSE,fig.align='center'}
+par(mfrow=c(2,4))
+for(i in 1:8){
+  dessiner_histo(modele$P_hat_liste,i, c("#0000FF","#00FF00","#FF3232","#FFFF00","#CF00CF","#FFCFFF"),main=paste0("\n\nItération ",i)) 
+} 
+```
+
+
 Les tableaux \@ref(tab:tabq2convmed), \@ref(tab:tabq2erreur), \@ref(tab:tabq2tempsconv) et  \@ref(tab:tabq2nbnonconv) présentent les résultats sur plusieurs valeurs de $m$ et $n$ avec 10 simulations pour chaques paramètres (seed de 1 à 10). Pour toutes les simulations on a une convergence en moins de 100 itérations vers la bonne valeur.
 
-
+<div class="col2">
 ```{r tabq2convmed, echo=FALSE}
 stats <- readRDS("Resultats/statsq2.RDS")
 note_debut <- "S'il n'y a pas convergence les statistiques ne sont pas calculées"
@@ -339,7 +483,8 @@ creation_tableau(stats$it_conv_med, titre = "Médiane du numéro de simulation d
 creation_tableau(round(stats$erreur_finale,3), titre = "Moyenne de l'erreur à la simulation de convergence",
                  note_debut = c(note_debut, "L'erreur est définie comme 1 - gamma_T"))
 ```
-
+</div>
+<div class="col2">
 ```{r tabq2nbnonconv, echo=FALSE}
 creation_tableau(stats$nb_non_conv,
                  titre = "Nombre de simulations n'ayant pas convergé vers la bonne valeur")
@@ -350,9 +495,11 @@ creation_tableau(round(stats$temps_conv),
                  titre = "Moyenne du temps de calcul jusqu'à la convergence (en secondes)",
                  note_debut = note_debut)
 ```
+</div>
 
-Les tableaux \@ref(tab:tabq1vsq2convmed), \@ref(tab:tabq1vsq2erreur), \@ref(tab:tabq1vsq2nbnonconv) et \@ref(tab:tabq1vsq2tempsconv) présentent les résultats obtenus en utilisant l'algorithme de la partie \@ref(sec:q1), qui ne suppose pas que l'on ait des permutations, sur les mêmes codes à déchiffrer. Même si le nombre d'itérations nécessaires pour converger est plus faible en adaptant l'algorithme pour ne tirer que des permutations, l'algorithme est plus gourmand en temps de calcul. Cela vient du mécanisme utilisé pour tiré les échantillons qui a une complexité plus importante.
+Les tableaux \@ref(tab:tabq1vsq2convmed), \@ref(tab:tabq1vsq2erreur), \@ref(tab:tabq1vsq2nbnonconv) et \@ref(tab:tabq1vsq2tempsconv) présentent les résultats obtenus en utilisant l'algorithme de la partie \@ref(sec:q1) (qui ne suppose pas que l'on ait des permutations) mais sur les mêmes codes $y$ à déchiffrer (qui sont donc des permutations). 
 
+<div class="col2">
 ```{r tabq1vsq2convmed, echo=FALSE}
 stats <- readRDS("Resultats/statsq1vsq2.RDS")
 creation_tableau(stats$it_conv_med, titre = "Médiane du numéro de simulation de convergence")
@@ -362,7 +509,9 @@ creation_tableau(stats$it_conv_med, titre = "Médiane du numéro de simulation d
 creation_tableau(round(stats$erreur_finale,3), titre = "Moyenne de l'erreur à la simulation de convergence",
                  note_debut = "L'erreur est définie comme 1 - gamma_T")
 ```
+</div>
 
+<div class="col2">
 ```{r tabq1vsq2nbnonconv, echo=FALSE}
 creation_tableau(stats$nb_non_conv,
                  titre = "Nombre de simulations n'ayant pas convergé vers la bonne valeur")
@@ -372,24 +521,31 @@ creation_tableau(stats$nb_non_conv,
 creation_tableau(round(stats$temps_conv),
                  titre = "Moyenne du temps de calcul jusqu'à la convergence (en secondes)")
 ```
+</div>
 
+<i class="fas fa-arrow-alt-circle-right"></i> Même si le nombre d'itérations nécessaires pour converger est plus faible en adaptant l'algorithme pour ne tirer que des permutations, l'algorithme est plus gourmand en temps de calcul. Cela vient du mécanisme utilisé pour tirer les échantillons qui a une complexité plus importante.
+
+```{r, echo=FALSE, include=FALSE}
+library(icon) #Je sais pas pourquoi, sans ce truc ça ne s'affiche pas
+icon::fa("arrow-alt-circle-right")
+```
 
 ## Utilisation d'une loi spécifique pour générer les permutations {#sec:q3}
 
-Dans cette partie on utilise la loi suivante sur l'ensemble des permutations :
+Dans cette partie, nous utilisons la loi suivante sur l'ensemble des permutations :
 $$
 \pi_{\lambda, x^*}(x)\propto\exp{(−\lambda d(x, x^{*}))}
 $$
-Pour générer les échantillons on utilise l'algorithme de Metropolis-Hastings (voir partie \@ref(sec:mh)). Pour la mise en oeuvre de la méthode de *Cross-Entropy*, on va mettre à jour $\lambda$ et $x^*$ à chaque itération. Le critère d'arrêt qui est utilisé est $x^*=y$ (i.e. $S(x^*)=1$).
+L'algorithme de Metropolis-Hastings (voir partie \@ref(sec:mh)) permet de générer les échantillons. Pour la mise en oeuvre de la méthode de *Cross-Entropy*, $\lambda$ et $x^*$ sont mis à jour à chaque itération. Le critère d'arrêt qui est utilisé est $x^*=y$ (i.e. $S(x^*)=1$).
 
 Nous avons ici $n+1$ paramètres à estimer ($n$ pour $x^*$ et 1 pour $\lambda$). Nous générons donc $N = C\times (n+1)$ échantillons à chaque itération de la *Cross-Entropy*. L'algorithme que nous utilisons est le suivant :
 
-1. Initialisation : tire aléatoire $x^*_0$ et on prend $\lambda_0=1$.
+1. Initialisation : on tire aléatoire $x^*_0$ et on prend $\lambda_0=1$.
 
 2. On génère un échantillon $X_{1},\dots,X_{N}$, $N=5\times (n+1)$, de loi $\pi_{\lambda_t,x^*_t}$ selon l'algorithme décrit dans la partie \@ref(sec:mh). On calcule le quantile 0,90 de la fonction score qui donne $\hat{\gamma}_{t}$ :
 $$\hat{\gamma}_{t}=S_{\lceil0.9N\rceil}$$
-3. On utilise le même échantillon $X_{1},\dots,X_{N}$ pour trouver $\tilde x_{t+1}$ comme décrit dans la partie \@ref(sec:estparamhamming). Si $S(\tilde x_{t+1})\geq S(x^*_t)$ alors $x^*_{t+1} = \tilde x_{t+1$, sinon $x^*_{t+1}=x^*_{t}$. On fixe $\lambda_{t+1}=1$
-4. Arrêt : si pour un certain $t$, $S(x^*_{t)=1$ alors on arrête l'algorithme.
+3. On utilise le même échantillon $X_{1},\dots,X_{N}$ pour trouver $\tilde x_{t+1}$ comme décrit dans la partie \@ref(sec:estparamhamming). Si $S(\tilde x_{t+1})\geq S(x^*_t)$ alors $x^*_{t+1} = \tilde x_{t+1}$, sinon $x^*_{t+1}=x^*_{t}$. On fixe $\lambda_{t+1}=1$
+4. Arrêt : si pour un certain $t$, $S(x^*_{t})=1$ alors on arrête l'algorithme.
 
 ### Génération de l'échantillon {#sec:mh}
 
@@ -411,79 +567,112 @@ r(x',x_t)=\min\left(1,\,\frac{\pi_{\lambda,x^*}(x')}{\pi_{\lambda,x^*}(x_{t})}\r
 =\min\left(1,\,\mathrm{e^{-\lambda(d(x',x^{*})-d(x_{t},x^{*}))}}\right)
 $$  
 
-  c. Acceptation ou rejet : on génére une loi uniforme $u\in[0,1]$. Si $u \leq r(x',x_{t}) $ alors on accepte le nouvel état et on pose $x_{t+1}=x'$, sinon $x_{t+1}=x_{t}$.
+  c. Acceptation ou rejet : on génére une loi uniforme $u\in[0,1]$. Si $u \leq r(x',x_{t})$ alors on accepte le nouvel état et on pose $x_{t+1}=x'$, sinon $x_{t+1}=x_{t}$.
   
   d. Incrémentation : $t=t+1$.
 
 Dans le cas où $m>n$, $x^*$ ne peut être une vraie permutation. Pour générer la loi dans ce cas, nous raisonnons de la même façon en modifiant deux étapes :
 
- - dans le mécanisme de proposition nous inversons deux coordonnées mais en imposant qu'au moins une des deux soit plus petite que $n$ ;
+ - dans le mécanisme de proposition, nous inversons deux coordonnées mais en imposant qu'au moins une des deux soit plus petite que $n$ ;
  
- - dans le calcule de la probabilité d'acceptation nous ne calculons la distance de Hamming que sur les $n$ premières coordonnées $x'$ et $x_t$ (comme $x^*$ est un vecteur de taille $n$) ;
+ - dans le calcule de la probabilité d'acceptation, nous ne calculons la distance de Hamming que sur les $n$ premières coordonnées $x'$ et $x_t$ (comme $x^*$ est un vecteur de taille $n$) ;
 
-Comme $x'$ est une transposition de $x_t$, $d(x',x^{*})-d(x_{t},x^{*})\in\{-2,-1,0,1,2\}$. Donc si, par rapport à $x_t$ dans $x'$ ne diminue pas la distance de Hamming à $x^{*}$ alors on accepte le nouvel état. S'il y a nouvel élément mal placé alors on accepte $x'$ avec une probabilité de $e^{-\lambda}$ : pour $\lambda>2$ la probabilité d'accepter un nouvel état moins proche que $x_t$ de $x^*$ est donc inférieure à 14 % et pour $\lambda>3$ cette probabilité inférieure à 5 %. Pour $\lambda$ grand on converge donc vers $x^*$ et tous les échantillons seront égaux à $x^*$.
+**Remarque importante** : Comme $x'$ est une transposition de $x_t$, $d(x',x^{*})-d(x_{t},x^{*})\in\{-2,-1,0,1,2\}$. Donc si $d(x',x^{*}) \leq d(x_{t},x^{*})$, on accepte le nouvel état $x'$ avec une probabilité de 1. S'il y a un nouvel élément mal placé alors on accepte $x'$ avec une probabilité de $e^{-\lambda}$. Pour $\lambda>2$ la probabilité d'accepter un nouvel état moins proche que $x_t$ de $x^*$ est donc inférieure à 14 % et pour $\lambda>3$ cette probabilité inférieure à 5 %. Pour $\lambda$ grand on converge donc vers $x^*$ et tous les échantillons seront égaux à $x^*$.
 
 #### Traitement supplémentaires
 
 
 L'algorithme de Metropolis-Hastings a deux désavantages :
 
-1. Il générer la loi cible, il construit itérativement une chaîne de Markov qui converge vers cette loi cible. Les échantillons initiaux peuvent donc suivre une distribution très différente de celle recherché. Il est donc nécessaire de rejetter une partie importante des échantillons initiaux (*burn-in*). C'est corrigé en enlevant les $250\times m$ premières observations (voir partie \@ref(subsec:burnin)).
+1. Pour générer la loi cible, il construit itérativement une chaîne de Markov qui converge vers cette loi cible. Les échantillons initiaux peuvent donc suivre une distribution très différente de celle recherchée. Il est donc nécessaire de rejeter une partie importante des échantillons initiaux (*burn-in*). On corrige cela en enlevant les $250\times m$ premières observations (voir partie \@ref(subsec:burnin)).
 
-2. Par construction, les échantillons proches sont corrélés entre eux. Pour générer des échantillons indépendants il faut donc en rejeter et ne garder que les $n$^ièmes^ échantillons. Dans notre cas nous prenons $n=100$ pour toutes les simulations  (voir partie \@ref(subsec:acf)).
+2. Par construction, les échantillons successifs sont corrélés entre eux. Pour générer des échantillons indépendants, une solution est d'en rejeter un certain nombre et de garder des échantillons séparés de $t$ périodes. Dans notre cas, nous prenons $t = 80$ pour toutes les simulations  (voir partie \@ref(subsec:acf)).
 
 #### Gestion du burn-in {#subsec:burnin}
 
-L'algorithme de Metropolis-Hastings requiert une initialisation à une valeur $X_0$. Cette valeur, choisie au hasard, ne correspond pas à un réel état qui aurait été simulé selon la loi $\pi$ qui nous intéresse. En réalité, cela va être le cas de toutes les premières valeurs, le temps que l'algorithme converge. Il faut donc pouvoir déterminer à partir de quel moment on peut considérer que l'obtient bien des états issus de la loi $\pi$, c'est ce qu'on appelle le *burn-in*.
+L'algorithme de Metropolis-Hastings requiert une initialisation à une valeur $X_0$. Cette valeur, choisie au hasard, ne correspond pas à un réel état qui aurait pu être simulé selon la loi $\pi$. En réalité, cela va être le cas de toutes les premières valeurs, le temps que l'algorithme converge. Il faut donc pouvoir déterminer à partir de quel moment on peut considérer que l'obtient bien des états issus de la loi $\pi$, c'est ce qu'on appelle le *burn-in*.
 
-L'idée est d'estimer ce *burn-in* pour des valeurs de $n$ et $m$ différentes. En effet, on peut supposer que plus $n$ et/ou $m$ vont être grands, plus le temps que va mettre l'algorithme de Metropolis-Hastings à converger est long. C'est ce que nous allons essayons de mesurer en s'intéressant à la trace. La trace est en fait le graphique représentant l'évolution d'une valeur au cours des différents états générés par l'algorithme de Metropolis-Hastings.
+L'idée est d'estimer ce *burn-in* pour des valeurs de $n$ et $m$ différentes. En effet, on peut supposer que plus $n$ et/ou $m$ vont être grands, plus le temps que va mettre l'algorithme de Metropolis-Hastings à converger est long. C'est ce que nous allons essayer mesurer en s'intéressant à la trace. La trace correspond au graphique de l'évolution d'une valeur au cours des différents états générés par l'algorithme de Metropolis-Hastings.
 
-Dans notre cas, chaque état correspond à une permutation, qu'il n'est pas facile de représenter, encore moins son évolution dans le temps. Nous allons donc représenter les 4 premières coordonnées de ces permutations, afin de mesurer le *burn-in* dans les différents cas et d'estimer une valeur grossière. L'idée est de regarder à partir de quand la valeur de la coordonnée semble suivre un comportement aléatoire.
+Dans notre cas, chaque état correspond à une permutation, qu'il n'est pas facile de représenter, encore moins son évolution dans le temps. Nous allons donc représenter les 4 premières coordonnées de ces permutations, afin de mesurer le *burn-in* dans les différents cas et d'estimer une valeur grossière de celui-ci. L'idée est de regarder à partir de quand la valeur de la coordonnée semble suivre un comportement aléatoire.
 
-```{r, fig.width=4, echo=FALSE, fig.cap="n = 4 et m = 4"}
+<div class="col2">
+
+```{r, fig.width=4, echo=FALSE}
 knitr::include_graphics("img/n_4_m_4.png")
 ```
 
-Quand $n$ et $m$ sont petits, il est inévitable qu'une coordonnée puisse garder la même valeur pendant plusieurs itérations, mais nous cherchons l'état à partir duquel ces *plateaux* ne sont plus très grands et à partir duquel les valeurs prises par la coordonnée balaye tout l'espace. Nous remarquons que cela semble être le cas à partir de 1 000 pour la 2ème coordonnée et que cette valeur dépasse également le *burn-in* des autres coordonnées.
+**n = 4 et m = 4**
 
-```{r, fig.width=4, echo=FALSE, fig.cap="n = 4 et m = 6"}
+Quand $n$ et $m$ sont petits, il est inévitable qu'une coordonnée puisse garder la même valeur pendant plusieurs itérations, mais nous cherchons l'état à partir duquel ces *plateaux* ne sont plus très grands et à partir duquel les valeurs prises par la coordonnée balaye tout l'espace. Nous remarquons que cela semble être le cas à partir de 1 000 pour la deuxième coordonnée et que cette valeur dépasse également le *burn-in* des autres coordonnées.
+
+</div>
+
+<div class="col2">
+```{r, fig.width=4, echo=FALSE}
 knitr::include_graphics("img/n_4_m_6.png")
 ```
 
+
+**n = 4 et m = 6**
+
 Quand $m$ passe à 6, le *burn-in* semble légèrement augmenter par rapport au cas précédent, avec l'apparition d'un plateau après 1000 pour la quatrième coordonnée, nous pourrions donc plutôt envisager un *burn-in* de 1 500 dans ce cas.
+</div>
 
+<div class="col2">
 
-```{r, fig.width=4, echo=FALSE, fig.cap="n = 10 et m = 20"}
+```{r, fig.width=4, echo=FALSE}
 knitr::include_graphics("img/n_10_m_20.png")
 ```
 
+
+**n = 10 et m = 20**
+
 Pour $m = 20$, on remarque sur la trace de la première coordonnée un long moment entre 3 000 et 4 000 où l'on ne semble plus atteindre des valeurs au-dessus de 4 et un autre moment autour de 5 000 où les valeurs faibles ne sont pas atteintes, on peut donc conseiller un *burn-in* de 5 000 ici.
+</div>
 
+<div class="col2">
 
-```{r, fig.width=4, echo=FALSE, fig.cap="n = 20 et m = 20"}
+```{r, fig.width=4, echo=FALSE}
 knitr::include_graphics("img/n_20_m_20.png")
 ```
 
+
+**n = 20 et m = 20**
+
+
 L'augmentation de $n$ par rapport au cas précédent a modifié légèrement les traces mais le *burn-in* de 5 000 reste toujours acceptable.
+</div>
 
+<div class="col2">
 
-```{r, fig.width=4, echo=FALSE, fig.cap="n = 10 et m = 40"}
+```{r, fig.width=4, echo=FALSE}
 knitr::include_graphics("img/n_10_m_40.png")
 ```
 
-Une nouvelle augmentation de $m$ à 50 allonge de nouveau le *burn-in*. En effet, on remarque que l'ensemble est valeurs est parcouru à partir de l'itération 7 500 environ (notamment sur la deuxième coordonnée), on peut donc prendre cette valeur comme burn-in.
 
-```{r, fig.width=4, echo=FALSE, fig.cap="n = 40 et m = 40"}
+**n = 10 et m = 40**
+
+Une nouvelle augmentation de $m$ à 40 allonge de nouveau le *burn-in*. En effet, on remarque que l'ensemble des valeurs est parcouru à partir de l'itération 7 500 environ (notamment sur la deuxième coordonnée), on peut donc prendre cette valeur comme burn-in.
+</div>
+
+<div class="col2">
+
+```{r, fig.width=4, echo=FALSE}
 knitr::include_graphics("img/n_40_m_40.png")
 ```
 
-L'augmentation de $n$ semble cette fois-ci avoir un peu modifié les traces, notamment pour la 2ème coordonnée, on a plutôt envie d'estimer le *burn-in* aux alentours de 10 000.
+**n = 40 et m = 40**
 
-En conclusion, on remarque qu'il y a bien des différences sur la trace et donc sur la valeur du *burn-in* selon la valeur de $n$ et $m$. Plus elles sont grandes, plus le *burn-in* est important. La valeur de $m$ semble être plus discriminante que celle de $n$, même si l'impact de cette dernière n'est pas nulle. Si on se restreint aux cas où $n = m$, on peut estimer le *burn-in* à environ $250 \times m$.
+L'augmentation de $n$ semble cette fois-ci avoir un peu modifié les traces, notamment pour la deuxième coordonnée, on a plutôt envie d'estimer le *burn-in* aux alentours de 10 000.
+
+</div>
+
+<i class="fas fa-arrow-alt-circle-right"></i>  En conclusion, on remarque qu'il y a bien des différences sur la trace et donc sur la valeur du *burn-in* selon la valeur de $n$ et $m$. Plus elles sont grandes, plus le *burn-in* est important. La valeur de $m$ semble être plus discriminante que celle de $n$, même si l'impact de cette dernière n'est pas nulle. Si on se restreint aux cas où $n = m$, on peut estimer le *burn-in* à environ $250 \times m$.
 
 #### Gestion des autocorrélations {#subsec:acf}
 
-Par construction, du fait du mécansime de proposition utilisé, les échantillons proches sont corrélés. Cette autocorrélation peut-être calculée avec la fonction `portes::LjungBox` (la fonction `acf` ne calculant les autocorrélations que pour les séries univariées). En revanche, intégrer ce test dans le mécanisme de proposition est très couteux en temps. Garder tous les 80^ièmes^ observations corrige ce problème : on ne rejette pas les tests de LjungBox d'indépendance des échantillons au seuil de 10 % pour tous les paramètres testés (à $\lambda = 1$). Pour $\lambda$ grand ces tests n'ont plus de sens puisque la majorité des échantillons tirés doivent être proches de $x*$ et on concluerait donc qu'ils sont corrélés.
+Par construction, du fait du mécansime de proposition utilisé, les échantillons proches sont corrélés. Cette autocorrélation peut-être calculée avec la fonction `portes::LjungBox` (la fonction `acf` ne calculant les autocorrélations que pour les séries univariées). En revanche, intégrer ce test dans le mécanisme de proposition est très couteux en temps. Garder tous les 80^ièmes^ observations corrige ce problème : on ne rejette pas les tests de LjungBox d'indépendance des échantillons au seuil de 10 % pour tous les paramètres testés (à $\lambda = 1$). Pour $\lambda$ grand ces tests n'ont plus de sens puisque la majorité des échantillons tirés doivent être proches de $x^*$ et on concluerait donc qu'ils sont corrélés.
 
 Les graphiques \@ref(fig:acfn10m40) à \@ref(fig:acfn20m40corr) montrent les autocorrélogrammes des 4 premières composantes (i.e. : 4 premières boules) pour $n=10$ et $m=40$ et $n=20$ et $m=40$ et $\lambda =1$. Le tableau \@ref(tab:tabcorrlb) montre qu'avec ce pas de 80 les échantillons générés sont bien indépendants. 
 
@@ -548,7 +737,7 @@ m\sum_{k=0}^{m}\frac{(\exp(\lambda)-1)^{k}}{k!}
 } +
 \frac{1}{\sum_{i=1}^N\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}\sum_{i=1}^N\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}d(X_i,x^*) = 0
 $$
-Dans notre cas, le problème est que nous observant une croissance rapide de $\lambda$ à chaque itération de la méthode de *Cross-Entropy*. Ainsi, si $y$ n'est pas décodé dans les premières itérations (ce qui est souvent le cas pour $m$ et $n$ grands), les échantillons $X_i$ générés seront très proches de $x^*$ (voir partie \@ref(sec:mh)) et on ne trouvera pas $y$. 
+Dans notre cas, le problème est que nous observons une croissance rapide de $\lambda$ à chaque itération de la méthode de *Cross-Entropy*. Ainsi, si $y$ n'est pas décodé dans les premières itérations (ce qui est souvent le cas pour $m$ et $n$ grands), les échantillons $X_i$ générés seront très proches de $x^*$ (voir partie \@ref(sec:mh)) et on ne trouvera pas $y$. 
 
 Nous avons testé plusieurs approches pour $\lambda$ : en le faisant croître linéaire, décroître, constant et maximum de vraisemblance. La solution qui donnait les meilleurs résultats est de prendre $\lambda = 1$.
 
