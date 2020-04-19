@@ -1,0 +1,11 @@
+base
+knitr
+kableExtra
+clue
+mvtnorm
+plot3D
+forecast
+portes
+shiny
+shinyjs
+shinyWidgets

@@ -1,0 +1,108 @@
+\headcommand {\slideentry {0}{0}{1}{1/1}{}{0}}
+\headcommand {\beamer@framepages {1}{1}}
+\headcommand {\beamer@sectionpages {1}{1}}
+\headcommand {\beamer@subsectionpages {1}{1}}
+\headcommand {\sectionentry {1}{Introduction}{2}{Introduction}{0}}
+\headcommand {\slideentry {1}{0}{1}{2/2}{}{0}}
+\headcommand {\beamer@framepages {2}{2}}
+\headcommand {\slideentry {1}{0}{2}{3/3}{}{0}}
+\headcommand {\beamer@framepages {3}{3}}
+\headcommand {\beamer@subsectionpages {2}{3}}
+\headcommand {\beamer@subsectionentry {0}{1}{1}{4}{Rappels sur la méthode de \emph {Cross-Entropy}}}
+\headcommand {\slideentry {1}{1}{1}{4/4}{Rappels sur la méthode de \emph {Cross-Entropy}}{0}}
+\headcommand {\beamer@framepages {4}{4}}
+\headcommand {\slideentry {1}{1}{2}{5/5}{Rappels sur la méthode de \emph {Cross-Entropy}}{0}}
+\headcommand {\beamer@framepages {5}{5}}
+\headcommand {\slideentry {1}{1}{3}{6/6}{Rappels sur la méthode de \emph {Cross-Entropy}}{0}}
+\headcommand {\beamer@framepages {6}{6}}
+\headcommand {\beamer@sectionpages {2}{6}}
+\headcommand {\beamer@subsectionpages {4}{6}}
+\headcommand {\sectionentry {2}{Application de la méthode de \emph {Cross-Entropy} au Mastermind}{7}{Application de la méthode de \emph {Cross-Entropy} au Mastermind}{0}}
+\headcommand {\slideentry {2}{0}{1}{7/7}{}{0}}
+\headcommand {\beamer@framepages {7}{7}}
+\headcommand {\beamer@subsectionpages {7}{7}}
+\headcommand {\beamer@subsectionentry {0}{2}{1}{8}{Paramètres utilisés dans le projet}}
+\headcommand {\slideentry {2}{1}{1}{8/8}{Paramètres utilisés dans le projet}{0}}
+\headcommand {\beamer@framepages {8}{8}}
+\headcommand {\beamer@subsectionpages {8}{8}}
+\headcommand {\beamer@subsectionentry {0}{2}{2}{9}{Application de la méthode de \emph {Cross-Entropy}}}
+\headcommand {\slideentry {2}{2}{1}{9/9}{Application de la méthode de \emph {Cross-Entropy}}{0}}
+\headcommand {\beamer@framepages {9}{9}}
+\headcommand {\beamer@subsectionpages {9}{9}}
+\headcommand {\beamer@subsectionentry {0}{2}{3}{10}{Résultats}}
+\headcommand {\slideentry {2}{3}{1}{10/10}{Résultats}{0}}
+\headcommand {\beamer@framepages {10}{10}}
+\headcommand {\slideentry {2}{3}{2}{11/11}{Résultats}{0}}
+\headcommand {\beamer@framepages {11}{11}}
+\headcommand {\slideentry {2}{3}{3}{12/12}{Résultats}{0}}
+\headcommand {\beamer@framepages {12}{12}}
+\headcommand {\slideentry {2}{3}{4}{13/13}{Résultats}{0}}
+\headcommand {\beamer@framepages {13}{13}}
+\headcommand {\beamer@sectionpages {7}{13}}
+\headcommand {\beamer@subsectionpages {10}{13}}
+\headcommand {\sectionentry {3}{Restriction aux permutations}{14}{Restriction aux permutations}{0}}
+\headcommand {\slideentry {3}{0}{1}{14/14}{}{0}}
+\headcommand {\beamer@framepages {14}{14}}
+\headcommand {\beamer@subsectionpages {14}{14}}
+\headcommand {\beamer@subsectionentry {0}{3}{1}{15}{Adaptation de l'algorithme précédent}}
+\headcommand {\slideentry {3}{1}{1}{15/15}{Adaptation de l'algorithme précédent}{0}}
+\headcommand {\beamer@framepages {15}{15}}
+\headcommand {\beamer@subsectionpages {15}{15}}
+\headcommand {\beamer@subsectionentry {0}{3}{2}{16}{Estimation}}
+\headcommand {\slideentry {3}{2}{1}{16/16}{Estimation}{0}}
+\headcommand {\beamer@framepages {16}{16}}
+\headcommand {\beamer@subsectionpages {16}{16}}
+\headcommand {\beamer@subsectionentry {0}{3}{3}{17}{Résultats (1)}}
+\headcommand {\slideentry {3}{3}{1}{17/17}{Résultats (1)}{0}}
+\headcommand {\beamer@framepages {17}{17}}
+\headcommand {\slideentry {3}{3}{2}{18/18}{Résultats (1)}{0}}
+\headcommand {\beamer@framepages {18}{18}}
+\headcommand {\slideentry {3}{3}{3}{19/19}{Résultats (1)}{0}}
+\headcommand {\beamer@framepages {19}{19}}
+\headcommand {\slideentry {3}{3}{4}{20/20}{Résultats (1)}{0}}
+\headcommand {\beamer@framepages {20}{20}}
+\headcommand {\slideentry {3}{3}{5}{21/21}{Résultats (1)}{0}}
+\headcommand {\beamer@framepages {21}{21}}
+\headcommand {\beamer@subsectionpages {17}{21}}
+\headcommand {\beamer@subsectionentry {0}{3}{4}{22}{Utilisation d'une loi spécifique pour générer les permutations}}
+\headcommand {\slideentry {3}{4}{1}{22/22}{Utilisation d'une loi spécifique pour générer les permutations}{0}}
+\headcommand {\beamer@framepages {22}{22}}
+\headcommand {\slideentry {3}{4}{2}{23/23}{Utilisation d'une loi spécifique pour générer les permutations}{0}}
+\headcommand {\beamer@framepages {23}{23}}
+\headcommand {\slideentry {3}{4}{3}{24/24}{Utilisation d'une loi spécifique pour générer les permutations}{0}}
+\headcommand {\beamer@framepages {24}{24}}
+\headcommand {\slideentry {3}{4}{4}{25/25}{Utilisation d'une loi spécifique pour générer les permutations}{0}}
+\headcommand {\beamer@framepages {25}{25}}
+\headcommand {\slideentry {3}{4}{5}{26/26}{Utilisation d'une loi spécifique pour générer les permutations}{0}}
+\headcommand {\beamer@framepages {26}{26}}
+\headcommand {\slideentry {3}{4}{6}{27/27}{Utilisation d'une loi spécifique pour générer les permutations}{0}}
+\headcommand {\beamer@framepages {27}{27}}
+\headcommand {\slideentry {3}{4}{7}{28/28}{Utilisation d'une loi spécifique pour générer les permutations}{0}}
+\headcommand {\beamer@framepages {28}{28}}
+\headcommand {\slideentry {3}{4}{8}{29/29}{Utilisation d'une loi spécifique pour générer les permutations}{0}}
+\headcommand {\beamer@framepages {29}{29}}
+\headcommand {\slideentry {3}{4}{9}{30/30}{Utilisation d'une loi spécifique pour générer les permutations}{0}}
+\headcommand {\beamer@framepages {30}{30}}
+\headcommand {\slideentry {3}{4}{10}{31/31}{Utilisation d'une loi spécifique pour générer les permutations}{0}}
+\headcommand {\beamer@framepages {31}{31}}
+\headcommand {\slideentry {3}{4}{11}{32/32}{Utilisation d'une loi spécifique pour générer les permutations}{0}}
+\headcommand {\beamer@framepages {32}{32}}
+\headcommand {\slideentry {3}{4}{12}{33/33}{Utilisation d'une loi spécifique pour générer les permutations}{0}}
+\headcommand {\beamer@framepages {33}{33}}
+\headcommand {\slideentry {3}{4}{13}{34/34}{Utilisation d'une loi spécifique pour générer les permutations}{0}}
+\headcommand {\beamer@framepages {34}{34}}
+\headcommand {\beamer@subsectionpages {22}{34}}
+\headcommand {\beamer@subsectionentry {0}{3}{5}{35}{Résultats (2)}}
+\headcommand {\slideentry {3}{5}{1}{35/35}{Résultats (2)}{0}}
+\headcommand {\beamer@framepages {35}{35}}
+\headcommand {\slideentry {3}{5}{2}{36/36}{Résultats (2)}{0}}
+\headcommand {\beamer@framepages {36}{36}}
+\headcommand {\slideentry {3}{5}{3}{37/37}{Résultats (2)}{0}}
+\headcommand {\beamer@framepages {37}{37}}
+\headcommand {\slideentry {3}{5}{4}{38/38}{Résultats (2)}{0}}
+\headcommand {\beamer@framepages {38}{38}}
+\headcommand {\beamer@partpages {1}{38}}
+\headcommand {\beamer@subsectionpages {35}{38}}
+\headcommand {\beamer@sectionpages {14}{38}}
+\headcommand {\beamer@documentpages {38}}
+\headcommand {\gdef \inserttotalframenumber {37}}

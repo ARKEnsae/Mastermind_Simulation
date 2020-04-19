@@ -1,0 +1,13 @@
+\babel@toc {french}{}
+\beamer@sectionintoc {1}{Introduction}{2}{0}{1}
+\beamer@subsectionintoc {1}{1}{Rappels sur la méthode de \emph {Cross-Entropy}}{4}{0}{1}
+\beamer@sectionintoc {2}{Application de la méthode de \emph {Cross-Entropy} au Mastermind}{7}{0}{2}
+\beamer@subsectionintoc {2}{1}{Paramètres utilisés dans le projet}{8}{0}{2}
+\beamer@subsectionintoc {2}{2}{Application de la méthode de \emph {Cross-Entropy}}{9}{0}{2}
+\beamer@subsectionintoc {2}{3}{Résultats}{10}{0}{2}
+\beamer@sectionintoc {3}{Restriction aux permutations}{14}{0}{3}
+\beamer@subsectionintoc {3}{1}{Adaptation de l'algorithme précédent}{15}{0}{3}
+\beamer@subsectionintoc {3}{2}{Estimation}{16}{0}{3}
+\beamer@subsectionintoc {3}{3}{Résultats (1)}{17}{0}{3}
+\beamer@subsectionintoc {3}{4}{Utilisation d'une loi spécifique pour générer les permutations}{22}{0}{3}
+\beamer@subsectionintoc {3}{5}{Résultats (2)}{35}{0}{3}
