@@ -707,7 +707,7 @@ kable_styling(full_width = F)%>%
 
 ### Estimation des paramètres {#sec:estparamhamming}
 
-@hongrois montre le problème de maximisation de la vraisemblance d'une loi de Mallow (qui est celle ici utilisée) peut se décomposer en deux étapes :
+@hongrois montre que le problème de maximisation de la vraisemblance d'une loi de Mallow (qui est celle ici utilisée) peut se décomposer en deux étapes :
 
 1. Estimation de $x^*$ qui minimise la somme des distances de Hamming.
 
@@ -737,20 +737,26 @@ m\sum_{k=0}^{m}\frac{(\exp(\lambda)-1)^{k}}{k!}
 } +
 \frac{1}{\sum_{i=1}^N\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}\sum_{i=1}^N\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}d(X_i,x^*) = 0
 $$
-Dans notre cas, le problème est que nous observons une croissance rapide de $\lambda$ à chaque itération de la méthode de *Cross-Entropy*. Ainsi, si $y$ n'est pas décodé dans les premières itérations (ce qui est souvent le cas pour $m$ et $n$ grands), les échantillons $X_i$ générés seront très proches de $x^*$ (voir partie \@ref(sec:mh)) et on ne trouvera pas $y$. 
 
-Nous avons testé plusieurs approches pour $\lambda$ : en le faisant croître linéaire, décroître, constant et maximum de vraisemblance. La solution qui donnait les meilleurs résultats est de prendre $\lambda = 1$.
+**Remarque importante** : Dans notre cas, le problème est que nous observons une croissance rapide de $\lambda$ à chaque itération de la méthode de *Cross-Entropy*. Ainsi, si $y$ n'est pas décodé dans les premières itérations (ce qui est souvent le cas pour $m$ et $n$ grands), les échantillons $X_i$ générés seront très proches de $x^*$ (voir partie \@ref(sec:mh)) et on ne trouvera pas $y$. Ce problème vient sûrement du fait que les permutations qui ont les meilleurs scores (sur lesquels est faite la maximisation) sont corrélées entre elles : le $\lambda$ qui représente cette distribution est donc grand. De plus le problème d'optimisation n'avait pas toujours de solution sur $[0,10]$, même pour des petites valeurs de $m$ et $n$ de $m$ et $n$ (voir par exemple partie \@ref(sec:codeq3)).   
+Nous avons testé plusieurs approches pour $\lambda$ : en le faisant croître linéaire (l'idée étant que plus on se rapproche de la solution, plus les simulations doivent être proches de $x^*$), constant et maximum de vraisemblance. La solution qui donnait les meilleurs résultats est de prendre $\lambda = 1$.
 
 ### Résultats
 
-Les tableaux  \@ref(tab:tabq3convmed) à \&ref(tab:tabq3tempsconv) montrent qu'il n'y a pas toujours convergence de $x^*$ vers $y$ en 100 itérations. Pour comparer cette algorithme au précédent, les tableaux \@ref(tab:tabq3vsq1convmed) à \&ref(tab:tabq3vsq1convmed)
+Les tableaux \@ref(tab:tabq3convmed) à \@ref(tab:tabq3tempsconv) montrent qu'il n'y a pas toujours convergence de $x^*$ vers $y$ en 100 itérations. 
 
+Pour comparer cette algorithme à ceux des parties précédentes, nous avons relancé les algorithmes avec $N=5\times n \times m$ simultations. Les résultats sont dans les tableaux \@ref(tab:tabq3vsq1convmed) à \@ref(tab:tabq3vsq1convmed). Augmenter $N$ permet une convergence plus rapide dans le cas où $n<m$ mais ce n'est pas forcément le cas lorsque $m=n$. En revanche, cela augmente beaucoup le temps de calcul.  
+Par rapport aux algorithmes précédents, utiliser une loi spécifique pour les permutations donne de moins résultats. Cette algorithme pourrait
+
+
+<div class="col2">
 
 ```{r tabq3convmed, echo=FALSE}
 stats <- readRDS("Resultats/statsq3.RDS")
 note_debut <- "S'il n'y a pas convergence les statistiques ne sont pas calculées"
 creation_tableau(stats$it_arret_med, titre = "Médiane du numéro de simulation de convergence",
-                 note_debut = note_debut)
+                 note_debut = note_debut,
+                 nb_simuls = "5 x (n + 1)")
 ```
 
 ```{r tabq3erreur, echo=FALSE}
@@ -758,6 +764,7 @@ creation_tableau(round(stats$erreur_finale,3), titre = "Moyenne de l'erreur à l
                  note_debut = c(note_debut, "L'erreur est définie comme 1 - gamma_T"),
                  nb_simuls = "5 x (n + 1)")
 ```
+
 
 ```{r tabq3score, echo=FALSE}
 creation_tableau(round(stats$erreur_score,3), titre = "Moyenne du score de x* à la simulation de convergence",
@@ -770,6 +777,7 @@ creation_tableau(stats$nb_non_conv,
                  titre = "Nombre de simulations n'ayant pas convergé vers la bonne valeur",
                  nb_simuls = "5 x (n + 1)")
 ```
+
 
 ```{r tabq3tempsconv, echo=FALSE}
 creation_tableau(round(stats$temps_arret),
@@ -789,28 +797,27 @@ creation_tableau(stats$it_arret_med, titre = "Médiane du numéro de simulation 
 
 ```{r tabq3vsq1erreur, echo=FALSE}
 creation_tableau(round(stats$erreur_finale,3), titre = "Moyenne de l'erreur à la simulation de convergence",
-                 note_debut = c(note_debut, "L'erreur est définie comme 1 - gamma_T"),
-                 nb_simuls = "5 x (n + 1)")
+                 note_debut = c(note_debut, "L'erreur est définie comme 1 - gamma_T"))
 ```
 
 ```{r tabq3vsq1score, echo=FALSE}
 creation_tableau(round(stats$erreur_score,3), titre = "Moyenne du score de x* à la simulation de convergence",
-                 note_debut = note_debut,
-                 nb_simuls = "5 x (n + 1)")
+                 note_debut = note_debut)
 ```
+
 
 ```{r tabq3vsq1nbnonconv, echo=FALSE}
 creation_tableau(stats$nb_non_conv,
-                 titre = "Nombre de simulations n'ayant pas convergé vers la bonne valeur",
-                 nb_simuls = "5 x (n + 1)")
+                 titre = "Nombre de simulations n'ayant pas convergé vers la bonne valeur")
 ```
 
 ```{r tabq3vsq1tempsconv, echo=FALSE}
 creation_tableau(round(stats$temps_arret),
                  titre = "Moyenne du temps de calcul jusqu'à la convergence (en secondes)",
-                 nb_simuls = "5 x (n + 1)",
                  note_debut = note_debut)
 ```
+
+</div>
 
 
 # Code {#sec:enscode}
@@ -1266,13 +1273,14 @@ creer_matriceF <- function(X_top,n,m){
 
 ```
 
-Et l'algorithme est ci-dessous. L'option `mle = TRUE` peut-être utilisée si l'on souhaite comparer les résultats
+Et l'algorithme est ci-dessous. L'option `mle = TRUE` peut-être utilisée si l'on souhaite comparer les résultats.
 
 ```{r algohamming}
 lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,
                                       rho = 0.1, alpha = 0.7, poids_blanc = 1, 
                                       poids_noir = 2, C = 5, d = 10, stop_d = TRUE,
-                                      mle = FALSE){
+                                      mle = FALSE,
+                                      meilleur_x_star = TRUE){
   
   duree = Sys.time()
   duree_totale = NULL
@@ -1328,11 +1336,7 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,
     for(i in 1:n){
       x_star[i] <- as.numeric(res[i,"hongarian"])
     }
-    if(score(param_liste[[iter]]$x_star,y) >= score(x_star,y)){
-      x_star = param_liste[[iter]]$x_star
-    }
     
-    min_loss <- sum(apply(X_top,1, function(x) sum(x != x_star)))
     
     # Pour lambda, on le fait peu à peu tendre vers 0
     # lambda <- param_liste[[iter]]$lambda + 3*param_liste[[1]]$lambda/(maxIters+1)
@@ -1340,6 +1344,7 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,
     lambda = 1
     # Si on veut tester estimation par maximum de vraisemblance
     if(mle){
+      min_loss <- sum(apply(X_top,1, function(x) sum(x != x_star)))
       gradient <- function(lambda) {
         N_top = nrow(X_top)
         p1 <- N_top * m
@@ -1351,11 +1356,15 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,
         (sum_exp_tm1 * exp(lambda) - m* sum_exp_t)/sum_exp_t + min_loss/N_top
       }
       lambda <- tryCatch(uniroot(gradient, c(0,10))$root, error = function(e){
-        print("error")
+        print("Pas de solution pour lambda : on fixe lambda = 1")
         1})
-      lambda <- alpha * lambda + (1-alpha)* param_liste[[iter]]$lambda
+      
+      # lambda <- alpha * lambda + (1-alpha)* param_liste[[iter]]$lambda
     }
     
+    if(score(param_liste[[iter]]$x_star,y) >= score(x_star,y) & meilleur_x_star){
+      x_star = param_liste[[iter]]$x_star
+    }
     # print(sprintf("i %s - N_top %s - lambda %.3f - gamma %.3f - loss %.3f - prop %s",
     #               iter,
     #               nrow(X_top), lambda, gamma, min_loss, paste(x_star,collapse = " ")))
@@ -1425,8 +1434,14 @@ set.seed(1)
 y <- initialiser_y(m = m, n = n, avec_remise = FALSE)
 y
 resultat <- lancer_algorithme_hamming(y = y, n = n, m = m,
-                              stop_d = TRUE) # Pour s'arrêter si convergence
+                              # Pour s'arrêter si convergence :
+                              stop_d = TRUE)
 mise_en_forme_tableau(resultat, matriciel = FALSE)
+resultat_mle <- lancer_algorithme_hamming(y = y, n = n, m = m,
+                              stop_d = TRUE, mle = TRUE,
+                              # Pour changer x* même si le score est moin bon :
+                              meilleur_x_star = FALSE)
+mise_en_forme_tableau(resultat_mle, matriciel = FALSE)
 ```
 
 

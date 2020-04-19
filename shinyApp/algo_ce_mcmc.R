@@ -142,10 +142,8 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,
     for(i in 1:n){
       x_star[i] <- as.numeric(res[i,"hongarian"])
     }
-    if(score(param_liste[[iter]]$x_star,y) >= score(x_star,y)){
-      x_star = param_liste[[iter]]$x_star
-    }
     
+
     min_loss <- sum(apply(X_top,1, function(x) sum(x != x_star)))
     
     # Pour lambda, on le fait peu à peu tendre vers 0
@@ -173,6 +171,10 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,
     # print(sprintf("i %s - N_top %s - lambda %.3f - gamma %.3f - loss %.3f - prop %s",
     #               iter,
     #               nrow(X_top), lambda, gamma, min_loss, paste(x_star,collapse = " ")))
+    
+    if(score(param_liste[[iter]]$x_star,y) >= score(x_star,y)){
+      x_star = param_liste[[iter]]$x_star
+    }
     
     gammas_hat[iter] = gamma
     s_max[iter] = s
