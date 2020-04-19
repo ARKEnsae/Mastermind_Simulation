@@ -13,6 +13,7 @@ output:
     toc: true
     number_sections: true
 bibliography: biblio.bib
+nocite: '@*'
 ---
 
 ```{r setup, include=FALSE}
@@ -85,7 +86,7 @@ $$
 Avec $\lambda > 0$ et $d(x, x^{*})$ la distance de Hamming entre $x$ et $x^{*}$ (i.e. : le nombre d'emplacements pour lesquels les deux permutations sont différentes).
 
 Tous les codes utilisés (langage `R`) sont disponibles dans la partie \@ref(sec:enscode). 
-Une application web de démonstration faite également à l'aide de `R` (package `shiny`) est disponible à l'adresse suivante : http://arkensae.shinyapps.io/mastermind. 
+Une application web de démonstration faite également à l'aide de `R` (package `shiny`) est disponible à l'adresse suivante : https://antuki.shinyapps.io/mastermind. 
 
 ## Rappels sur la méthode de *Cross-Entropy*
 
@@ -450,7 +451,7 @@ context.stroke();
 
 </script>
 
-Le nouvel algorithme appliqué à cet exemple converge cette fois-ci plus tôt, à la 8ème étape, toujours vers la bonne valeur de y. Le temps d'exécution (0,1 seconde) est supérieur à précédemment car la loi de génération des échantillons sans remise est plus chronophage.
+Le deuxième algorithme appliqué à cet exemple converge cette fois-ci plus tôt, à la 8ème étape, toujours vers la bonne valeur de y. Le temps d'exécution (0,1 seconde) est supérieur à précédemment car la loi de génération des échantillons sans remise est plus chronophage.
 
 ```{r modeleq2, echo=FALSE,fig.align='center'}
 modele <- readRDS("Resultats/q2.RDS")
@@ -672,10 +673,11 @@ L'augmentation de $n$ semble cette fois-ci avoir un peu modifié les traces, not
 
 #### Gestion des autocorrélations {#subsec:acf}
 
-Par construction, du fait du mécansime de proposition utilisé, les échantillons proches sont corrélés. Cette autocorrélation peut-être calculée avec la fonction `portes::LjungBox` (la fonction `acf` ne calculant les autocorrélations que pour les séries univariées). En revanche, intégrer ce test dans le mécanisme de proposition est très couteux en temps. Garder tous les 80^ièmes^ observations corrige ce problème : on ne rejette pas les tests de LjungBox d'indépendance des échantillons au seuil de 10 % pour tous les paramètres testés (à $\lambda = 1$). Pour $\lambda$ grand ces tests n'ont plus de sens puisque la majorité des échantillons tirés doivent être proches de $x^*$ et on concluerait donc qu'ils sont corrélés.
+Par construction, du fait du mécansime de proposition utilisé, les échantillons proches sont corrélés. Cette autocorrélation peut-être mesurée grâce à la fonction `portes::LjungBox` (la fonction `acf` ne calculant les autocorrélations que pour les séries univariées). En revanche, intégrer ce test dans le mécanisme de proposition est très couteux en temps. Garder les observations séparés de $t = 80$ périodes corrige ce problème : pour $\lambda = 1$, on ne rejette pas les tests de LjungBox d'indépendance des échantillons au seuil de 10 % pour tous les paramètres testés. Pour $\lambda$ grand ces tests n'ont plus de sens puisque la majorité des échantillons tirés doivent être proches de $x^*$ et on concluerait donc qu'ils sont corrélés.
 
-Les graphiques \@ref(fig:acfn10m40) à \@ref(fig:acfn20m40corr) montrent les autocorrélogrammes des 4 premières composantes (i.e. : 4 premières boules) pour $n=10$ et $m=40$ et $n=20$ et $m=40$ et $\lambda =1$. Le tableau \@ref(tab:tabcorrlb) montre qu'avec ce pas de 80 les échantillons générés sont bien indépendants. 
+Les graphiques \@ref(fig:acfn10m40) à \@ref(fig:acfn20m40corr) montrent les autocorrélogrammes des 4 premières composantes (i.e. : 4 premières boules) pour $n=10$ et $m=40$ d'une part et $n=20$ et $m=40$ d'autre part ($\lambda =1$). 
 
+<div class="col2">
 ```{r acfn10m40, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec lambda = 1, n = 10 et m = 40"}
 knitr::include_graphics("img/acfn10m40.png")
 ```
@@ -683,14 +685,19 @@ knitr::include_graphics("img/acfn10m40.png")
 ```{r acfn10m40corr, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec un pas de 80, lambda = 1, n = 10 et m = 40"}
 knitr::include_graphics("img/acfn10m40corr.png")
 ```
-
+</div>
+<div class="col2">
 ```{r acfn20m40, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec lambda = 1, n = 20 et m = 40"}
 knitr::include_graphics("img/acfn20m40.png")
 ```
 
+
 ```{r acfn20m40corr, echo = FALSE, fig.cap="Autocorrélogrammes des quatres premières composantes des échantillons avec un pas de 80, lambda = 1, n = 20 et m = 40"}
 knitr::include_graphics("img/acfn20m40corr.png")
 ```
+</div>
+
+Le tableau \@ref(tab:tabcorrlb) montre qu'avec ce pas de $t = 80$ les échantillons générés sont bien indépendants. 
 
 ```{r tabcorrlb, echo=FALSE}
 data_corr <- readRDS("Resultats/corr_n10m40n20m40.RDS")
@@ -713,17 +720,21 @@ kable_styling(full_width = F)%>%
 
 2. Estimation de $\lambda$ par un algorithme de type Newton-Raphston.
 
+####  Trouver $x^*$ 
+
 L'estimation des paramètres dans l'algorithme de *Cross-Entropy* est équivalent à calculer l'estimateur de vraisemblance sur les 10 % meilleurs échantillons en terme de score. Intuitivement, le $x^*$ qui minimise la somme :
 $$
 \sum_{i=1}^N\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}d(X_i,x^*)
 $$
-est le $x^*=(x_1^*,\dots,x_n^*)$ tel que $x_j^*$ correspond au chiffre le plus fréquent dans la $j$^ème^ coordonnée des 10 % meilleurs échantillons. L'algorithme décrit par @hongrois, et que nous utilisons dans notre projet, pat de ce principe mais en imposant que $x^*$ soit bien une permutation :
+est le $x^*=(x_1^*,\dots,x_n^*)$ tel que $x_j^*$ correspond au chiffre le plus fréquent dans la $j$^ème^ coordonnée des 10 % meilleurs échantillons. L'algorithme décrit par @hongrois, et que nous utilisons dans notre projet, part de ce principe mais en imposant en outre que $x^*$ soit bien une permutation :
 
-1. On crée une matrice $F=(f_{i,j})\in\mathcal M_{n,m}(\N)$ telle $f_{i,j}$ soit égal au nombre de fois que l'entier $j$ apparait en $i$^ème^ position parmi les 10 % meilleurs échantillon.
+1. On crée une matrice $F=(f_{i,j})\in\mathcal M_{n,m}(\N)$ telle que $f_{i,j}$ soit égal au nombre de fois que l'entier $j$ apparait en $i$^ème^ position parmi les 10 % meilleurs échantillon.
 
 2. On sélectionne une composante par ligne et par colonne de $F$ de façon à ce que leur somme soit maximale. Cette étape est faite avec la fonction `clue::solve_LSAP`.
 
-@hongrois montre que la constante de normalisation de $\pi_{\lambda,x^*}$ est en fait connue est égale à :
+####  Trouver $\lambda$ 
+
+@hongrois montre que la constante de normalisation de $\pi_{\lambda,x^*}$ est en fait connue et égale à :
 $$
 m!\exp(-\lambda m)\sum_{k=0}^{m}\frac{(\exp(\lambda)-1)^{k}}{k!}
 $$
@@ -738,16 +749,70 @@ m\sum_{k=0}^{m}\frac{(\exp(\lambda)-1)^{k}}{k!}
 \frac{1}{\sum_{i=1}^N\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}\sum_{i=1}^N\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}d(X_i,x^*) = 0
 $$
 
-**Remarque importante** : Dans notre cas, le problème est que nous observons une croissance rapide de $\lambda$ à chaque itération de la méthode de *Cross-Entropy*. Ainsi, si $y$ n'est pas décodé dans les premières itérations (ce qui est souvent le cas pour $m$ et $n$ grands), les échantillons $X_i$ générés seront très proches de $x^*$ (voir partie \@ref(sec:mh)) et on ne trouvera pas $y$. Ce problème vient sûrement du fait que les permutations qui ont les meilleurs scores (sur lesquels est faite la maximisation) sont corrélées entre elles : le $\lambda$ qui représente cette distribution est donc grand. De plus le problème d'optimisation n'avait pas toujours de solution sur $[0,10]$, même pour des petites valeurs de $m$ et $n$ de $m$ et $n$ (voir par exemple partie \@ref(sec:codeq3)).   
-Nous avons testé plusieurs approches pour $\lambda$ : en le faisant croître linéaire (l'idée étant que plus on se rapproche de la solution, plus les simulations doivent être proches de $x^*$), constant et maximum de vraisemblance. La solution qui donnait les meilleurs résultats est de prendre $\lambda = 1$.
+**Remarque importante** : Dans notre cas, le problème est que nous observons une croissance rapide de $\lambda$ à chaque itération de la méthode de *Cross-Entropy*. Ainsi, si $y$ n'est pas décodé dans les premières itérations (ce qui est souvent le cas pour $m$ et $n$ grands), les échantillons $X_i$ générés seront très proches de $x^*$ (voir partie \@ref(sec:mh)) et on ne trouvera pas $y$. Ce problème vient sûrement du fait que les permutations qui ont les meilleurs scores (sur lesquels est faite la maximisation) sont corrélées entre elles : le $\lambda$ qui représente cette distribution est donc grand. De plus le problème d'optimisation n'avait pas toujours de solution sur $[0,10]$, même pour des petites valeurs de $m$ et $n$ de $m$ et $n$ (voir par exemple partie \@ref(sec:codeq3)). 
+
+Partant de ce constant, nous avons testé plusieurs approches pour $\lambda$ :  
+
+1. le faire décroître linéaire (l'idée étant que plus on se rapproche de la solution, plus les simulations doivent être proches de $x^*$) ;
+2. le maintenir constant ;
+3. le calculer par maximum de vraisemblance grâce à la formule ci-dessus présentée dans Arrieta (2014).
+
+<i class="fas fa-arrow-alt-circle-right"></i> <b>La solution qui donnait les meilleurs résultats est de prendre $\lambda = 1$.</b>
 
 ### Résultats
 
-Les tableaux \@ref(tab:tabq3convmed) à \@ref(tab:tabq3tempsconv) montrent qu'il n'y a pas toujours convergence de $x^*$ vers $y$ en 100 itérations. 
+Revenons à notre exemple de combinaison $y$ à deviner ($n = 4$, $m = 5$) :
 
-Pour comparer cette algorithme à ceux des parties précédentes, nous avons relancé les algorithmes avec $N=5\times n \times m$ simultations. Les résultats sont dans les tableaux \@ref(tab:tabq3vsq1convmed) à \@ref(tab:tabq3vsq1convmed). Augmenter $N$ permet une convergence plus rapide dans le cas où $n<m$ mais ce n'est pas forcément le cas lorsque $m=n$. En revanche, cela augmente beaucoup le temps de calcul.  
-Par rapport aux algorithmes précédents, utiliser une loi spécifique pour les permutations donne de moins résultats. Cette algorithme pourrait
+<canvas id="myCanvasE" width="25" height="25"></canvas><canvas id="myCanvasF" width="25" height="25"></canvas><canvas id="myCanvasG" width="25" height="25"></canvas><canvas id="myCanvasH" width="25" height="25"></canvas>
 
+<script>
+var canvas = document.getElementById('myCanvasE');
+var context = canvas.getContext('2d');
+context.beginPath();
+context.arc(10, 10, 10, 0, 2 * Math.PI, true);
+context.fillStyle = '#0000FF';
+context.fill();
+context.stroke();
+
+var canvas = document.getElementById('myCanvasF');
+var context = canvas.getContext('2d');
+context.beginPath();
+context.arc(10, 10, 10, 0, 2 * Math.PI, true);
+context.fillStyle = '#FFFF00';
+context.fill();
+context.stroke();
+
+var canvas = document.getElementById('myCanvasG');
+var context = canvas.getContext('2d');
+context.beginPath();
+context.arc(10, 10, 10, 0, 2 * Math.PI, true);
+context.fillStyle = '#FF3232';
+context.fill();
+context.stroke();
+
+var canvas = document.getElementById('myCanvasH');
+var context = canvas.getContext('2d');
+context.beginPath();
+context.arc(10, 10, 10, 0, 2 * Math.PI, true);
+context.fillStyle = '#FFCFFF';
+context.fill();
+context.stroke();
+
+</script>
+
+Le troisième algorithme appliqué à cet exemple converge trouve $x^* = y* à la 12ème étape. Le temps d'exécution (1,13 seconde) est bien supérieur à précédemment.
+
+```{r modeleq3, echo=FALSE,fig.align='center'}
+modele <- readRDS("Resultats/q3.RDS")
+modele <- modele[[8]][[1]]
+mise_en_forme_tableau(modele,matriciel=FALSE)
+```
+
+
+
+Les tableaux \@ref(tab:tabq3convmed) à \@ref(tab:tabq3tempsconv) montrent qu'il n'y a pas toujours convergence de $x^*$ vers $y$ en 100 itérations avec cette troisième et dernière méthode. 
+
+Pour comparer cet algorithme à ceux des parties précédentes, nous avons relancé les mêmes algorithmes avec $N=5\times n \times m$ simultations. Les résultats sont dans les tableaux \@ref(tab:tabq3vsq1convmed) à \@ref(tab:tabq3vsq1tempsconv). 
 
 <div class="col2">
 
@@ -819,6 +884,9 @@ creation_tableau(round(stats$temps_arret),
 
 </div>
 
+Augmenter $N$ permet une convergence plus rapide dans le cas où $n<m$ mais ce n'est pas forcément le cas lorsque $m=n$. En revanche, cela augmente beaucoup le temps de calcul.  
+
+<i class="fas fa-arrow-alt-circle-right"></i>  <b>Par rapport aux algorithmes précédents, utiliser une loi spécifique pour les permutations donne des résultats moins concluants, à la fois en termes de temps de calcul et de vitesse de convergence.</b>
 
 # Code {#sec:enscode}
 
@@ -837,7 +905,7 @@ library(shinyjs)
 library(shinyWidgets)
 ```
 
-Pour lancer l'application shiny :
+Pour lancer l'application shiny sur votre console `RStudio` (application également consultable en ligne à l'adresse https://antuki.shinyapps.io/mastermind)
 
 ```{r shinyapp, eval = FALSE}
 library(shiny)
@@ -995,8 +1063,6 @@ mise_en_forme_tableau <- function(modele,matriciel=TRUE){
 
 ## Questions 1 et 2 {#sec:codeq1q2}
 
-### Génération des échantillons
-
 Pour générer les échantillons en prenant ou non en compte les fait que la solution est une permutation, on utilise les codes suivants :
 
 ```{r gen_algo_ce_classique}
@@ -1050,9 +1116,7 @@ meilleure_proposition <- function(matrice){
 ```
 
 
-### Algorithme de Cross-Entropy
-
-L'algorithme de *Cross-Entropy* est définit ci-dessous. Il faut utiliser l'option `avec_remise = FALSE` si on veut tester l'algorithme en ne générant que des permutations.
+L'algorithme de *Cross-Entropy* est défini ci-dessous. Il faut utiliser l'option `avec_remise = FALSE` si on veut tester l'algorithme en ne générant que des permutations.
 
 ```{r algo_ce_classique}
 lancer_algorithme <- function(y, n, m, N = C * m * n, maxIters = 100,
@@ -1186,22 +1250,36 @@ lancer_algorithme <- function(y, n, m, N = C * m * n, maxIters = 100,
     
   )
 }
+```
+
+**Exemple d'application**
+
+On fixe $m = 6$ et $n = 4$ et on génère un $y$ aléatoirement.
+
+```{r algo_ce_classique_applic1}
 m = 6
 n = 4
 set.seed(1)
-y <- initialiser_y(m = m, n = n, avec_remise = TRUE)
+y <- initialiser_y(m = m, n = n, avec_remise = TRUE) #
 y
-resultat <- lancer_algorithme(y = y, n = n, m = m,
-                              stop_d = TRUE) # Pour s'arrêter si convergence
-mise_en_forme_tableau(resultat)
-dessiner_histo(resultat$P_hat_liste, 
-               3, # On trace l'histogramme des probabilités à l'itération 3
-               c("#0000FF","#00FF00","#FF3232","#FFFF00","#CF00CF","#FFCFFF"))
-dessiner_histo(resultat$P_hat_liste, 
-               4, # On trace l'histogramme des probabilités à l'itération 4 
-               c("#0000FF","#00FF00","#FF3232","#FFFF00","#CF00CF","#FFCFFF"))
 ```
 
+On fait tourner l'algorithme et on affiche le tableau des résultats.
+
+```{r algo_ce_classique_applic2}
+resultat <- lancer_algorithme(y = y, n = n, m = m,
+                              avec_remise = TRUE, # TRUE si question 1, FALSE si question 2.
+                              stop_d = TRUE) # L'algorithme s'arrête si convergence
+mise_en_forme_tableau(resultat)
+```
+
+On trace l'histogramme de la matrice de probabilités à l'itération 4 (par exemple).
+
+```{r algo_ce_classique_applic3}
+dessiner_histo(resultat$P_hat_liste, 
+               4, #itération 4
+               c("#0000FF","#00FF00","#FF3232","#FFFF00","#CF00CF","#FFCFFF"))
+```
 
 ## Question 3 {#sec:codeq3}
 
@@ -1273,7 +1351,7 @@ creer_matriceF <- function(X_top,n,m){
 
 ```
 
-Et l'algorithme est ci-dessous. L'option `mle = TRUE` peut-être utilisée si l'on souhaite comparer les résultats.
+Et l'algorithme est ci-dessous. L'option `mle = TRUE` peut-être utilisée si l'on souhaite estimer $\lambda$ par maximum de vraisemblance.
 
 ```{r algohamming}
 lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,
@@ -1356,7 +1434,7 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,
         (sum_exp_tm1 * exp(lambda) - m* sum_exp_t)/sum_exp_t + min_loss/N_top
       }
       lambda <- tryCatch(uniroot(gradient, c(0,10))$root, error = function(e){
-        print("Pas de solution pour lambda : on fixe lambda = 1")
+        print(paste0("Pour l'itération ",iter,", pas de solution pour lambda : on fixe lambda = 1"))
         1})
       
       # lambda <- alpha * lambda + (1-alpha)* param_liste[[iter]]$lambda
@@ -1428,22 +1506,39 @@ lancer_algorithme_hamming <- function(y, n, m, N = C * (n + 1), maxIters = 100,
     
   )
 }
+```
+
+
+**Exemple d'application**
+
+On fixe $m = 6$ et $n = 4$ et on génère un $y$ aléatoirement.
+
+```{r algohamming_applic1}
 m = 6
 n = 4
 set.seed(1)
-y <- initialiser_y(m = m, n = n, avec_remise = FALSE)
+y <- initialiser_y(m = m, n = n, avec_remise = FALSE) 
 y
+```
+
+On fait tourner l'algorithme (version $\lambda = 1$) et on affiche le tableau des résultats.
+
+```{r algohamming_applic2}
+
 resultat <- lancer_algorithme_hamming(y = y, n = n, m = m,
                               # Pour s'arrêter si convergence :
                               stop_d = TRUE)
 mise_en_forme_tableau(resultat, matriciel = FALSE)
+```
+
+On fait tourner l'algorithme (version $\lambda$ maximum de vraisemblance) et on affiche le tableau des résultats.
+
+```{r algohamming_applic3}
 resultat_mle <- lancer_algorithme_hamming(y = y, n = n, m = m,
                               stop_d = TRUE, mle = TRUE,
-                              # Pour changer x* même si le score est moin bon :
+                              # Pour changer x* même si le score est moins bon :
                               meilleur_x_star = FALSE)
 mise_en_forme_tableau(resultat_mle, matriciel = FALSE)
 ```
 
-
-
-# Bilbiographie
+# Bibliographie
