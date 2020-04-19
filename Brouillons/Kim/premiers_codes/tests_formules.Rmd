@@ -9,10 +9,27 @@ output: md_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-$$ \pi(x) \alpha exp{(− \lambda d(x, x*))} $$
+
+```{r, echo = FALSE}
+library(shiny)
+
+sliderInput("bins", "Number of bins:", min = 1, max = 50, value = 30)
+
+renderPlot({
+  x <- faithful[, 2]  # Old Faithful Geyser data
+  bins <- seq(min(x), max(x), length.out = input$bins + 1)
+
+  # draw the histogram with the specified number of bins
+  hist(x, breaks = bins, col = 'darkgray', border = 'white')
+})
+```
 
 $\lambda > 0$
 
 $m \ge n$
 
 $d(x, x*)$
+
+
+$$ \pi(x) \alpha exp{(− \lambda d(x, x*))} $$
+
