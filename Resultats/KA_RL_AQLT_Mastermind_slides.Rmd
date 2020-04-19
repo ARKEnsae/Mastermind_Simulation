@@ -37,7 +37,7 @@ fontsize: 10pt
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,
-                      cache = TRUE)
+                      cache = FALSE)
 library(knitr)
 library(kableExtra)
 library(clue)
@@ -62,12 +62,13 @@ creation_tableau <- function(tab, titre = "", note_debut = NULL, note_fin = NULL
             "Au maximum 100 itérations")
   note <- c(note_debut, note, note_fin)
   tableau %>% 
-    kable(caption = titre) %>%
+    kable(caption = titre,
+                   format.args = list(decimal.mark = ",")) %>%
     kable_styling(full_width = F)%>%
     column_spec(1:2, bold = T) %>% 
     collapse_rows(columns = 1, valign = "middle") %>% 
     add_header_above(c(" " = 2, "m" = 7)) %>% 
-    footnote(general = note, general_title = "Note : ")
+    footnote(general = note, general_title = "Note : ",threeparttable = TRUE)
 }
 ```
 
@@ -75,13 +76,15 @@ creation_tableau <- function(tab, titre = "", note_debut = NULL, note_fin = NULL
 
 ### Introduction
 
-Le Mastermind est un jeu à deux joueurs, où le premier joueur choisit un *code* : une séquence de $n$ boules de couleur, parmi $m$ couleurs possibles (classiquement, n = 4 et m = 6) et le second joueur doit deviner ce code en un minimum de coups. 
+Le Mastermind, jeu à deux joueurs où :
 
-À chaque coup, le second joueur propose un code, et le premier joueur doit lui donner :
-\begin{itemize}
-\item le nombre de boules bien placées : c'est que ce nous appelons le \textit{nombre de boules noires} ;  
-\item le nombre de boules de la bonne couleur, mais mal placées : c'est que ce nous appelons le \textit{nombre de boules blanches}.
-\end{itemize}
+- Joueur 1 choisit un *code* : $n$ boules de couleur parmi $m$ couleurs possibles (classiquement $n = 4$ et $m = 6$)  
+- Joueur doit deviner ce code en un minimum de coups. À chaque coup il propose un code et J1 donne :  
+  * nombre de boules bien placées = *nombre de boules noires*  
+  * nombre de boules de la bonne couleur, mais mal placées = *nombre de boules blanches*
+  
+\pause
+$\longrightarrow$ Résolution par *Cross-Entropy*
 
 ## Rappels sur la méthode de *Cross-Entropy*
 ### Rappels sur la méthode de *Cross-Entropy*
@@ -98,22 +101,23 @@ Pour le résoudre, on lui associe un problème stochastique, en définissant :
 \item $\{f(\cdot;v),\,v\in\mathcal{V}\}$ une famille discrète de probabilités sur $\mathcal{X}$, paramétrée par un paramètre vectoriel $v$. 
 \end{itemize}
 
-Pour $u\in\mathcal{V}$, le problème est équivalent au problème d'estimation de la probabilité :
+Pour $u\in\mathcal{V}$, le problème est équivalent au problème d'estimation de la probabilité d'un événement rare :
 $$\mathbb{P}_{u}(S(X)\geq\gamma)=\sum_{x}1_{\{S(x)\geq\gamma\}}f(x;u)=\mathbb{E}_{u}[1_{\{S(x)\geq\gamma\}}]$$
 
 ### Algorithme utilisé
 
 \begin{enumerate}
 
-\item Initialisation : on fixe arbitrairement $\hat{v}_{0}$, deux paramètres $N\in \mathbb N$ et $\rho\in]0,1[$, $t = 1$.  
-\item On génère un échantillon $X_{1},\dots,X_{N}$ de loi $f(\cdot,v_{t-1})$, on calcule le quantile $(1-\rho)$ de la fonction score qui donne $\hat{\gamma}_{t}$ :
+\item<1-> \textbf{Initialisation :} on fixe arbitrairement $\hat{v}_{0}$, deux paramètres $N\in \mathbb N$ et $\rho\in]0,1[$ (ici $\rho = 0,1$), $t = 1$.  
+\item<2-> On génère un échantillon $X_{1},\dots,X_{N}$ de loi $f(\cdot,v_{t-1})$, on calcule le quantile $(1-\rho)$ de la fonction score qui donne $\hat{\gamma}_{t}$ :
 $$\hat{\gamma}_{t}=S_{\lceil(1-\rho)N\rceil}$$
 Si $\hat{\gamma}_{t}\geq\gamma^*$ on prend $\hat{\gamma}_{t}=\gamma^*$.  
-\item On utilise le même échantillon $X_{1},\dots,X_{N}$ pour trouver $\hat{v}_{t}$ :
+
+\item<3-> On utilise le même échantillon $X_{1},\dots,X_{N}$ pour trouver $\hat{v}_{t}$ :
 \begin{equation}
 \hat{v}_{t}=\underset{v}{argmax}\;\hat{D}(v)=\underset{v}{argmax}\frac{1}{N}\sum_{i=1}^{N}1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\ln f(X_{i};v)
 \end{equation}
-\item Arrêt : si pour un certain $t\geq d$, (par exemple $d=5$), on a : 
+\item<4-> Arrêt : si pour un certain $t\geq d$, (ici $d=5$), on a : 
 $$\hat{\gamma}_{t}=\hat{\gamma}_{t-1}=\dots=\hat{\gamma}_{t-d}$$
 alors on arrête l'algorithme.
 \end{enumerate}
@@ -135,7 +139,7 @@ avec $\tilde{v}_{t}$ la valeur obtenue en résolvant le problème d'optimisation
 ### Paramètres utilisés dans le projet
 
 
-Ici, la fonction $S$ de score correspond à la réponse du joueur 1 : plus il est grand plus le joueur 2 est proche de la bonne réponse. Pour toute proposition $x$ on a :
+La fonction $S$ de score correspond à la réponse du joueur 1 : plus il est grand plus le joueur 2 est proche de la bonne réponse. Pour toute proposition $x$ on a :
 $$
 S(x)=\frac{\omega_{noir}\times N_{\text{boules noires}}+\omega_{blanc}\times N_{\text{boules blanches}}
 }{
@@ -143,7 +147,6 @@ S(x)=\frac{\omega_{noir}\times N_{\text{boules noires}}+\omega_{blanc}\times N_{
 }
 $$
 Habituellement $\omega_{noir}=2$ et $\omega_{blanc}=1$.
-
 
 Dans l'algorithme de *Cross-Entropy*, $\rho = 0,1$ (la maximisation est donc faite sur les 10 \% meilleurs échantillons), $N = C\times\text{nombre de paramètres à estimer}$ (avec $C=5$ par défaut) et $d=5$.
 
@@ -198,7 +201,7 @@ creation_tableau(round(stats$temps_conv),
 
 ### Adaptation de l'algorithme précédent
 
-Désormais, le premier joueur choisit obligatoirement une \textbf{permutation}. On adapte alors l'algorithme :
+Joueur 1 choisit obligatoirement une \textbf{permutation}. On adapte alors l'algorithme :
 \begin{itemize}
 \item Initialisation : la première boule est générée en tirant un entier $x_1$ selon la loi de probabilité discrète donnée par $p_{1,\cdot} = (p_{1,1},\dots, p_{1,m})$. On pose $k=1$ et $P^{(1)} = P$.
 \item Itération : $P^{(k+1)}$ est obtenue en remplaçant la colonne $k$ de $P^{(k)}$ par 0 et en normalisant les lignes pour que leur somme valent 1. $x_{k+1}$ est alors obtenu en faisant un tirage d'une loi discrète donnée par la ligne $k+1$ de $P^{(k+1)}$. 
