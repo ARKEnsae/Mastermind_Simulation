@@ -319,18 +319,9 @@ column(6,
                                       )
                                     ))),
 
-              tabPanel("Code"#,
-         
-                       #includeHTML("../Resultats/Resultats.html")
-         
-              ),
-             tabPanel("À propos",
-                      
-                      includeMarkdown("www/a_propos.md") 
-                      
-                      
-
-             )
+              tabPanel("Rapport",
+                       tags$iframe(id="toto", src = "Rapport.html", frameborder="0", scrolling="auto", seamless=NA, style="width:100%;min-height:700px;")
+              )
   )
   
 )
