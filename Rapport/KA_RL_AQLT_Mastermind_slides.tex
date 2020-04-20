@@ -49,6 +49,15 @@
             breaklinks=true}
 \urlstyle{same}  % don't use monospace font for urls
 \newif\ifbibliography
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
 % Prevent slide breaks in the middle of a paragraph:
 \widowpenalties 1 10000
 \raggedbottom
@@ -94,6 +103,22 @@
 \usepackage{makecell}
 \usepackage{animate}
 \usepackage{fontawesome5}
+\usepackage{caption}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{decorations}
+\usetikzlibrary{decorations.pathmorphing}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{decorations.shapes}
+\usetikzlibrary{decorations.text}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{decorations.fractals}
+\usetikzlibrary{decorations.footprints}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{babel}
 
 \title{Mastermind et permutations}
 \ateneo{Projet Monte-Carlo, Ensae}
@@ -108,7 +133,7 @@
 \rel{}
 \division{25/04/2020}
 
-\departement{Ensae --- 2019-2020}
+\departement{Ensae — 2019-2020}
 \makeatletter
 \let\@@magyar@captionfix\relax
 \makeatother
@@ -129,28 +154,28 @@
 \begin{frame}{Introduction}
 \protect\hypertarget{introduction-1}{}
 
-Le Mastermind, jeu à deux joueurs où :
-
 \begin{itemize}
 \tightlist
 \item
-  Joueur 1 choisit un \emph{code} : \(n\) boules de couleur parmi \(m\)
-  couleurs possibles (classiquement \(n = 4\) et \(m = 6\))\\
+  \textbf{code} : \(n\) boules de couleur parmi \(m\) couleurs
+  possibles\\
+  (classiquement \(n = 4\) et \(m = 6\))\\
 \item
-  Joueur doit deviner ce code en un minimum de coups. À chaque coup il
-  propose un code et J1 donne :
-
-  \begin{itemize}
-  \tightlist
-  \item
-    nombre de boules bien placées = \emph{nombre de boules noires}\\
-  \item
-    nombre de boules de la bonne couleur, mais mal placées =
-    \emph{nombre de boules blanches}
-  \end{itemize}
+  \textbf{boules noires} : boules bien placées
+\item
+  \textbf{boules blanches} : boules de la bonne couleur, mais mal
+  placées
 \end{itemize}
 
-\pause
+\begin{figure}
+\begin{tikzpicture}
+\draw[color=black,decorate,decoration={brace}] (2,2) -- (3,2) node[above=0.2cm,pos=0.5] {Joueur 1};
+\draw[color=black,decorate,decoration={brace}] (3,2) -- (10,2) node[above=0.2cm,pos=0.5] {Joueur 2};
+\end{tikzpicture}
+
+\includegraphics[width=0.7\textwidth]{img/mastermind.png}
+\captionsetup{margin=0cm,format=hang,justification=justified}
+\end{figure}
 
 \(\longrightarrow\) Résolution par \emph{Cross-Entropy}
 
@@ -160,706 +185,711 @@ Le Mastermind, jeu à deux joueurs où :
 \subsection{\texorpdfstring{Rappels sur la méthode de
 \emph{Cross-Entropy}}{Rappels sur la méthode de Cross-Entropy}}\label{rappels-sur-la-muxe9thode-de-cross-entropy}}
 
-\begin{frame}{Rappels sur la méthode de \emph{Cross-Entropy}}
-\protect\hypertarget{rappels-sur-la-muxe9thode-de-cross-entropy-1}{}
+\begin{frame}{Objectif de la \emph{Cross-Entropy}}
+\protect\hypertarget{objectif-de-la-cross-entropy}{}
 
-Soit \(\mathcal{X}\) un ensemble fini d'états et \(S\) une fonction de
-score, on cherche le maximum de \(S\) sur \(\mathcal{X}\) :
-
-\begin{equation} 
+Résoudre \dots  \begin{equation} 
 S(x^{*})=\gamma^{*}=\underset{x\in\mathcal{X}}{{\max}} S(x)
 \end{equation}
 
-Pour le résoudre, on lui associe un problème stochastique, en
-définissant :
+\dots ~ en lui associant un problème stochastique :
 
 \begin{itemize}
-\item un ensemble d'indicatrices $1_{\left\{ S(x)\geq\gamma\right\}}$ sur $\mathcal{X}$ pour plusieurs seuils $\gamma\in\mathbb{R}$ ;  
-\item $\{f(\cdot;v),\,v\in\mathcal{V}\}$ une famille discrète de probabilités sur $\mathcal{X}$, paramétrée par un paramètre vectoriel $v$. 
+\item $1_{\left\{ S(x)\geq\gamma\right\}}$ sur $\mathcal{X}$ pour plusieurs seuils $\gamma\in\mathbb{R}$ ;  
+\item $\{f(\cdot;v),\,v\in\mathcal{V}\}$ famille discrète de probabilités sur $\mathcal{X}$, paramétrée par $v$. 
 \end{itemize}
-
-Pour \(u\in\mathcal{V}\), le problème est équivalent au problème
-d'estimation de la probabilité d'un événement rare :
-\[\mathbb{P}_{u}(S(X)\geq\gamma)=\sum_{x}1_{\{S(x)\geq\gamma\}}f(x;u)=\mathbb{E}_{u}[1_{\{S(x)\geq\gamma\}}]\]
 
 \end{frame}
 
-\begin{frame}{Algorithme utilisé}
-\protect\hypertarget{algorithme-utilisuxe9}{}
+\begin{frame}{Algorithme}
+\protect\hypertarget{algorithme}{}
 
 \begin{enumerate}
 
-\item<1-> \textbf{Initialisation :} on fixe arbitrairement $\hat{v}_{0}$, deux paramètres $N\in \mathbb N$ et $\rho\in]0,1[$ (ici $\rho = 0,1$), $t = 1$.  
-\item<2-> On génère un échantillon $X_{1},\dots,X_{N}$ de loi $f(\cdot,v_{t-1})$, on calcule le quantile $(1-\rho)$ de la fonction score qui donne $\hat{\gamma}_{t}$ :
+\item<1-> \textbf{Initialisation :} on fixe  $\hat{v}_{0}$, $N\in \mathbb N$ et $\rho\in]0,1[$, $t = 1$.  
+\item<2-> On génère $X_{1},\dots,X_{N} \quad  {\sim} \quad f(\cdot,v_{t-1})$, on calcule 
 $$\hat{\gamma}_{t}=S_{\lceil(1-\rho)N\rceil}$$
-Si $\hat{\gamma}_{t}\geq\gamma^*$ on prend $\hat{\gamma}_{t}=\gamma^*$.  
 
 \item<3-> On utilise le même échantillon $X_{1},\dots,X_{N}$ pour trouver $\hat{v}_{t}$ :
 \begin{equation}
 \hat{v}_{t}=\underset{v}{argmax}\;\hat{D}(v)=\underset{v}{argmax}\frac{1}{N}\sum_{i=1}^{N}1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}\ln f(X_{i};v)
 \end{equation}
-\item<4-> Arrêt : si pour un certain $t\geq d$, (ici $d=5$), on a : 
-$$\hat{\gamma}_{t}=\hat{\gamma}_{t-1}=\dots=\hat{\gamma}_{t-d}$$
-alors on arrête l'algorithme.
-\end{enumerate}
-
-\end{frame}
-
-\begin{frame}{Smoothed updating}
-\protect\hypertarget{smoothed-updating}{}
-
-Plutôt que de mettre à jour directement \(\hat{v}_{t-1}\) l'équation,
-nous faisons une mise à jour lissée -- \emph{smoothed updating} : \[
+\item<5->  \emph{[FACULTATIF] smoothed updating} (éviter l'occurence de 0 et de 1) :
+$$
 \hat{v}_{t}=\alpha\tilde{v}_{t}+(1-\alpha)\hat{v}_{t-1}
-\] avec \(\tilde{v}_{t}\) la valeur obtenue en résolvant le problème
-d'optimisation.
-
-\textbf{Intérêt} : éviter l'occurence de 0 et de 1
+$$
+\item<4-> \textbf{Arrêt} : si pour un certain $t\geq d$,  on a : 
+$$\hat{\gamma}_{t}=\hat{\gamma}_{t-1}=\dots=\hat{\gamma}_{t-d}$$
+\end{enumerate}
 
 \end{frame}
 
 \hypertarget{sec:q1}{%
 \section{\texorpdfstring{Application de la méthode de
-\emph{Cross-Entropy} au
-Mastermind}{Application de la méthode de Cross-Entropy au Mastermind}}\label{sec:q1}}
+\emph{Cross-Entropy} au Mastermind
+(Q1)}{Application de la méthode de Cross-Entropy au Mastermind (Q1)}}\label{sec:q1}}
 
-\hypertarget{paramuxe8tres-utilisuxe9s-dans-le-projet}{%
-\subsection{Paramètres utilisés dans le
-projet}\label{paramuxe8tres-utilisuxe9s-dans-le-projet}}
+\begin{frame}{Question 1}
+\protect\hypertarget{question-1}{}
 
-\begin{frame}{Paramètres utilisés dans le projet}
-\protect\hypertarget{paramuxe8tres-utilisuxe9s-dans-le-projet-1}{}
+Mettre en oeuvre un algorithme basé sur la méthode CE en détaillant :
 
-La fonction \(S\) de score correspond à la réponse du joueur 1 : plus il
-est grand plus le joueur 2 est proche de la bonne réponse. Pour toute
-proposition \(x\) on a : \[
+\begin{enumerate}
+\item la fonction score choisie;
+\item la famille paramétrique choisie (pour simuler des codes);
+\item la méthode pour simuler une loi de cette famille;
+\item la méthode utilisée pour estimer le paramètre \og optimal \fg{} à chaque étape.
+\end{enumerate}
+
+\end{frame}
+
+\hypertarget{paramuxe8tres-utilisuxe9s}{%
+\subsection{Paramètres utilisés}\label{paramuxe8tres-utilisuxe9s}}
+
+\begin{frame}{Paramètres utilisés}
+\protect\hypertarget{paramuxe8tres-utilisuxe9s-1}{}
+
+\begin{itemize}
+
+\item<1-> $\mathcal{X}=\left\{ 1,2,\dots,m\right\}^{n}$  
+
+\item<2-> Famille paramétrique : $$\mathcal{V} = \left\{ \left(p_{i,j}\right)_{i,j} \in\mathcal{M}_{n,m}([0,1])\::\:\forall i,\sum_{j=1}^mp_{i,j}=1\right\} $$
+\textbf{Remarque} : $X=(X_{1},\dots,X_{n})\in\mathcal{X}$ tirées aléatoirement selon $p_{1},\dots,p_{n}$, la $j$ \ieme composante de $p_{i}$ étant égale à $p_{ij}=\mathbb{P}(X_{i}=j)$ : probabilité d'avoir une boule de couleur $j$ en $i$ème position.
+
+\item<3-> Score : 
+$$
 S(x)=\frac{\omega_{noir}\times N_{\text{boules noires}}+\omega_{blanc}\times N_{\text{boules blanches}}
 }{
 \omega_{noir}\times n
 }
-\] Habituellement \(\omega_{noir}=2\) et \(\omega_{blanc}=1\).
+$$
+avec, par exemple, $\omega_{noir}=2$ et $\omega_{blanc}=1$.
 
-Dans l'algorithme de \emph{Cross-Entropy}, \(\rho = 0,1\) (la
-maximisation est donc faite sur les 10 \% meilleurs échantillons),
-\(N = C\times\text{nombre de paramètres à estimer}\) (avec \(C=5\) par
-défaut) et \(d=5\).
+
+\end{itemize}
 
 \end{frame}
 
-\hypertarget{application-de-la-muxe9thode-de-cross-entropy}{%
-\subsection{\texorpdfstring{Application de la méthode de
-\emph{Cross-Entropy}}{Application de la méthode de Cross-Entropy}}\label{application-de-la-muxe9thode-de-cross-entropy}}
+\hypertarget{algorithme-de-cross-entropy}{%
+\subsection{\texorpdfstring{Algorithme de
+\emph{Cross-Entropy}}{Algorithme de Cross-Entropy}}\label{algorithme-de-cross-entropy}}
 
-\begin{frame}{Application de la méthode de \emph{Cross-Entropy}}
-\protect\hypertarget{application-de-la-muxe9thode-de-cross-entropy-1}{}
+\begin{frame}{Algorithme de \emph{Cross-Entropy}}
+\protect\hypertarget{algorithme-de-cross-entropy-1}{}
 
-Mastermind : choix de \(n\) boules parmi \(m\) couleurs, on les numérote
-de 1 à \(m\).
+\begin{enumerate}
+
+
+\item Initialisation 
 
 \begin{itemize}
-\item $\mathcal{X}=\left\{ 1,2,\dots,m\right\}^{n}$  
-\item Génération des échantillons : $$\mathcal{V} = \left\{ \left(p_{i,j}\right)_{i,j} \in\mathcal{M}_{n,m}([0,1])\::\:\forall i,\sum_{j=1}^mp_{i,j}=1\right\} $$
-\item $X=(X_{1},\dots,X_{n})\in\mathcal{X}$ tirées aléatoirement selon $p_{1},\dots,p_{n}$, la $j$ \ieme composante de $p_{i}$ étant égale à $p_{ij}=\mathbb{P}(X_{i}=j)$ : probabilité d'avoir une boule de couleur $j$ en $i$ème position.
-\item Initialisation : vecteurs de probabilité uniformes pour chaque couleur
-$$
-\hat{v}_{0}=\left(\frac{1}{m}\right)_{i=1..n,j=1..m}
-$$
-\item Estimation : $p_{k,l}=\frac{\sum_{i=1}^{N}1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}1_{\left\{ X_{i,k}=l\right\} }}{\sum_{i=1}^{N}1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}$
+\item 
+\textcolor{processblue}{$\hat{v}_{0} = \left(\frac{1}{m}\right)_{i=1..n,j=1..m}$} (probabilités uniformes pour chaque couleur)
+\item \textcolor{processblue}{$N = C\times m \times n $} ($C=5$ par défaut)
+\item \textcolor{processblue}{$\rho = 0,1$} (maximisation réalisée sur les 10 \% meilleurs échantillons)
+
 \end{itemize}
+ 
+\item $X_{1},\dots,X_{N} \quad  {\sim} \quad f(\cdot,v_{t-1})$, 
+$\hat{\gamma}_{t}=S_{\lceil(1-\rho)N\rceil}$
+
+\item Trouver $\hat{v}_{t}$, qui correspond ici à la matrice de terme  :
+\textcolor{processblue}{\begin{equation}
+p_{k,l}=\frac{\sum_{i=1}^{N}1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}1_{\left\{ X_{i,k}=l\right\} }}{\sum_{i=1}^{N}1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}
+\end{equation}}
+
+\item \emph{[FACULTATIF] smoothed updating}
+
+\item Arrêt : si pour un certain $t\geq d$ (\textcolor{processblue}{$d = 5$}), on a : 
+$\hat{\gamma}_{t}=\dots=\hat{\gamma}_{t-d}$
+
+\end{enumerate}
 
 \end{frame}
 
 \hypertarget{ruxe9sultats}{%
 \subsection{Résultats}\label{ruxe9sultats}}
 
-\begin{frame}{Résultats}
-\protect\hypertarget{ruxe9sultats-1}{}
+\begin{frame}{Premiers résultats}
+\protect\hypertarget{premiers-ruxe9sultats}{}
 
-\begin{table}
+\href{https://antuki.shinyapps.io/mastermind}{Application web
+interactive}
 
-\caption{\label{tab:tabq1convmed}Médiane du numéro de simulation de convergence}
-\centering
-\begin{threeparttable}
-\begin{tabular}[t]{>{\bfseries}l|>{\bfseries}l|r|r|r|r|r|r|r}
-\hline
-\multicolumn{2}{c|}{ } & \multicolumn{7}{c}{m} \\
-\cline{3-9}
-  &    & 4 & 6 & 10 & 15 & 20 & 30 & 40\\
-\hline
- & 4 & 8 & 8 & 9 & 10,0 & 9,5 & 10,0 & 10,0\\
-\cline{2-9}
- & 6 & 9 & 10 & 11 & 11,0 & 11,0 & 11,0 & 12,0\\
-\cline{2-9}
- & 10 & 11 & 12 & 13 & 13,5 & 14,0 & 14,0 & 14,0\\
-\cline{2-9}
- & 15 & 12 & 13 & 15 & 16,0 & 17,0 & 17,5 & 18,0\\
-\cline{2-9}
- & 20 & 13 & 14 & 16 & 18,0 & 19,5 & 19,5 & 19,5\\
-\cline{2-9}
- & 30 & 14 & 16 & 19 & 21,0 & 23,0 & 24,0 & 24,0\\
-\cline{2-9}
-\multirow{-7}{*}{\raggedright\arraybackslash n} & 40 & 16 & 17 & 19 & 22,0 & 23,0 & 27,0 & 27,0\\
-\hline
-\end{tabular}
-\begin{tablenotes}
-\item \textit{Note : } 
-\item Statistiques sur 10 seeds
-\item N = 5 x n x m simulations
-\item Au maximum 100 itérations
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
+\href{https://antuki.shinyapps.io/mastermind}{\includegraphics{img/appli.png}}
 
 \end{frame}
+
+\begin{frame}{Résultats sur de nombreuses simulations}
+\protect\hypertarget{ruxe9sultats-sur-de-nombreuses-simulations}{}
+
+\tiny
+\begin{figure}
+\begin{minipage}{.4\textwidth}
+\normalsize{Itération médiane
+
+de convergence}
+\end{minipage}%
+\begin{minipage}{.6\textwidth}
+
+\begin{tabular}{>{\bfseries}l|r|r|r|r|r|r|r}
+\hline
+\textbf{n / m } & \textbf{4} & \textbf{6} & \textbf{10} & \textbf{15} & \textbf{20} & \textbf{30} & \textbf{40}\\
+\hline
+4 & 8 & 8 & 9 & 10,0 & 9,5 & 10,0 & 10,0\\
+\hline
+6 & 9 & 10 & 11 & 11,0 & 11,0 & 11,0 & 12,0\\
+\hline
+10 & 11 & 12 & 13 & 13,5 & 14,0 & 14,0 & 14,0\\
+\hline
+15 & 12 & 13 & 15 & 16,0 & 17,0 & 17,5 & 18,0\\
+\hline
+20 & 13 & 14 & 16 & 18,0 & 19,5 & 19,5 & 19,5\\
+\hline
+30 & 14 & 16 & 19 & 21,0 & 23,0 & 24,0 & 24,0\\
+\hline
+40 & 16 & 17 & 19 & 22,0 & 23,0 & 27,0 & 27,0\\
+\hline
+\end{tabular}
+\end{minipage}
+\end{figure}
+
+\begin{figure}
+\begin{minipage}{.4\textwidth}
+\normalsize{Nombre de simulations
+
+n'ayant pas convergé
+
+vers la bonne valeur}
+\end{minipage}%
+\begin{minipage}{.6\textwidth}
+
+\begin{tabular}{>{\bfseries}l|r|r|r|r|r|r|r}
+\hline
+\textbf{n / m } & \textbf{4} & \textbf{6} & \textbf{10} & \textbf{15} & \textbf{20} & \textbf{30} & \textbf{40}\\
+\hline
+4 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+\hline
+6 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+\hline
+10 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+\hline
+15 & 0 & 0 & 1 & 1 & 1 & 0 & 0\\
+\hline
+20 & 0 & 1 & 1 & 0 & 1 & 1 & 0\\
+\hline
+30 & 1 & 1 & 3 & 3 & 4 & 1 & 2\\
+\hline
+40 & 1 & 0 & 2 & 4 & 6 & 3 & 3\\
+\hline
+\end{tabular}
+\end{minipage}
+\end{figure}
+
+\begin{figure}
+\begin{minipage}{.4\textwidth}
+\normalsize{Moyenne de l'erreur
+
+à la simulation
+
+de convergence}
+\end{minipage}%
+\begin{minipage}{.6\textwidth}
+
+\begin{tabular}{>{\bfseries}l|r|r|r|r|r|r|r}
+\hline
+\textbf{n / m } & \textbf{4} & \textbf{6} & \textbf{10} & \textbf{15} & \textbf{20} & \textbf{30} & \textbf{40}\\
+\hline
+4 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000\\
+\hline
+6 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000\\
+\hline
+10 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000\\
+\hline
+15 & 0,000 & 0,000 & 0,003 & 0,003 & 0,003 & 0,000 & 0,000\\
+\hline
+20 & 0,000 & 0,005 & 0,005 & 0,000 & 0,005 & 0,005 & 0,000\\
+\hline
+30 & 0,003 & 0,003 & 0,010 & 0,005 & 0,008 & 0,002 & 0,007\\
+\hline
+40 & 0,003 & 0,000 & 0,005 & 0,005 & 0,009 & 0,004 & 0,004\\
+\hline
+\end{tabular}
+\end{minipage}
+\end{figure}
+
+\begin{figure}
+\begin{minipage}{.4\textwidth}
+\normalsize{Moyenne du temps de
+
+calcul jusqu'à
+
+la convergence}
+\end{minipage}%
+\begin{minipage}{.6\textwidth}
+
+\begin{tabular}{>{\bfseries}l|r|r|r|r|r|r|r}
+\hline
+\textbf{n / m } & \textbf{4} & \textbf{6} & \textbf{10} & \textbf{15} & \textbf{20} & \textbf{30} & \textbf{40}\\
+\hline
+4 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+\hline
+6 & 0 & 0 & 0 & 0 & 0 & 1 & 1\\
+\hline
+10 & 0 & 0 & 1 & 1 & 1 & 2 & 3\\
+\hline
+15 & 0 & 1 & 1 & 2 & 3 & 6 & 8\\
+\hline
+20 & 1 & 1 & 2 & 4 & 6 & 11 & 16\\
+\hline
+30 & 1 & 3 & 6 & 11 & 17 & 30 & 43\\
+\hline
+40 & 3 & 5 & 11 & 21 & 31 & 60 & 88\\
+\hline
+\end{tabular}
+
+\end{minipage}
+\end{figure}
+
+\normalsize
+
+\end{frame}
+
+\hypertarget{restriction-aux-permutations-q2}{%
+\section{Restriction aux permutations
+(Q2)}\label{restriction-aux-permutations-q2}}
+
+\begin{frame}{Question 2}
+\protect\hypertarget{question-2}{}
+
+Le Joueur 1 choisit obligatoirement une \textbf{permutation} (chaque
+couleur ne peut apparaître qu’une seule fois, donc \(m \leq n\)).
+
+\begin{enumerate}
+\item  Mettre en oeuvre l’algorithme précédent en l'adaptant ;
+\item  La méthode d’estimation utilisée dans la question précédente
+est toujours valide ? 
+\end{enumerate}
+
+\end{frame}
+
+\hypertarget{adaptation-de-lalgorithme-pruxe9cuxe9dent}{%
+\subsection{Adaptation de l’algorithme
+précédent}\label{adaptation-de-lalgorithme-pruxe9cuxe9dent}}
+
+\begin{frame}{Adaptation de l’algorithme précédent (1/2)}
+\protect\hypertarget{adaptation-de-lalgorithme-pruxe9cuxe9dent-12}{}
+
+Il y a \textbf{deux principaux changements} par rapport à l’algorithme
+précédent :
+
+\pause
+
+\begin{enumerate}
+
+\item Les échantillons sont désormais générés grâce à une loi \og sans remise \fg{}.
+
+\begin{itemize}
+\item Initialisation : on tire la première boule, entier $x_1$, selon la loi discrète donnée par $p_{1,\cdot} = (p_{1,1},\dots, p_{1,m})$. On pose $k=1$ et $P^{(1)} = P$.
+\pause
+\item Itération : $P^{(k+1)}$ est obtenue en remplaçant la colonne $k$ de $P^{(k)}$ par 0 et en normalisant les lignes (somme = 1). On tire $x_{k+1}$ selon la loi discrète donnée par la ligne $k+1$ de $P^{(k+1)}$. 
+\pause
+\item Si $k=n$ alors on arrête, sinon on pose $k=k+1$ et on répéte l'étape 2.
+\end{itemize}
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}{Adaptation de l’algorithme précédent (2/2)}
+\protect\hypertarget{adaptation-de-lalgorithme-pruxe9cuxe9dent-22}{}
+
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item La formule de mise à jour des paramètres s'écrit :
+$$p_{k,l}=\frac{
+\sum_{i=1}^{N}1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}1_{\left\{ X_{i,k}=l\right\} }
+\textcolor{processblue}{1_{\{X_{i}\text{ permutation}\}}}
+}{
+\sum_{i=1}^{N}1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}
+\textcolor{processblue}{1_{\{X_{i}\text{ permutation}\}}}
+}$$
+\end{enumerate}
+
+\pause
+
+Possibilité d’appliquer la méthode de génération des échantillons de la
+\textbf{question 1} \dots
+
+\pause
+
+\dots ~mais dans ce cas, beaucoup d’échantillons non pertinents (les
+non-permutations)
+
+\pause
+
+\(\longrightarrow\) Algorithme de la \textbf{question 2} améliore le
+processus en ne conservant que les permutations (telles que
+\(1_{\{X_{i}\text{ permutation}\}} = 1\))
+
+\end{frame}
+
+\hypertarget{ruxe9sultats-1}{%
+\subsection{Résultats}\label{ruxe9sultats-1}}
 
 \begin{frame}{Résultats}
 \protect\hypertarget{ruxe9sultats-2}{}
 
-\begin{table}
+\tiny
+\begin{figure}
+\begin{minipage}{.4\textwidth}
+\normalsize{Itération médiane
 
-\caption{\label{tab:tabq1erreur}Moyenne de l'erreur à la simulation de convergence}
-\centering
-\begin{threeparttable}
-\begin{tabular}[t]{>{\bfseries}l|>{\bfseries}l|r|r|r|r|r|r|r}
+de convergence
+
+\faArrowCircleRight \textbf{\ converge + vite\dots}
+}
+\end{minipage}%
+\begin{minipage}{.6\textwidth}
+
+\begin{tabular}{>{\bfseries}l|r|r|r|r|r|r|r}
 \hline
-\multicolumn{2}{c|}{ } & \multicolumn{7}{c}{m} \\
-\cline{3-9}
-  &    & 4 & 6 & 10 & 15 & 20 & 30 & 40\\
+\textbf{n / m } & \textbf{4} & \textbf{6} & \textbf{10} & \textbf{15} & \textbf{20} & \textbf{30} & \textbf{40}\\
 \hline
- & 4 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000\\
-\cline{2-9}
- & 6 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000\\
-\cline{2-9}
- & 10 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000 & 0,000\\
-\cline{2-9}
- & 15 & 0,000 & 0,000 & 0,003 & 0,003 & 0,003 & 0,000 & 0,000\\
-\cline{2-9}
- & 20 & 0,000 & 0,005 & 0,005 & 0,000 & 0,005 & 0,005 & 0,000\\
-\cline{2-9}
- & 30 & 0,003 & 0,003 & 0,010 & 0,005 & 0,008 & 0,002 & 0,007\\
-\cline{2-9}
-\multirow{-7}{*}{\raggedright\arraybackslash n} & 40 & 0,003 & 0,000 & 0,005 & 0,005 & 0,009 & 0,004 & 0,004\\
+4 & 7 & 8 & 9,0 & 9 & 9 & 10 & 10\\
+\hline
+6 &  & 8 & 9,5 & 10 & 10 & 11 & 11\\
+\hline
+10 &  &  & 10,0 & 12 & 12 & 13 & 13\\
+\hline
+15 &  &  &  & 12 & 14 & 15 & 15\\
+\hline
+20 &  &  &  &  & 14 & 17 & 17\\
+\hline
+30 &  &  &  &  &  & 18 & 19\\
+\hline
+40 &  &  &  &  &  &  & 21\\
 \hline
 \end{tabular}
-\begin{tablenotes}
-\item \textit{Note : } 
-\item L'erreur est définie comme 1 - gamma\_T
-\item Statistiques sur 10 seeds
-\item N = 5 x n x m simulations
-\item Au maximum 100 itérations
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
+\end{minipage}
+\end{figure}
+
+\begin{figure}
+\begin{minipage}{.4\textwidth}
+\normalsize{Nombre de simulations
+
+n'ayant pas convergé
+
+vers la bonne valeur}
+\end{minipage}%
+\begin{minipage}{.6\textwidth}
+
+\begin{tabular}{>{\bfseries}l|r|r|r|r|r|r|r}
+\hline
+\textbf{n / m } & \textbf{4} & \textbf{6} & \textbf{10} & \textbf{15} & \textbf{20} & \textbf{30} & \textbf{40}\\
+\hline
+4 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+\hline
+6 &  & 0 & 0 & 0 & 0 & 0 & 0\\
+\hline
+10 &  &  & 0 & 0 & 0 & 0 & 0\\
+\hline
+15 &  &  &  & 0 & 0 & 0 & 0\\
+\hline
+20 &  &  &  &  & 0 & 0 & 0\\
+\hline
+30 &  &  &  &  &  & 0 & 0\\
+\hline
+40 &  &  &  &  &  &  & 0\\
+\hline
+\end{tabular}
+\end{minipage}
+\end{figure}
+
+\begin{figure}
+\begin{minipage}{.4\textwidth}
+\normalsize{Moyenne de l'erreur
+
+à la simulation
+
+de convergence
+}
+\end{minipage}%
+\begin{minipage}{.6\textwidth}
+
+\begin{tabular}{>{\bfseries}l|r|r|r|r|r|r|r}
+\hline
+\textbf{n / m } & \textbf{4} & \textbf{6} & \textbf{10} & \textbf{15} & \textbf{20} & \textbf{30} & \textbf{40}\\
+\hline
+4 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+\hline
+6 &  & 0 & 0 & 0 & 0 & 0 & 0\\
+\hline
+10 &  &  & 0 & 0 & 0 & 0 & 0\\
+\hline
+15 &  &  &  & 0 & 0 & 0 & 0\\
+\hline
+20 &  &  &  &  & 0 & 0 & 0\\
+\hline
+30 &  &  &  &  &  & 0 & 0\\
+\hline
+40 &  &  &  &  &  &  & 0\\
+\hline
+\end{tabular}
+\end{minipage}
+\end{figure}
+
+\begin{figure}
+\begin{minipage}{.4\textwidth}
+\normalsize{Moyenne du temps de calcul
+
+jusqu'à la convergence
+
+\faArrowCircleRight \textbf{\ \dots \ mais est + gourmand}
+}
+\end{minipage}%
+\begin{minipage}{.6\textwidth}
+
+\begin{tabular}{>{\bfseries}l|r|r|r|r|r|r|r}
+\hline
+\textbf{n / m } & \textbf{4} & \textbf{6} & \textbf{10} & \textbf{15} & \textbf{20} & \textbf{30} & \textbf{40}\\
+\hline
+4 & 0 & 0 & 0 & 0 & 0 & 1 & 1\\
+\hline
+6 &  & 0 & 0 & 1 & 1 & 2 & 3\\
+\hline
+10 &  &  & 1 & 2 & 3 & 6 & 9\\
+\hline
+15 &  &  &  & 5 & 9 & 15 & 22\\
+\hline
+20 &  &  &  &  & 15 & 29 & 44\\
+\hline
+30 &  &  &  &  &  & 69 & 109\\
+\hline
+40 &  &  &  &  &  &  & 211\\
+\hline
+\end{tabular}
+\end{minipage}
+\end{figure}
+
+\normalsize
 
 \end{frame}
 
-\begin{frame}{Résultats}
-\protect\hypertarget{ruxe9sultats-3}{}
+\hypertarget{loi-spuxe9cifique-pour-guxe9nuxe9rer-les-permutations-q3}{%
+\section{Loi spécifique pour générer les permutations
+(Q3)}\label{loi-spuxe9cifique-pour-guxe9nuxe9rer-les-permutations-q3}}
 
-\begin{table}
+\begin{frame}{Question 3}
+\protect\hypertarget{question-3}{}
 
-\caption{\label{tab:tabq1nbnonconv}Nombre de simulations n'ayant pas convergé vers la bonne valeur}
-\centering
-\begin{threeparttable}
-\begin{tabular}[t]{>{\bfseries}l|>{\bfseries}l|r|r|r|r|r|r|r}
-\hline
-\multicolumn{2}{c|}{ } & \multicolumn{7}{c}{m} \\
-\cline{3-9}
-  &    & 4 & 6 & 10 & 15 & 20 & 30 & 40\\
-\hline
- & 4 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-\cline{2-9}
- & 6 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-\cline{2-9}
- & 10 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-\cline{2-9}
- & 15 & 0 & 0 & 1 & 1 & 1 & 0 & 0\\
-\cline{2-9}
- & 20 & 0 & 1 & 1 & 0 & 1 & 1 & 0\\
-\cline{2-9}
- & 30 & 1 & 1 & 3 & 3 & 4 & 1 & 2\\
-\cline{2-9}
-\multirow{-7}{*}{\raggedright\arraybackslash n} & 40 & 1 & 0 & 2 & 4 & 6 & 3 & 3\\
-\hline
-\end{tabular}
-\begin{tablenotes}
-\item \textit{Note : } 
-\item Statistiques sur 10 seeds
-\item N = 5 x n x m simulations
-\item Au maximum 100 itérations
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
-
-\end{frame}
-
-\begin{frame}{Résultats}
-\protect\hypertarget{ruxe9sultats-4}{}
-
-\begin{table}
-
-\caption{\label{tab:tabq1tempsconv}Moyenne du temps de calcul jusqu'à la convergence (en secondes)}
-\centering
-\begin{threeparttable}
-\begin{tabular}[t]{>{\bfseries}l|>{\bfseries}l|r|r|r|r|r|r|r}
-\hline
-\multicolumn{2}{c|}{ } & \multicolumn{7}{c}{m} \\
-\cline{3-9}
-  &    & 4 & 6 & 10 & 15 & 20 & 30 & 40\\
-\hline
- & 4 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-\cline{2-9}
- & 6 & 0 & 0 & 0 & 0 & 0 & 1 & 1\\
-\cline{2-9}
- & 10 & 0 & 0 & 1 & 1 & 1 & 2 & 3\\
-\cline{2-9}
- & 15 & 0 & 1 & 1 & 2 & 3 & 6 & 8\\
-\cline{2-9}
- & 20 & 1 & 1 & 2 & 4 & 6 & 11 & 16\\
-\cline{2-9}
- & 30 & 1 & 3 & 6 & 11 & 17 & 30 & 43\\
-\cline{2-9}
-\multirow{-7}{*}{\raggedright\arraybackslash n} & 40 & 3 & 5 & 11 & 21 & 31 & 60 & 88\\
-\hline
-\end{tabular}
-\begin{tablenotes}
-\item \textit{Note : } 
-\item Statistiques sur 10 seeds
-\item N = 5 x n x m simulations
-\item Au maximum 100 itérations
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
-
-\end{frame}
-
-\hypertarget{restriction-aux-permutations}{%
-\section{Restriction aux
-permutations}\label{restriction-aux-permutations}}
-
-\hypertarget{adaptation-de-lalgorithme-pruxe9cuxe9dent}{%
-\subsection{Adaptation de l'algorithme
-précédent}\label{adaptation-de-lalgorithme-pruxe9cuxe9dent}}
-
-\begin{frame}{Adaptation de l'algorithme précédent}
-\protect\hypertarget{adaptation-de-lalgorithme-pruxe9cuxe9dent-1}{}
-
-Joueur 1 choisit obligatoirement une \textbf{permutation}. On adapte
-alors l'algorithme :
+Considérons désormais la loi suivante sur l’ensemble des permutations :
+\[\pi_{\lambda,x^*}(x) \propto \exp{(-\lambda d(x,x^{*}))}\] avec :
 
 \begin{itemize}
-\item Initialisation : la première boule est générée en tirant un entier $x_1$ selon la loi de probabilité discrète donnée par $p_{1,\cdot} = (p_{1,1},\dots, p_{1,m})$. On pose $k=1$ et $P^{(1)} = P$.
-\item Itération : $P^{(k+1)}$ est obtenue en remplaçant la colonne $k$ de $P^{(k)}$ par 0 et en normalisant les lignes pour que leur somme valent 1. $x_{k+1}$ est alors obtenu en faisant un tirage d'une loi discrète donnée par la ligne $k+1$ de $P^{(k+1)}$. 
-\item Si $k=n$ alors on arrête, sinon on pose $k=k+1$ et on répéte l'étape 2.
+\item $\lambda$ > 0
+\item $d(x,x^{*})$ : distance de Hamming (nombre de positions où les deux permutations $x$ et $x^{*}$ diffèrent). 
 \end{itemize}
 
-Les autres étapes de l'algorithme restent les mêmes.
+\begin{enumerate}
+\item Proposer un algorithme de MCMC pour simuler selon une telle loi ;
+\item Utiliser cet algorithme au sein d’une approche CE ;
+\item Comparer la performance de l’algorithme obtenu à l’algorithme proposé en question 1.
+\end{enumerate}
 
 \end{frame}
 
-\hypertarget{estimation}{%
-\subsection{Estimation}\label{estimation}}
+\begin{frame}{Adaptation de l’algorithme de CE}
+\protect\hypertarget{adaptation-de-lalgorithme-de-ce}{}
 
-\begin{frame}{Estimation}
-\protect\hypertarget{estimation-1}{}
+\begin{enumerate}
+
+
+\item Initialisation 
 
 \begin{itemize}
-\item La méthode d'estimation upour mettre à jour les $p_{i,j}$ reste la même.
-\item $P=(p_{i,j})$ s'interprète de la même façon que précédemment : la loi des $X_i$ est la même.
-\item La formule de mise à jour des paramètres s'écrit :
-$$p_{k,l}=\frac{
-\sum_{i=1}^{N}1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}1_{\left\{ X_{i,k}=l\right\} }
-1_{\{X_{i}\text{ permutation}\}}
-}{
-\sum_{i=1}^{N}1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}
-1_{\{X_{i}\text{ permutation}\}}
-}$$
+\item 
+\textcolor{processblue}{Tirage aléatoire de $x^*_0$ et  $\lambda_0=1$.}
+\item $N = C\times \textcolor{processblue}{(n+1)} $ ($C=5$ par défaut)
+\item $\rho = 0,1$ (maximisation réalisée sur les 10 \% meilleurs échantillons)
+
 \end{itemize}
+ 
+\item $X_{1},\dots,X_{N}$ générés avec la \textcolor{processblue}{loi $\pi_{\lambda_t,x^*_t}$} (Metropolis-Hastings), calcul de 
+$\hat{\gamma}_{t}=S_{\lceil(1-\rho)N\rceil}$
 
-Il est donc possible de mettre à jour les paramètres en appliquant la
-méthode de génération des échantillons de la partie mais beaucoup
-d'échantillons ne seraient plus pertinents : le nouvel algorithme de
-génération permet juste d'améliorer le processus de génération en ne
-proposant que des permutations, on a
-\(1_{\{X_{i}\text{ permutation}\}} = 1\).
+\item \textcolor{processblue}{Trouver $\tilde x_{t+1}$. Si $S(\tilde x_{t+1})\geq S(x^*_t)$ alors $x^*_{t+1} = \tilde x_{t+1}$, sinon $x^*_{t+1}=x^*_{t}$. On fixe $\lambda_{t+1}=1$}
 
-\end{frame}
+\item \emph{[FACULTATIF] \textcolor{processblue}{Pas de smoothed updating}}
 
-\hypertarget{ruxe9sultats-1-1}{%
-\subsection{Résultats (1)}\label{ruxe9sultats-1-1}}
+\item \textcolor{processblue}{Arrêt : si pour un certain $t$, $S(x^*_{t})=1$ alors on arrête l'algorithme.}
 
-\begin{frame}{Résultats}
-\protect\hypertarget{ruxe9sultats-5}{}
-
-\begin{table}
-
-\caption{\label{tab:tabq2convmed}Médiane du numéro de simulation de convergence}
-\centering
-\begin{threeparttable}
-\begin{tabular}[t]{>{\bfseries}l|>{\bfseries}l|r|r|r|r|r|r|r}
-\hline
-\multicolumn{2}{c|}{ } & \multicolumn{7}{c}{m} \\
-\cline{3-9}
-  &    & 4 & 6 & 10 & 15 & 20 & 30 & 40\\
-\hline
- & 4 & 7 & 8 & 9,0 & 9 & 9 & 10 & 10\\
-\cline{2-9}
- & 6 &  & 8 & 9,5 & 10 & 10 & 11 & 11\\
-\cline{2-9}
- & 10 &  &  & 10,0 & 12 & 12 & 13 & 13\\
-\cline{2-9}
- & 15 &  &  &  & 12 & 14 & 15 & 15\\
-\cline{2-9}
- & 20 &  &  &  &  & 14 & 17 & 17\\
-\cline{2-9}
- & 30 &  &  &  &  &  & 18 & 19\\
-\cline{2-9}
-\multirow{-7}{*}{\raggedright\arraybackslash n} & 40 &  &  &  &  &  &  & 21\\
-\hline
-\end{tabular}
-\begin{tablenotes}
-\item \textit{Note : } 
-\item S'il n'y a pas convergence les statistiques ne sont pas calculées
-\item Statistiques sur 10 seeds
-\item N = 5 x n x m simulations
-\item Au maximum 100 itérations
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
+\end{enumerate}
 
 \end{frame}
 
-\begin{frame}{Résultats}
-\protect\hypertarget{ruxe9sultats-6}{}
-
-\begin{table}
-
-\caption{\label{tab:tabq2erreur}Moyenne de l'erreur à la simulation de convergence}
-\centering
-\begin{threeparttable}
-\begin{tabular}[t]{>{\bfseries}l|>{\bfseries}l|r|r|r|r|r|r|r}
-\hline
-\multicolumn{2}{c|}{ } & \multicolumn{7}{c}{m} \\
-\cline{3-9}
-  &    & 4 & 6 & 10 & 15 & 20 & 30 & 40\\
-\hline
- & 4 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-\cline{2-9}
- & 6 &  & 0 & 0 & 0 & 0 & 0 & 0\\
-\cline{2-9}
- & 10 &  &  & 0 & 0 & 0 & 0 & 0\\
-\cline{2-9}
- & 15 &  &  &  & 0 & 0 & 0 & 0\\
-\cline{2-9}
- & 20 &  &  &  &  & 0 & 0 & 0\\
-\cline{2-9}
- & 30 &  &  &  &  &  & 0 & 0\\
-\cline{2-9}
-\multirow{-7}{*}{\raggedright\arraybackslash n} & 40 &  &  &  &  &  &  & 0\\
-\hline
-\end{tabular}
-\begin{tablenotes}
-\item \textit{Note : } 
-\item S'il n'y a pas convergence les statistiques ne sont pas calculées
-\item L'erreur est définie comme 1 - gamma\_T
-\item Statistiques sur 10 seeds
-\item N = 5 x n x m simulations
-\item Au maximum 100 itérations
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
-
-\end{frame}
-
-\begin{frame}{Résultats}
-\protect\hypertarget{ruxe9sultats-7}{}
-
-\begin{table}
-
-\caption{\label{tab:tabq2nbnonconv}Nombre de simulations n'ayant pas convergé vers la bonne valeur}
-\centering
-\begin{threeparttable}
-\begin{tabular}[t]{>{\bfseries}l|>{\bfseries}l|r|r|r|r|r|r|r}
-\hline
-\multicolumn{2}{c|}{ } & \multicolumn{7}{c}{m} \\
-\cline{3-9}
-  &    & 4 & 6 & 10 & 15 & 20 & 30 & 40\\
-\hline
- & 4 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-\cline{2-9}
- & 6 &  & 0 & 0 & 0 & 0 & 0 & 0\\
-\cline{2-9}
- & 10 &  &  & 0 & 0 & 0 & 0 & 0\\
-\cline{2-9}
- & 15 &  &  &  & 0 & 0 & 0 & 0\\
-\cline{2-9}
- & 20 &  &  &  &  & 0 & 0 & 0\\
-\cline{2-9}
- & 30 &  &  &  &  &  & 0 & 0\\
-\cline{2-9}
-\multirow{-7}{*}{\raggedright\arraybackslash n} & 40 &  &  &  &  &  &  & 0\\
-\hline
-\end{tabular}
-\begin{tablenotes}
-\item \textit{Note : } 
-\item Statistiques sur 10 seeds
-\item N = 5 x n x m simulations
-\item Au maximum 100 itérations
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
-
-\end{frame}
-
-\begin{frame}{Résultats}
-\protect\hypertarget{ruxe9sultats-8}{}
-
-\begin{table}
-
-\caption{\label{tab:tabq2tempsconv}Moyenne du temps de calcul jusqu'à la convergence (en secondes)}
-\centering
-\begin{threeparttable}
-\begin{tabular}[t]{>{\bfseries}l|>{\bfseries}l|r|r|r|r|r|r|r}
-\hline
-\multicolumn{2}{c|}{ } & \multicolumn{7}{c}{m} \\
-\cline{3-9}
-  &    & 4 & 6 & 10 & 15 & 20 & 30 & 40\\
-\hline
- & 4 & 0 & 0 & 0 & 0 & 0 & 1 & 1\\
-\cline{2-9}
- & 6 &  & 0 & 0 & 1 & 1 & 2 & 3\\
-\cline{2-9}
- & 10 &  &  & 1 & 2 & 3 & 6 & 9\\
-\cline{2-9}
- & 15 &  &  &  & 5 & 9 & 15 & 22\\
-\cline{2-9}
- & 20 &  &  &  &  & 15 & 29 & 44\\
-\cline{2-9}
- & 30 &  &  &  &  &  & 69 & 109\\
-\cline{2-9}
-\multirow{-7}{*}{\raggedright\arraybackslash n} & 40 &  &  &  &  &  &  & 211\\
-\hline
-\end{tabular}
-\begin{tablenotes}
-\item \textit{Note : } 
-\item S'il n'y a pas convergence les statistiques ne sont pas calculées
-\item Statistiques sur 10 seeds
-\item N = 5 x n x m simulations
-\item Au maximum 100 itérations
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
-
-\end{frame}
-
-\begin{frame}{Comparaison questions 1 et 2}
-\protect\hypertarget{comparaison-questions-1-et-2}{}
-
-Le nombre d'itérations nécessaires pour converger est plus faible dans
-la méthode de la question 2, en adaptant l'algorithme pour ne tirer que
-des permutations, mais l'algorithme est plus gourmand en temps de
-calcul.
-
-Cela vient du mécanisme utilisé pour tiré les échantillons qui a une
-complexité plus importante.
-
-\end{frame}
-
-\hypertarget{utilisation-dune-loi-spuxe9cifique-pour-guxe9nuxe9rer-les-permutations}{%
-\subsection{Utilisation d'une loi spécifique pour générer les
-permutations}\label{utilisation-dune-loi-spuxe9cifique-pour-guxe9nuxe9rer-les-permutations}}
-
-\begin{frame}{Utilisation d'une loi spécifique pour générer les
-permutations}
-\protect\hypertarget{utilisation-dune-loi-spuxe9cifique-pour-guxe9nuxe9rer-les-permutations-1}{}
-
-Loi sur l'ensemble des permutations :
-\(\pi_{\lambda,x^*}(x) \propto \exp{(-\lambda d(x,x^{*}))}\)
-
-Pour générer les échantillons on utilise l'algorithme de
-Metropolis-Hastings.
-
-Pour la mise en oeuvre de la méthode de \emph{Cross-Entropy}, on va
-mettre à jour \(\lambda\) et \(x^*\) à chaque itération.
-
-Le critère d'arrêt qui est utilisé est \(x^*=y\) (i.e. \(S(x^*)=1\)).
-
-Nous avons ici \(n+1\) paramètres à estimer, nous générons donc
-\(N = C\times (n+1)\) échantillons à chaque itération de la
-\emph{Cross-Entropy}.
-
-\end{frame}
-
-\begin{frame}{Algorithme utilisé}
-\protect\hypertarget{algorithme-utilisuxe9-1}{}
-
-\begin{itemize}
-\item Initialisation : on tire aléatoire $x^*_0$ et on prend $\lambda_0=1$.
-\item  On génère un échantillon $X_{1},\dots,X_{N}$, $N=5\times (n+1)$, de loi $\pi_{\lambda_t,x^*_t}$. On calcule le quantile 0,90 de la fonction score qui donne $\hat{\gamma}_{t}$ : $\hat{\gamma}_{t}=S_{\lceil0.9N\rceil}$
-\item On utilise le même échantillon $X_{1},\dots,X_{N}$ pour trouver $\tilde x_{t+1}$. Si $S(\tilde x_{t+1})\geq S(x^*_t)$ alors $x^*_{t+1} = \tilde x_{t+1}$, sinon $x^*_{t+1}=x^*_{t}$. On fixe $\lambda_{t+1}=1$
-\item Arrêt : si pour un certain $t$, $S(x^*_{t})=1$ alors on arrête l'algorithme.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}{Génération de l'échantillon : Metropolis-Hastings}
+\begin{frame}{Génération de l’échantillon : Metropolis-Hastings}
 \protect\hypertarget{guxe9nuxe9ration-de-luxe9chantillon-metropolis-hastings}{}
 
-Algorithme de Metropolis-Hastings avec le mécanisme de proposition
-suivant : inverser deux éléments de la permutation (symétrique).
+\faArrowCircleRight \textbf{ mécanisme de proposition} : inverser deux
+éléments de la permutation (symétrique).
 
-Pour \(m=n\), les \(X_i\) sont des vraies permutations sur
-\(\{1,\dots,m\}\).
+\pause
+
+Pour \(m=n\), (vraies permutations)
 
 \begin{itemize}
-\item Initialisation : on choisit $x_0$ une permutation au hasard de $\{1,\dots,m\}$ et on fixe $t=0$.
+\item Initialisation : on choisit $x_0$ une permutation au hasard et on fixe $t=0$.
+
+\pause 
+
 \item Itération : 
 \begin{itemize}
-\item On permute au hasard deux éléments de $x_t$ et on note $x'$ la nouvelle permutation (on fait donc une transposition de $x_t$).
+\item On permute au hasard deux éléments de $x_t$ et on note $x'$ la nouvelle permutation.
+
+\pause 
+
 \item On calcule la probabilité d'acceptation : $r(x',x_t)=\min\left(1,\,\frac{\pi_{\lambda,x^*}(x')}{\pi_{\lambda,x^*}(x_{t})}\right)
 =\min\left(1,\,\mathrm{e^{-\lambda(d(x',x^{*})-d(x_{t},x^{*}))}}\right)$
+
+\pause 
+
 \item Acceptation ou rejet : on génére une loi uniforme $u\in[0,1]$. Si $u \leq r(x',x_{t}) $ alors on accepte le nouvel état et on pose $x_{t+1}=x'$, sinon $x_{t+1}=x_{t}$.
+
+\pause 
+
 \item Incrémentation : $t=t+1$.
 \end{itemize}
 \end{itemize}
 
 \end{frame}
 
-\begin{frame}{Génération de l'échantillon : Metropolis-Hastings}
+\begin{frame}{Génération de l’échantillon : Metropolis-Hastings}
 \protect\hypertarget{guxe9nuxe9ration-de-luxe9chantillon-metropolis-hastings-1}{}
 
-Pour \(m>n\), \(x^*\) ne peut être une vraie permutation. Nous
-raisonnons de la même façon en modifiant deux étapes :
+Pour \(m>n\), nous raisonnons de la même façon en modifiant deux étapes
+:
 
 \begin{itemize}
 \item Dans le mécanisme de proposition nous inversons deux coordonnées mais en imposant qu'au moins une des deux soit plus petite que $n$ ;
-\item Dans le calcul de la probabilité d'acceptation nous ne calculons la distance de Hamming que sur les $n$ premières coordonnées $x'$ et $x_t$ (comme $x^*$ est un vecteur de taille $n$) ;
+\item Dans le calcul de la probabilité d'acceptation nous ne calculons la distance de Hamming que sur les $n$ premières coordonnées $x'$ et $x_t$.
 \end{itemize}
 
-\(d(x',x^{*})-d(x_{t},x^{*})\in\{-2,-1,0,1,2\}\) : si par rapport à
-\(x_t\) dans \(x'\) ne diminue pas la distance de Hamming à \(x^{*}\)
-alors on accepte le nouvel état ; s'il y a pas de nouvel élément mal
-placé alors on accepte \(x'\) avec une probabilité de \(e^{-\lambda}\).
+\pause
 
-Pour \(\lambda>2\) la probabilité d'accepter un nouvel état moins proche
-que \(x_t\) de \(x^*\) est donc inférieure à 14 \% et pour \(\lambda>3\)
-cette probabilité inférieure à 5 \%. Pour \(\lambda\) grand on converge
-donc vers \(x^*\) et tous les échantillons seront égaux à \(x^*\).
+\textbf{Remarque} : Pour \(\lambda\) grand on converge vers \(x^*\) et
+tous les échantillons seront égaux à \(x^*\).
 
-\end{frame}
+\bigskip
+\bigskip
 
-\begin{frame}{Traitements spécifiques}
-\protect\hypertarget{traitements-spuxe9cifiques}{}
+\pause
 
-L'algorithme de Metropolis-Hastings a deux désavantages :
+L’algorithme de Metropolis-Hastings a \textbf{deux désavantages} :
 
 \begin{enumerate}
-\item Pour générer la loi cible, il construit itérativement une chaîne de Markov qui converge vers cette loi cible. Les échantillons initiaux peuvent donc suivre une distribution très différente de celle recherché. Il est donc nécessaire de rejetter une partie importante des échantillons initiaux (*burn-in*). C'est corrigé en enlevant les $250\times m$ premières observations.
-\item  Par construction, les échantillons proches sont corrélés entre eux. Pour générer des échantillons indépendants il faut donc en rejeter et ne garder que les $n$ièmes échantillons. Dans notre cas nous prenons $n=100$ pour toutes les simulations.
+\item Le \emph{burn-in}.
+\item Les échantillons générés à des périodes proches sont corrélés entre eux. 
 \end{enumerate}
 
 \end{frame}
 
-\begin{frame}{Gestion du burn-in: n = 4 et m = 6}
-\protect\hypertarget{gestion-du-burn-in-n-4-et-m-6}{}
+\begin{frame}{Gestion du burn-in}
+\protect\hypertarget{gestion-du-burn-in}{}
 
 \begin{figure}
-\includegraphics[width=9.83in]{img/n_4_m_6} \caption{n = 4 et m = 6}\label{fig:unnamed-chunk-1}
+\begin{minipage}{.5\textwidth}
+\includegraphics[width=1\textwidth]{img/n_4_m_6.png}
+\captionsetup{margin=0cm,format=hang,justification=justified}
+\caption{n = 4, m = 6}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+\includegraphics[width=1\textwidth]{img/n_40_m_40.png}
+\captionsetup{margin=0cm,format=hang,justification=justified}
+\caption{n = 40, m = 40}
+\end{minipage}
 \end{figure}
+
+\bigskip
+
+\bigskip
+
+\(\longrightarrow\) Enlever les \(250\times m\) premières observations.
 
 \end{frame}
 
-\begin{frame}{Gestion du burn-in : n = m = 40}
-\protect\hypertarget{gestion-du-burn-in-n-m-40}{}
-
-\begin{figure}
-\includegraphics[width=9.83in]{img/n_40_m_40} \caption{n = 40 et m = 40}\label{fig:unnamed-chunk-2}
-\end{figure}
-
-\end{frame}
-
-\begin{frame}[fragile]{Gestion des autocorrélations}
+\begin{frame}{Gestion des autocorrélations}
 \protect\hypertarget{gestion-des-autocorruxe9lations}{}
 
-Par construction, les échantillons proches sont corrélés.
-
-On peut utiliser la fonction \texttt{portes::LjungBox} pour calculer les
-autocorrélation : séries multivariées.
-
-Mais intégrer ce test dans le mécanisme de proposition est très couteux
-en temps.
-
-Garder tous les 80ièmes observations corrige ce problème.
-
-\end{frame}
-
-\begin{frame}{Gestion des autocorrélations}
-\protect\hypertarget{gestion-des-autocorruxe9lations-1}{}
+Autocorrélogrammes des 4 premières composantes des échantillons
+(\(\lambda = 1\), \(n = 10\) et \(m = 40\))
 
 \begin{figure}
-\includegraphics[width=33.33in]{img/acfn10m40} \caption{Autocorrélogrammes des quatres premières composantes des échantillons avec lambda = 1, n = 10 et m = 40}\label{fig:acfn10m40}
+\begin{minipage}{.5\textwidth}
+\includegraphics[width=1\textwidth]{img/acfn10m40.png}
+\captionsetup{margin=0cm,format=hang,justification=justified}
+\caption{Toutes les autocorrélations}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+\includegraphics[width=1\textwidth]{img/acfn10m40corr.png}
+\captionsetup{margin=0cm,format=hang,justification=justified}
+\caption{Pas de 80 périodes}
+\end{minipage}
 \end{figure}
 
-\end{frame}
+\bigskip
 
-\begin{frame}{Gestion des autocorrélations}
-\protect\hypertarget{gestion-des-autocorruxe9lations-2}{}
+\(\longrightarrow\) Conserver uniquement les simulations séparées de
+\(t = 80\) périodes.
 
-\begin{figure}
-\includegraphics[width=33.33in]{img/acfn10m40corr} \caption{Autocorrélogrammes des quatres premières composantes des échantillons avec un pas de 80, lambda = 1, n = 10 et m = 40}\label{fig:acfn10m40corr}
-\end{figure}
-
-\end{frame}
-
-\begin{frame}{Estimation des paramètres}
-\protect\hypertarget{estimation-des-paramuxe8tres}{}
-
-La littérature montre le problème de maximisation de la vraisemblance
-d'une loi de Mallow peut se décomposer en deux étapes :
-
-\begin{itemize}
-\item Estimation de $x^*$ qui minimise la somme des distances de Hamming.
-\item Estimation de $\lambda$ par un algorithme de type Newton-Raphston.
-\end{itemize}
-
-L'estimation des paramètres dans l'algorithme de \emph{Cross-Entropy}
-est équivalent à calculer l'estimateur de vraisemblance sur les 10 \%
-meilleurs échantillons en terme de score.
+\(\longrightarrow\) Intégrer ce test dans le mécanisme de proposition
+est \textbf{très couteux en temps}.
 
 \end{frame}
 
 \begin{frame}{Estimation de \(x^*\)}
 \protect\hypertarget{estimation-de-x}{}
 
-Intuitivement, le \(x^*\) qui minimise la somme :
-\[\sum_{i=1}^N 1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}d(X_i,x^*)\] est le
-\(x^*=(x_1^*,\dots,x_n^*)\) tel que \(x_j^*\) correspond au chiffre le
-plus fréquent dans la \(j\)ème coordonnée des 10 \% meilleurs
-échantillons.
+Trouver le \(x^*\) qui minimise la somme
+\(\sum_{i=1}^N 1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}d(X_i,x^*)\)
 
-On part de ce principe mais en imposant que \(x^*\) soit bien une
-permutation :
+\begin{itemize}
+
+\pause 
+
+\item Intuitivement, il s'agit de $x^*=(x_1^*,\dots,x_n^*)$ tel que $x_j^*$ correspond au chiffre le plus fréquent dans la $j$ème coordonnée des 10 % meilleurs échantillons.
+
+\pause 
+
+\item On part de ce principe en imposant que $x^*$ soit bien une permutation :
 
 \begin{enumerate}
-\item
-  On crée une matrice \(F=(f_{i,j})\in\mathcal M_{n,m}(\mathbb{N})\)
-  telle \(f_{i,j}\) soit égal au nombre de fois que l'entier \(j\)
-  apparait en \(i\)ème position parmi les 10 \% meilleurs échantillon.
-\item
-  On sélectionne une composante par ligne et par colonne de \(F\) de
-  façon à ce que leur somme soit maximale
+\item On crée une matrice $F=(f_{i,j})\in\mathcal M_{n,m}(\mathbb{N})$ telle $f_{i,j}$ soit égal au nombre de fois que l'entier $j$ apparait en $i$ème position parmi les 10 % meilleurs échantillon.
+
+\item On sélectionne une composante par ligne et par colonne de $F$ de façon à ce que leur somme soit maximale
 \end{enumerate}
+\end{itemize}
 
 \end{frame}
 
 \begin{frame}{Estimation de \(\lambda\)}
 \protect\hypertarget{estimation-de-lambda}{}
 
-On trouve dans la littérature la constante de normalisation de
-\(\pi_{\lambda,x^*}\) : \[
+Plusieurs tests réalisés pour estimer \(\lambda\) :
+
+\begin{enumerate}
+\item décroissance linéaire à chaque itération
+\item constance
+
+\pause 
+
+\item (Arrieta, 2014) nous fournit la constante de normalisation de $\pi_{\lambda,x^*}$ :
+$$
 m!\exp(-\lambda m)\sum_{k=0}^{m}\frac{(\exp(\lambda)-1)^{k}}{k!}
-\] Le maximum de vraisemblance est alors obtenu en prenant \(\lambda\)
-tel que : \[
+$$
+
+le $\lambda$ qui maximise la vraisemblance est alors tel que :
+\footnotesize
+$$
 \frac{
 \exp(\lambda)\sum_{k=0}^{m-1}\frac{(\exp(\lambda)-1)^{k}}{k!} -
 m\sum_{k=0}^{m}\frac{(\exp(\lambda)-1)^{k}}{k!}
@@ -867,153 +897,175 @@ m\sum_{k=0}^{m}\frac{(\exp(\lambda)-1)^{k}}{k!}
 \sum_{k=0}^{m}\frac{(\exp(\lambda)-1)^{k}}{k!}
 } +
 \frac{\sum_{i=1}^N 1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}d(X_i,x^*)}{\sum_{i=1}^N 1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}} = 0
-\] Problème : croissance rapide de \(\lambda\) à chaque itération, si
-\(y\) n'est pas décodé dans les premières itérations, les échantillons
-\(X_i\) générés seront très proches de \(x^*\) et on ne trouvera pas
-\(y\).
+$$
+\normalsize
 
-Plusieurs test pour estimer \(\lambda\) : croissance linéaire,
-décroissance, constance et maximum de vraisemblance. Meilleure solution
-: \(\lambda = 1\).
+\textbf{Problème} : croissance rapide de $\lambda$ à chaque itération. Si $y$ n'est pas décodé dans les premières itérations, les échantillons $X_i$ générés seront très proches de $x^*$ et on ne trouvera pas $y$.
+\end{enumerate}
 
-\end{frame}
+\pause
 
-\hypertarget{ruxe9sultats-2-1}{%
-\subsection{Résultats (2)}\label{ruxe9sultats-2-1}}
-
-\begin{frame}{Résultats}
-\protect\hypertarget{ruxe9sultats-9}{}
-
-Il n'y a pas toujours convergence de \(x^*\) vers \(y\) en 100
-itérations.
-
-\begin{table}
-
-\caption{\label{tab:tabq3convmed}Médiane du numéro de simulation de convergence}
-\centering
-\begin{threeparttable}
-\begin{tabular}[t]{>{\bfseries}l|>{\bfseries}l|r|r|r|r|r|r|r}
-\hline
-\multicolumn{2}{c|}{ } & \multicolumn{7}{c}{m} \\
-\cline{3-9}
-  &    & 4 & 6 & 10 & 15 & 20 & 30 & 40\\
-\hline
- & 4 & 14,5 & 4 & 8,5 & 17 & 25,5 & 21,5 & 91\\
-\cline{2-9}
- & 6 &  & 6 & 15,0 & 19 & 90,0 &  & \\
-\cline{2-9}
- & 10 &  &  & 9,0 & 31 & 73,5 &  & \\
-\cline{2-9}
- & 15 &  &  &  & 14 & 49,0 &  & \\
-\cline{2-9}
- & 20 &  &  &  &  & 23,0 &  & \\
-\cline{2-9}
- & 30 &  &  &  &  &  & 95,0 & \\
-\cline{2-9}
-\multirow{-7}{*}{\raggedright\arraybackslash n} & 40 &  &  &  &  &  &  & \\
-\hline
-\end{tabular}
-\begin{tablenotes}
-\item \textit{Note : } 
-\item S'il n'y a pas convergence les statistiques ne sont pas calculées
-\item Statistiques sur 10 seeds
-\item N = 5 x n x m simulations
-\item Au maximum 100 itérations
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
+\textbf{$\longrightarrow$ Meilleure solution : $\lambda = 1$.}
 
 \end{frame}
 
-\begin{frame}{Résultats}
-\protect\hypertarget{ruxe9sultats-10}{}
-
-\begin{table}
-
-\caption{\label{tab:tabq3nbnonconv}Nombre de simulations n'ayant pas convergé vers la bonne valeur}
-\centering
-\begin{threeparttable}
-\begin{tabular}[t]{>{\bfseries}l|>{\bfseries}l|r|r|r|r|r|r|r}
-\hline
-\multicolumn{2}{c|}{ } & \multicolumn{7}{c}{m} \\
-\cline{3-9}
-  &    & 4 & 6 & 10 & 15 & 20 & 30 & 40\\
-\hline
- & 4 & 0 & 0 & 0 & 0 & 4 & 8 & 6\\
-\cline{2-9}
- & 6 &  & 0 & 0 & 2 & 6 & 10 & 10\\
-\cline{2-9}
- & 10 &  &  & 0 & 3 & 6 & 10 & 10\\
-\cline{2-9}
- & 15 &  &  &  & 0 & 7 & 10 & 10\\
-\cline{2-9}
- & 20 &  &  &  &  & 0 & 10 & 10\\
-\cline{2-9}
- & 30 &  &  &  &  &  & 7 & 10\\
-\cline{2-9}
-\multirow{-7}{*}{\raggedright\arraybackslash n} & 40 &  &  &  &  &  &  & 10\\
-\hline
-\end{tabular}
-\begin{tablenotes}
-\item \textit{Note : } 
-\item Statistiques sur 10 seeds
-\item N = 5 x (n + 1) simulations
-\item Au maximum 100 itérations
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
-
-\end{frame}
+\hypertarget{ruxe9sultats-3}{%
+\subsection{Résultats}\label{ruxe9sultats-3}}
 
 \begin{frame}{Résultats}
-\protect\hypertarget{ruxe9sultats-11}{}
+\protect\hypertarget{ruxe9sultats-4}{}
 
-\begin{table}
+\tiny
+\begin{figure}
+\begin{minipage}{.4\textwidth}
+\normalsize{Itération médiane
 
-\caption{\label{tab:tabq3tempsconv}Moyenne du temps de calcul jusqu'à la convergence (en secondes)}
-\centering
-\begin{threeparttable}
-\begin{tabular}[t]{>{\bfseries}l|>{\bfseries}l|r|r|r|r|r|r|r}
+de convergence
+
+\faArrowCircleRight \textbf{\ converge - vite}
+}
+\end{minipage}%
+\begin{minipage}{.6\textwidth}
+
+\begin{tabular}{>{\bfseries}l|r|r|r|r|r|r|r}
 \hline
-\multicolumn{2}{c|}{ } & \multicolumn{7}{c}{m} \\
-\cline{3-9}
-  &    & 4 & 6 & 10 & 15 & 20 & 30 & 40\\
+\textbf{n / m } & \textbf{4} & \textbf{6} & \textbf{10} & \textbf{15} & \textbf{20} & \textbf{30} & \textbf{40}\\
 \hline
- & 4 & 1 & 0 & 2 & 4 & 6 & 5 & 26\\
-\cline{2-9}
- & 6 &  & 1 & 3 & 5 & 19 &  & \\
-\cline{2-9}
- & 10 &  &  & 2 & 10 & 15 &  & \\
-\cline{2-9}
- & 15 &  &  &  & 5 & 18 &  & \\
-\cline{2-9}
- & 20 &  &  &  &  & 12 &  & \\
-\cline{2-9}
- & 30 &  &  &  &  &  & 64 & \\
-\cline{2-9}
-\multirow{-7}{*}{\raggedright\arraybackslash n} & 40 &  &  &  &  &  &  & \\
+4 & 14,5 & 4 & 8,5 & 17 & 25,5 & 21,5 & 91\\
+\hline
+6 &  & 6 & 15,0 & 19 & 90,0 &  & \\
+\hline
+10 &  &  & 9,0 & 31 & 73,5 &  & \\
+\hline
+15 &  &  &  & 14 & 49,0 &  & \\
+\hline
+20 &  &  &  &  & 23,0 &  & \\
+\hline
+30 &  &  &  &  &  & 95,0 & \\
+\hline
+40 &  &  &  &  &  &  & \\
 \hline
 \end{tabular}
-\begin{tablenotes}
-\item \textit{Note : } 
-\item S'il n'y a pas convergence les statistiques ne sont pas calculées
-\item Statistiques sur 10 seeds
-\item N = 5 x (n + 1) simulations
-\item Au maximum 100 itérations
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
+\end{minipage}
+\end{figure}
+
+\begin{figure}
+\begin{minipage}{.4\textwidth}
+\normalsize{Nombre de simulations
+
+n'ayant pas convergé
+
+vers la bonne valeur
+
+\faArrowCircleRight \textbf{\ converge - souvent}
+}
+\end{minipage}%
+\begin{minipage}{.6\textwidth}
+
+\begin{tabular}{>{\bfseries}l|r|r|r|r|r|r|r}
+\hline
+\textbf{n / m } & \textbf{4} & \textbf{6} & \textbf{10} & \textbf{15} & \textbf{20} & \textbf{30} & \textbf{40}\\
+\hline
+4 & 0 & 0 & 0 & 0 & 4 & 8 & 6\\
+\hline
+6 &  & 0 & 0 & 2 & 6 & 10 & 10\\
+\hline
+10 &  &  & 0 & 3 & 6 & 10 & 10\\
+\hline
+15 &  &  &  & 0 & 7 & 10 & 10\\
+\hline
+20 &  &  &  &  & 0 & 10 & 10\\
+\hline
+30 &  &  &  &  &  & 7 & 10\\
+\hline
+40 &  &  &  &  &  &  & 10\\
+\hline
+\end{tabular}
+
+\end{minipage}
+\end{figure}
+
+\begin{figure}
+\begin{minipage}{.4\textwidth}
+\normalsize{Moyenne de l'erreur
+
+à la simulation
+
+de convergence
+}
+\end{minipage}%
+\begin{minipage}{.6\textwidth}
+
+\begin{tabular}{>{\bfseries}l|r|r|r|r|r|r|r}
+\hline
+\textbf{n / m } & \textbf{4} & \textbf{6} & \textbf{10} & \textbf{15} & \textbf{20} & \textbf{30} & \textbf{40}\\
+\hline
+4 & 0,025 & 0,312 & 0,462 & 0,525 & 0,550 & 0,662 & 0,725\\
+\hline
+6 &  & 0,208 & 0,425 & 0,492 & 0,567 & 0,633 & 0,725\\
+\hline
+10 &  &  & 0,295 & 0,440 & 0,530 & 0,640 & 0,700\\
+\hline
+15 &  &  &  & 0,360 & 0,460 & 0,587 & 0,667\\
+\hline
+20 &  &  &  &  & 0,385 & 0,528 & 0,622\\
+\hline
+30 &  &  &  &  &  & 0,425 & 0,535\\
+\hline
+40 &  &  &  &  &  &  & 0,450\\
+\hline
+\end{tabular}
+\end{minipage}
+\end{figure}
+
+\begin{figure}
+\begin{minipage}{.4\textwidth}
+\normalsize{Moyenne du temps de calcul
+
+jusqu'à la convergence
+
+\faArrowCircleRight \textbf{\ et est + gourmand}
+}
+\end{minipage}%
+\begin{minipage}{.6\textwidth}
+
+\begin{tabular}{>{\bfseries}l|r|r|r|r|r|r|r}
+\hline
+\textbf{n / m } & \textbf{4} & \textbf{6} & \textbf{10} & \textbf{15} & \textbf{20} & \textbf{30} & \textbf{40}\\
+\hline
+4 & 1 & 0 & 2 & 4 & 6 & 5 & 26\\
+\hline
+6 &  & 1 & 3 & 5 & 19 &  & \\
+\hline
+10 &  &  & 2 & 10 & 15 &  & \\
+\hline
+15 &  &  &  & 5 & 18 &  & \\
+\hline
+20 &  &  &  &  & 12 &  & \\
+\hline
+30 &  &  &  &  &  & 64 & \\
+\hline
+40 &  &  &  &  &  &  & \\
+\hline
+\end{tabular}
+\end{minipage}
+\end{figure}
+
+\normalsize
 
 \end{frame}
 
 \begin{frame}{Merci pour votre attention}
 \protect\hypertarget{merci-pour-votre-attention}{}
 
-L'ensemble du projet est disponible sous :
-\url{https://github.com/ARKEnsae/Mastermind_Simulation}
+\href{https://github.com/ARKEnsae/Mastermind_Simulation}{\faGithub{} ARKEnsae/Mastermind\_Simulation}
+
+\href{https://antuki.shinyapps.io/mastermind}{\faChartBar{} Application web}
+
+\href{https://arkensae.github.io/Mastermind_Simulation/Rapport/Rapport.html}{\faEdit{} Rapport du projet}
 
 \begin{center}
-\includegraphics[width = 5cm]{img/LOGO-ENSAE.png}
+\includegraphics[width = 2.5cm]{img/LOGO-ENSAE.png}
 \end{center}
 
 \end{frame}

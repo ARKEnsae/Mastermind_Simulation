@@ -291,7 +291,7 @@ Pour toutes les simulations, la convergence se fait en moins de 100 itérations,
 <div class="col2">
 ```{r tabq1convmed, echo=FALSE}
 stats <- readRDS("Resultats/statsq1.RDS")
-creation_tableau(stats$it_conv_med, titre = "Médiane du numéro de simulation de convergence")
+creation_tableau(stats$it_conv_med, titre = "Itération médiane de convergence")
 ```
 
 ```{r tabq1erreur, echo=FALSE}
@@ -476,7 +476,7 @@ Les tableaux \@ref(tab:tabq2convmed), \@ref(tab:tabq2erreur), \@ref(tab:tabq2tem
 ```{r tabq2convmed, echo=FALSE}
 stats <- readRDS("Resultats/statsq2.RDS")
 note_debut <- "S'il n'y a pas convergence les statistiques ne sont pas calculées"
-creation_tableau(stats$it_conv_med, titre = "Médiane du numéro de simulation de convergence",
+creation_tableau(stats$it_conv_med, titre = "Itération médiane de convergence",
                  note_debut = note_debut)
 ```
 
@@ -503,7 +503,7 @@ Les tableaux \@ref(tab:tabq1vsq2convmed), \@ref(tab:tabq1vsq2erreur), \@ref(tab:
 <div class="col2">
 ```{r tabq1vsq2convmed, echo=FALSE}
 stats <- readRDS("Resultats/statsq1vsq2.RDS")
-creation_tableau(stats$it_conv_med, titre = "Médiane du numéro de simulation de convergence")
+creation_tableau(stats$it_conv_med, titre = "Itération médiane de convergence")
 ```
 
 ```{r tabq1vsq2erreur, echo=FALSE}
@@ -819,7 +819,7 @@ Pour comparer cet algorithme à ceux des parties précédentes, nous avons relan
 ```{r tabq3convmed, echo=FALSE}
 stats <- readRDS("Resultats/statsq3.RDS")
 note_debut <- "S'il n'y a pas convergence les statistiques ne sont pas calculées"
-creation_tableau(stats$it_arret_med, titre = "Médiane du numéro de simulation de convergence",
+creation_tableau(stats$it_arret_med, titre = "Itération médiane de convergence",
                  note_debut = note_debut,
                  nb_simuls = "5 x (n + 1)")
 ```
@@ -856,7 +856,7 @@ creation_tableau(round(stats$temps_arret),
 ```{r tabq3vsq1convmed, echo=FALSE}
 stats <- readRDS("Resultats/statsq3vsq1.RDS")
 note_debut <- "S'il n'y a pas convergence les statistiques ne sont pas calculées"
-creation_tableau(stats$it_arret_med, titre = "Médiane du numéro de simulation de convergence",
+creation_tableau(stats$it_arret_med, titre = "Itération médiane de convergence",
                  note_debut = note_debut)
 ```
 

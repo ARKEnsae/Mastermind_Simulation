@@ -1,0 +1,13 @@
+\frametitle{Gestion des autocorrélations}
+\protect\hypertarget{gestion-des-autocorruxe9lations}{}
+
+Par construction, les échantillons proches sont corrélés.
+
+On peut utiliser la fonction \texttt{portes::LjungBox} pour calculer les
+autocorrélation : séries multivariées.
+
+Mais intégrer ce test dans le mécanisme de proposition est très couteux
+en temps.
+
+Garder tous les 80ièmes observations corrige ce problème.
+
