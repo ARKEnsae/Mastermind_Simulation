@@ -77,7 +77,7 @@ L'objectif de ce projet est d'appliquer trois méthodes différentes pour résou
 
 1. Mettre en oeuvre un algorithme basé sur la méthode *Cross-Entropy* (section \@ref(sec:q1)).
 
-2. Adapter la méthode précédente au cas où le premier joueur doit forcément choisir une permutation comme code (i.e. chaque couleur ne peut apparaître qu’une seule fois, donc $m \ge n$) (section \@ref(sec:q2)).
+2. Adapter la méthode précédente au cas où le premier joueur doit forcément choisir une permutation comme code (i.e. chaque couleur ne peut apparaître qu’une seule fois, donc $m \geq n$) (section \@ref(sec:q2)).
 
 3. En utilisant, au sein d'une approche de *Cross-Entropy*, la loi suivante sur l'ensemble des permutations (section \@ref(sec:q3)) :
 $$
@@ -100,7 +100,7 @@ S(x^{*})=\gamma^{*}=\underset{x\in\mathcal{X}}{{\max}} S(x)
 Pour le résoudre, on lui associe un problème stochastique d'estimation de probabilité d'événements rares. On définit :
 
 - un ensemble d'indicatrices $\1_{\left\{ S(x)\geq\gamma\right\}}$ sur $\mathcal{X}$ pour plusieurs seuils $\gamma\in\mathbb{R}$ ;  
--  $\{f(\cdot;v),\,v\in\mathcal{V}\}$ une famille discrète de probabilités sur $\mathcal{X}$, paramétrée par un paramètre vectoriel $v$. 
+-  $\{f(\cdot;v),\,v\in\mathcal{V}\}$ une famille de probabilités sur $\mathcal{X}$, paramétrée par un paramètre vectoriel $v$. 
 
 Pour $u\in\mathcal{V}$, le problème \@ref(eq:defscore) est équivalent au problème d'estimation de la probabilité :
 $$\mathbb{P}_{u}(S(X)\geq\gamma)=\sum_{x}\1_{\{S(x)\geq\gamma\}}f(x;u)=\mathbb{E}_{u}[\1_{\{S(x)\geq\gamma\}}]$$
@@ -749,13 +749,14 @@ m\sum_{k=0}^{m}\frac{(\exp(\lambda)-1)^{k}}{k!}
 \frac{1}{\sum_{i=1}^N\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}\sum_{i=1}^N\1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}d(X_i,x^*) = 0
 $$
 
-**Remarque importante** : Dans notre cas, le problème est que nous observons une croissance rapide de $\lambda$ à chaque itération de la méthode de *Cross-Entropy*. Ainsi, si $y$ n'est pas décodé dans les premières itérations (ce qui est souvent le cas pour $m$ et $n$ grands), les échantillons $X_i$ générés seront très proches de $x^*$ (voir partie \@ref(sec:mh)) et on ne trouvera pas $y$. Ce problème vient sûrement du fait que les permutations qui ont les meilleurs scores (sur lesquels est faite la maximisation) sont corrélées entre elles : le $\lambda$ qui représente cette distribution est donc grand. De plus le problème d'optimisation n'avait pas toujours de solution sur $[0,10]$, même pour des petites valeurs de $m$ et $n$ de $m$ et $n$ (voir par exemple partie \@ref(sec:codeq3)). 
+**Remarque importante** : Dans notre cas, le problème est que nous observons une croissance rapide de $\lambda$ à chaque itération de la méthode de *Cross-Entropy*. Ainsi, si $y$ n'est pas décodé dans les premières itérations (ce qui est souvent le cas pour $m$ et $n$ grands), les échantillons $X_i$ générés seront très proches de $x^*$ (voir partie \@ref(sec:mh)) et on ne trouvera pas $y$.   Intuitivement cela vient sûrement de l'algorithme de *Cross-Entropy* : le $x_t^*$ correspond à la permutation la plus proche des permutations qui ont le plus haut score. Les permutations générées sont donc "proches" de ce $x_t^*$, pour générer une telle distribution il faut donc $\lambda_t$ grand. À l'itération suivante il y a donc un effet boule de neige : $\lambda_t$ étant grand, le nouvel échantillon généré sera encore plus proche de $x_{t+1}^*$ et le $\lambda_{t+1}$ sera encore plus grand.  
+De plus le problème d'optimisation n'avait pas toujours de solution sur $]0,10]$, même pour des petites valeurs de $m$ et $n$ de $m$ et $n$ (voir par exemple partie \@ref(sec:codeq3)). 
 
 Partant de ce constant, nous avons testé plusieurs approches pour $\lambda$ :  
 
-1. le faire décroître linéaire (l'idée étant que plus on se rapproche de la solution, plus les simulations doivent être proches de $x^*$) ;
+1. le faire croître linéaire (l'idée étant que plus on se rapproche de la solution, plus les simulations doivent être proches de $x^*$ et donc plus $\lambda$ doit être grand) ;
 2. le maintenir constant ;
-3. le calculer par maximum de vraisemblance grâce à la formule ci-dessus présentée dans Arrieta (2014).
+3. le calculer par maximum de vraisemblance grâce à la formule ci-dessus présentée dans @hongrois.
 
 <i class="fas fa-arrow-alt-circle-right"></i> <b>La solution qui donnait les meilleurs résultats est de prendre $\lambda = 1$.</b>
 
