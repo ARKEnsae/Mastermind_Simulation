@@ -51,12 +51,12 @@ creation_tableau <- function(tab, titre = "", note_debut = NULL, note_fin = NULL
     footnote(general = note, general_title = "Note : ")
 }
 ```
-$$\renewcommand{\P}{\mathbb{P}}
-\renewcommand{\R}{\mathbb{R}}
-\renewcommand{\N}{\mathbb{N}}
-\newcommand\1{\mathbb{1}}
-\newcommand\E{\mathbb{E}}
-\DeclareMathOperator*{\argmax}{argmax}$$
+<!-- $$\renewcommand{\P}{\mathbb{P}} -->
+<!-- \renewcommand{\R}{\mathbb{R}} -->
+<!-- \renewcommand{\N}{\mathbb{N}} -->
+<!-- \newcommand\1{\mathbb{1}} -->
+<!-- \newcommand\E{\mathbb{E}} -->
+<!-- \DeclareMathOperator*{\argmax}{argmax}$$ -->
 
 # Introduction
 
