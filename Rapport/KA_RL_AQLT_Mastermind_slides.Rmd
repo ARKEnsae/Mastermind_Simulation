@@ -338,7 +338,7 @@ Les échantillons sont désormais générés grâce à une loi \og sans remise \
 \item Si $k=n$ alors on arrête, sinon on pose $k=k+1$ et on répéte l'étape 2.
 \end{itemize}
 
-### \dots Mais la méthode d'estimation reste la même
+### \dots \ Mais la méthode d'estimation reste la même
 
 
 Les $p_{k,l}$ s'interprètent de la même façon qu'en question 1 et la formule de mise à jour des paramètres s'écrit :
