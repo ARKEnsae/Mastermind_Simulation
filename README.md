@@ -6,6 +6,12 @@ Cours "Simulation et Monte-Carlo"
 
 Kim Antunez, Romain Lesauvage, Alain Quartier-la-Tente
 
+- Application shiny : https://antuki.shinyapps.io/mastermind
+
+- Rapport et code : https://arkensae.github.io/Mastermind_Simulation/Rapport/Rapport.html
+
+- Slides : https://arkensae.github.io/Mastermind_Simulation/Rapport/KA_RL_AQLT_Mastermind_slides.pdf
+
 ## Sujet 
 
 Le Mastermind est un jeu à deux joueurs, où le premier joueur choisit un “code” (une séquence de n fiches de couleur, parmi m couleurs possibles), et le second joueur doit deviner ce code en un minimum de coups. A chaque coup, le second joueur propose un code, et le premier joueur doit lui donner...  
