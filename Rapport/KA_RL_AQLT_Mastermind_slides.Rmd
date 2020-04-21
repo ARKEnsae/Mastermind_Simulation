@@ -125,10 +125,10 @@ S(x^{*})=\gamma^{*}=\underset{x\in\mathcal{X}}{{\max}} S(x)
 \dots \  en lui associant un problème stochastique :
 \begin{itemize}
 \item $1_{\left\{ S(x)\geq\gamma\right\}}$ sur $\mathcal{X}$ pour plusieurs seuils $\gamma\in\mathbb{R}$ ;  
-\item $\{f(\cdot;v),\,v\in\mathcal{V}\}$ famille discrète de probabilités sur $\mathcal{X}$, paramétrée par $v$. 
+\item $\{f(\cdot;v),\,v\in\mathcal{V}\}$ famille de probabilités sur $\mathcal{X}$, paramétrée par $v$. 
 \end{itemize}
 
-### Algorithme
+### Algorithme \bcoutil
 
 \begin{enumerate}
 
@@ -150,7 +150,7 @@ $$\hat{\gamma}_{t}=\hat{\gamma}_{t-1}=\dots=\hat{\gamma}_{t-d}$$
 
 # Application de la méthode de *Cross-Entropy* au Mastermind (Q1) {#sec:q1}
 
-### Question 1
+### Question 1 \bccrayon
 
 Mettre en oeuvre un algorithme basé sur la méthode CE en détaillant :
 
@@ -172,7 +172,7 @@ Mettre en oeuvre un algorithme basé sur la méthode CE en détaillant :
 \item<1-> $\mathcal{X}=\left\{ 1,2,\dots,m\right\}^{n}$  
 
 \item<2-> Famille paramétrique : $$\mathcal{V} = \left\{ \left(p_{i,j}\right)_{i,j} \in\mathcal{M}_{n,m}([0,1])\::\:\forall i,\sum_{j=1}^mp_{i,j}=1\right\} $$
-\textbf{Remarque} : $X=(X_{1},\dots,X_{n})\in\mathcal{X}$ tirées aléatoirement selon $p_{1},\dots,p_{n}$, la $j$ \ieme composante de $p_{i}$ étant égale à $p_{ij}=\mathbb{P}(X_{i}=j)$ : probabilité d'avoir une boule de couleur $j$ en $i$ème position.
+\textbf{Remarque} : $X=(X_{1},\dots,X_{n})\in\mathcal{X}$ tirées aléatoirement selon $p_{1},\dots,p_{n}$, la $j$ \ieme{} composante de $p_{i}$ étant égale à $p_{ij}=\mathbb{P}(X_{i}=j)$ : probabilité d'avoir une boule de couleur $j$ en $i$ème position.
 
 \item<3-> Score : 
 $$
@@ -198,9 +198,9 @@ avec, par exemple, $\omega_{noir}=2$ et $\omega_{blanc}=1$.
 
 \begin{itemize}
 \item 
-\textcolor{processblue}{$\hat{v}_{0} = \left(\frac{1}{m}\right)_{i=1..n,j=1..m}$} (probabilités uniformes pour chaque couleur)
-\item \textcolor{processblue}{$N = C\times m \times n $} ($C=5$ par défaut)
-\item \textcolor{processblue}{$\rho = 0,1$} (maximisation réalisée sur les 10 \% meilleurs échantillons)
+\highlight{$\hat{v}_{0} = \left(\frac{1}{m}\right)_{i=1..n,j=1..m}$} (probabilités uniformes pour chaque couleur)
+\item \highlight{$N = C\times m \times n $} ($C=5$ par défaut)
+\item \highlight{$\rho = 0,1$} (maximisation réalisée sur les 10 \% meilleurs échantillons)
 
 \end{itemize}
  
@@ -208,13 +208,13 @@ avec, par exemple, $\omega_{noir}=2$ et $\omega_{blanc}=1$.
 $\hat{\gamma}_{t}=S_{\lceil(1-\rho)N\rceil}$
 
 \item Trouver $\hat{v}_{t}$, qui correspond ici à la matrice de terme  :
-\textcolor{processblue}{\begin{equation}
+\highlight{\begin{equation}
 p_{k,l}=\frac{\sum_{i=1}^{N}1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}1_{\left\{ X_{i,k}=l\right\} }}{\sum_{i=1}^{N}1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}}
 \end{equation}}
 
 \item \emph{[FACULTATIF] smoothed updating}
 
-\item Arrêt : si pour un certain $t\geq d$ (\textcolor{processblue}{$d = 5$}), on a : 
+\item Arrêt : si pour un certain $t\geq d$ (\highlight{$d = 5$}), on a : 
 $\hat{\gamma}_{t}=\dots=\hat{\gamma}_{t-d}$
 
 \end{enumerate}
@@ -309,9 +309,9 @@ creation_tableau(round(stats$temps_conv))
 
 # Restriction aux permutations (Q2)
 
-### Question 2
+### Question 2 \bccrayon
 
-Le Joueur 1 choisit obligatoirement une \textbf{permutation} (chaque couleur ne peut apparaître qu’une seule fois, donc $m \leq n$).
+Le Joueur 1 choisit obligatoirement une \textbf{permutation} (chaque couleur ne peut apparaître qu’une seule fois, donc $m \geq n$).
 
 \begin{enumerate}
 \item  Mettre en oeuvre l’algorithme précédent en l'adaptant ;
@@ -322,15 +322,13 @@ est toujours valide ?
 
 ## Adaptation de l'algorithme précédent
 
-### Adaptation de l'algorithme précédent (1/2)
+### Adaptation du mécanisme de génération\dots
 
-Il y a \textbf{deux principaux changements} par rapport à l'algorithme précédent : 
+Par rapport à l'algorithme précédent, on ne change que le \textbf{mécanisme de génération} des échantillons : 
 
 \pause
 
-\begin{enumerate}
-
-\item Les échantillons sont désormais générés grâce à une loi \og sans remise \fg{}.
+Les échantillons sont désormais générés grâce à une loi \og sans remise \fg{}.
 
 \begin{itemize}
 \item Initialisation : on tire la première boule, entier $x_1$, selon la loi discrète donnée par $p_{1,\cdot} = (p_{1,1},\dots, p_{1,m})$. On pose $k=1$ et $P^{(1)} = P$.
@@ -339,22 +337,19 @@ Il y a \textbf{deux principaux changements} par rapport à l'algorithme précéd
 \pause
 \item Si $k=n$ alors on arrête, sinon on pose $k=k+1$ et on répéte l'étape 2.
 \end{itemize}
-\end{enumerate}
 
-### Adaptation de l'algorithme précédent (2/2)
+### \dots Mais la méthode d'estimation reste la même
 
 
-\begin{enumerate}
-\setcounter{enumi}{1}
-\item La formule de mise à jour des paramètres s'écrit :
+Les $p_{k,l}$ s'interprètent de la même façon qu'en question 1 et la formule de mise à jour des paramètres s'écrit :
 $$p_{k,l}=\frac{
 \sum_{i=1}^{N}1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}1_{\left\{ X_{i,k}=l\right\} }
-\textcolor{processblue}{1_{\{X_{i}\text{ permutation}\}}}
+\highlight{1_{\{X_{i}\text{ permutation}\}}}
 }{
 \sum_{i=1}^{N}1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}
-\textcolor{processblue}{1_{\{X_{i}\text{ permutation}\}}}
+\highlight{1_{\{X_{i}\text{ permutation}\}}}
 }$$
-\end{enumerate}
+
 
 \pause 
 
@@ -452,7 +447,9 @@ creation_tableau(round(stats$temps_conv))
 
 # Loi spécifique pour générer les permutations (Q3)
 
-### Question 3
+## Application de l'algorithme de CE
+
+### Question 3 \bccrayon
 
 Considérons désormais la loi suivante sur l’ensemble des permutations :
 $$\pi_{\lambda,x^*}(x) \propto \exp{(-\lambda d(x,x^{*}))}$$
@@ -477,33 +474,33 @@ avec :
 
 \begin{itemize}
 \item 
-\textcolor{processblue}{Tirage aléatoire de $x^*_0$ et  $\lambda_0=1$.}
-\item $N = C\times \textcolor{processblue}{(n+1)} $ ($C=5$ par défaut)
+\highlight{Tirage aléatoire de $x^*_0$ et  $\lambda_0=1$.}
+\item $N = C\times \highlight{(n+1)} $ ($C=5$ par défaut)
 \item $\rho = 0,1$ (maximisation réalisée sur les 10 \% meilleurs échantillons)
 
 \end{itemize}
  
-\item $X_{1},\dots,X_{N}$ générés avec la \textcolor{processblue}{loi $\pi_{\lambda_t,x^*_t}$} (Metropolis-Hastings), calcul de 
+\item $X_{1},\dots,X_{N}$ générés avec la \highlight{loi $\pi_{\lambda_t,x^*_t}$} (Metropolis-Hastings), calcul de 
 $\hat{\gamma}_{t}=S_{\lceil(1-\rho)N\rceil}$
 
-\item \textcolor{processblue}{Trouver $\tilde x_{t+1}$. Si $S(\tilde x_{t+1})\geq S(x^*_t)$ alors $x^*_{t+1} = \tilde x_{t+1}$, sinon $x^*_{t+1}=x^*_{t}$. On fixe $\lambda_{t+1}=1$}
+\item \highlight{Trouver $\tilde x_{t+1}$. Si $S(\tilde x_{t+1})\geq S(x^*_t)$ alors $x^*_{t+1} = \tilde x_{t+1}$, sinon $x^*_{t+1}=x^*_{t}$. On fixe $\lambda_{t+1}=1$}
 
-\item \emph{[FACULTATIF] \textcolor{processblue}{Pas de smoothed updating}}
+\item \emph{[FACULTATIF] \highlight{Pas de smoothed updating}}
 
-\item \textcolor{processblue}{Arrêt : si pour un certain $t$, $S(x^*_{t})=1$ alors on arrête l'algorithme.}
+\item \highlight{Arrêt : si pour un certain $t$, $S(x^*_{t})=1$ alors on arrête l'algorithme.}
 
 \end{enumerate}
 
 
 
-
+## Génération des données
 ### Génération de l'échantillon : Metropolis-Hastings
 
 \faArrowCircleRight \textbf{ mécanisme de proposition} : inverser deux éléments de la permutation (symétrique).
 
 \pause 
 
-Pour $m=n$, (vraies permutations)
+Pour \only<2-6>{$\boldsymbol{m=n}$ (vraies permutations) }\only<7->{$\highlight{\boldsymbol{m>n}}$}
 \begin{itemize}
 \item Initialisation : on choisit $x_0$ une permutation au hasard et on fixe $t=0$.
 
@@ -511,12 +508,14 @@ Pour $m=n$, (vraies permutations)
 
 \item Itération : 
 \begin{itemize}
-\item On permute au hasard deux éléments de $x_t$ et on note $x'$ la nouvelle permutation.
+\item On permute au hasard deux éléments $i$ et $j$ de $x_t$ et on note $x'$ la nouvelle permutation. \only<7->{$\highlight{\rightarrow\;i\text{ ou }j \leq n}$}
 
 \pause 
 
 \item On calcule la probabilité d'acceptation : $r(x',x_t)=\min\left(1,\,\frac{\pi_{\lambda,x^*}(x')}{\pi_{\lambda,x^*}(x_{t})}\right)
-=\min\left(1,\,\mathrm{e^{-\lambda(d(x',x^{*})-d(x_{t},x^{*}))}}\right)$
+=\min\left(1,\,\mathrm{e^{-\lambda(d(x',x^{*})-d(x_{t},x^{*}))}}\right)$  
+
+ \onslide<7->{$\highlight{\rightarrow}$ \highlight{distances calculées sur} $\highlight{n}$ \highlight{premières coordonnées}}
 
 \pause 
 
@@ -528,15 +527,8 @@ Pour $m=n$, (vraies permutations)
 \end{itemize}
 \end{itemize}
 
+
 ### Génération de l'échantillon : Metropolis-Hastings
-
-Pour $m>n$, nous raisonnons de la même façon en modifiant deux étapes :
-\begin{itemize}
-\item Dans le mécanisme de proposition nous inversons deux coordonnées mais en imposant qu'au moins une des deux soit plus petite que $n$ ;
-\item Dans le calcul de la probabilité d'acceptation nous ne calculons la distance de Hamming que sur les $n$ premières coordonnées $x'$ et $x_t$.
-\end{itemize}
-
-\pause 
 
 \textbf{Remarque} : Pour $\lambda$ grand on converge vers $x^*$ et tous les échantillons seront égaux à $x^*$.
 
@@ -597,6 +589,9 @@ $\longrightarrow$ Intégrer ce test dans le mécanisme de proposition est \textb
 
 ### Estimation de $x^*$
 
+\bcloupe (Arrieta, 2014) montre qu'on peut séparer le problème d'estimation de $x^*$ et $\lambda$
+
+\pause
 Trouver le $x^*$ qui minimise la somme  $\sum_{i=1}^N 1_{\{S(X_{i})\geq\hat{\gamma}_{t}\}}d(X_i,x^*)$
 
 \begin{itemize}
@@ -620,7 +615,7 @@ Trouver le $x^*$ qui minimise la somme  $\sum_{i=1}^N 1_{\{S(X_{i})\geq\hat{\gam
 
 Plusieurs tests réalisés pour estimer $\lambda$ : 
 \begin{enumerate}
-\item décroissance linéaire à chaque itération
+\item croissance linéaire à chaque itération
 \item constance
 
 \pause 
