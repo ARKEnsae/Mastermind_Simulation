@@ -46,6 +46,7 @@ header-includes:
 - \usepackage[utf8]{inputenc}
 - \usepackage{lmodern}
 - \usepackage{babel}
+- \usepackage{cancel}
 
 themeoptions: "coding=utf8,language=french"
 classoption: 'usepdftitle=false,french'
@@ -537,7 +538,7 @@ Pour \only<2-6>{$\boldsymbol{m=n}$ (vraies permutations) }\only<7->{$\highlight{
 
 \pause 
 
-L'algorithme de Metropolis-Hastings a \textbf{deux désavantages} :
+\bctakecare L'algorithme de Metropolis-Hastings a \textbf{deux désavantages} :
 \begin{enumerate}
 \item Le \emph{burn-in}.
 \item Les échantillons générés à des périodes proches sont corrélés entre eux. 
@@ -561,8 +562,9 @@ L'algorithme de Metropolis-Hastings a \textbf{deux désavantages} :
 \bigskip
 
 \bigskip
+\pause
 
-$\longrightarrow$ Enlever les $250\times m$ premières observations.
+ $\rightarrow\text{burn-in}\simeq250\times m$ 
 
 
 ### Gestion des autocorrélations 
@@ -615,11 +617,6 @@ Trouver le $x^*$ qui minimise la somme  $\sum_{i=1}^N 1_{\{S(X_{i})\geq\hat{\gam
 
 Plusieurs tests réalisés pour estimer $\lambda$ : 
 \begin{enumerate}
-\item croissance linéaire à chaque itération
-\item constance
-
-\pause 
-
 \item (Arrieta, 2014) nous fournit la constante de normalisation de $\pi_{\lambda,x^*}$ :
 $$
 m!\exp(-\lambda m)\sum_{k=0}^{m}\frac{(\exp(\lambda)-1)^{k}}{k!}
@@ -639,9 +636,16 @@ $$
 \normalsize
 
 \textbf{Problème} : croissance rapide de $\lambda$ à chaque itération. Si $y$ n'est pas décodé dans les premières itérations, les échantillons $X_i$ générés seront très proches de $x^*$ et on ne trouvera pas $y$.
-\end{enumerate}
 
 \pause 
+\item croissance linéaire à chaque itération
+\item constance
+\end{enumerate}
+
+
+\pause 
+
+
 
 \textbf{$\longrightarrow$ Meilleure solution : $\lambda = 1$.}
 
