@@ -6,6 +6,7 @@ library(shinyjs)
 library(gtools) #pour générer les permutations
 library(mvtnorm)
 library(clue)
+library(V8)
 
 #################################################################
 ##################### Paramètres du globaux  #####################
