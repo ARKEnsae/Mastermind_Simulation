@@ -562,7 +562,6 @@ Pour \only<2-6>{$\boldsymbol{m=n}$ (vraies permutations) }\only<7->{$\highlight{
 \bigskip
 
 \bigskip
-\pause
 
  $\rightarrow\text{burn-in}\simeq250\times m$ 
 
