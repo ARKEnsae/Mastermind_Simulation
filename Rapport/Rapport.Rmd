@@ -28,6 +28,7 @@ library(portes)
 library(shiny)
 library(shinyjs)
 library(shinyWidgets)
+library(V8)
 ```
 
 ```{r firstProg, echo=FALSE}
@@ -889,13 +890,84 @@ Augmenter $N$ permet une convergence plus rapide dans le cas où $n<m$ mais ce n
 
 <i class="fas fa-arrow-alt-circle-right"></i>  <b>Par rapport aux algorithmes précédents, utiliser une loi spécifique pour les permutations donne des résultats moins concluants, à la fois en termes de temps de calcul et de vitesse de convergence.</b>
 
+
+<!-- <div class="col2"> -->
+
+<!-- ```{r tabq3vsq1c10convmed, echo=FALSE} -->
+<!-- stats <- readRDS("Resultats/statsq3vsq1p2c10.RDS") -->
+<!-- note_debut <- "S'il n'y a pas convergence les statistiques ne sont pas calculées" -->
+<!-- creation_tableau(stats$it_arret_med, titre = "Itération médiane de convergence", -->
+<!--                  note_debut = note_debut, -->
+<!--                  nb_simuls = "5 x (n + 1)") -->
+<!-- ``` -->
+
+<!-- ```{r tabq3vsq1c10erreur, echo=FALSE} -->
+<!-- creation_tableau(round(stats$erreur_finale,3), titre = "Moyenne de l'erreur à la simulation de convergence", -->
+<!--                  note_debut = c(note_debut, "L'erreur est définie comme 1 - gamma_T"), -->
+<!--                  nb_simuls = "10 x (n + 1)") -->
+<!-- ``` -->
+
+
+<!-- ```{r tabq3vsq1c10score, echo=FALSE} -->
+<!-- creation_tableau(round(stats$erreur_score,3), titre = "Moyenne du score de x* à la simulation de convergence", -->
+<!--                  note_debut = note_debut, -->
+<!--                  nb_simuls = "5 x (n + 1)") -->
+<!-- ``` -->
+
+<!-- ```{r tabq3vsq1c10nbnonconv, echo=FALSE} -->
+<!-- creation_tableau(stats$nb_non_conv, -->
+<!--                  titre = "Nombre de simulations n'ayant pas convergé vers la bonne valeur", -->
+<!--                  nb_simuls = "10 x (n + 1)") -->
+<!-- ``` -->
+
+
+<!-- ```{r tabq3vsq1c10tempsconv, echo=FALSE} -->
+<!-- creation_tableau(round(stats$temps_arret), -->
+<!--                  titre = "Moyenne du temps de calcul jusqu'à la convergence (en secondes)", -->
+<!--                  nb_simuls = "10 x (n + 1)", -->
+<!--                  note_debut = note_debut) -->
+<!-- ``` -->
+
+
+
+<!-- ```{r tabq3vsq1c10lcroissantconvmed, echo=FALSE} -->
+<!-- stats <- readRDS("Resultats/statsq3vsq1p2c10lcroissant.RDS") -->
+<!-- note_debut <- "S'il n'y a pas convergence les statistiques ne sont pas calculées" -->
+<!-- creation_tableau(stats$it_arret_med, titre = "Itération médiane de convergence", -->
+<!--                  note_debut = note_debut) -->
+<!-- ``` -->
+
+<!-- ```{r tabq3vsq1c10lcroissanterreur, echo=FALSE} -->
+<!-- creation_tableau(round(stats$erreur_finale,3), titre = "Moyenne de l'erreur à la simulation de convergence", -->
+<!--                  note_debut = c(note_debut, "L'erreur est définie comme 1 - gamma_T")) -->
+<!-- ``` -->
+
+<!-- ```{r tabq3vsq1c10lcroissantscore, echo=FALSE} -->
+<!-- creation_tableau(round(stats$erreur_score,3), titre = "Moyenne du score de x* à la simulation de convergence", -->
+<!--                  note_debut = note_debut) -->
+<!-- ``` -->
+
+
+<!-- ```{r tabq3vsq1c10lcroissantnbnonconv, echo=FALSE} -->
+<!-- creation_tableau(stats$nb_non_conv, -->
+<!--                  titre = "Nombre de simulations n'ayant pas convergé vers la bonne valeur") -->
+<!-- ``` -->
+
+<!-- ```{r tabq3vsq1c10lcroissanttempsconv, echo=FALSE} -->
+<!-- creation_tableau(round(stats$temps_arret), -->
+<!--                  titre = "Moyenne du temps de calcul jusqu'à la convergence (en secondes)", -->
+<!--                  note_debut = note_debut) -->
+<!-- ``` -->
+
+<!-- </div> -->
+
 # Code {#sec:enscode}
 
 Les packages nécessaires pour faire tourner l'ensemble des programmes sont : 
 
 ```{r installpackages, eval=FALSE}
 # install.packages(c("clue", "kableExtra", "mvtnorm", "plot3D", "portes", "shiny", 
-#                    "shinyjs", "shinyWidgets"))
+#                    "shinyjs", "shinyWidgets", "V8"))
 library(clue)
 library(kableExtra)
 library(mvtnorm)
