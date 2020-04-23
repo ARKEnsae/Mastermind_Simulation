@@ -327,15 +327,12 @@ est toujours valide ?
 
 Par rapport à l'algorithme précédent, on ne change que le \textbf{mécanisme de génération} des échantillons : 
 
-\pause
 
 Les échantillons sont désormais générés grâce à une loi \og sans remise \fg{}.
 
 \begin{itemize}
 \item Initialisation : on tire la première boule, entier $x_1$, selon la loi discrète donnée par $p_{1,\cdot} = (p_{1,1},\dots, p_{1,m})$. On pose $k=1$ et $P^{(1)} = P$.
-\pause
 \item Itération : $P^{(k+1)}$ est obtenue en remplaçant la colonne $k$ de $P^{(k)}$ par 0 et en normalisant les lignes (somme = 1). On tire $x_{k+1}$ selon la loi discrète donnée par la ligne $k+1$ de $P^{(k+1)}$. 
-\pause
 \item Si $k=n$ alors on arrête, sinon on pose $k=k+1$ et on répéte l'étape 2.
 \end{itemize}
 
@@ -356,11 +353,9 @@ $$p_{k,l}=\frac{
 
 Possibilité d'appliquer la méthode de génération des échantillons de la \textbf{question 1} \dots
 
-\pause 
 
  \dots \ mais dans ce cas, beaucoup d'échantillons non pertinents (les non-permutations)
  
-\pause 
 
 
 $\longrightarrow$ Algorithme de la \textbf{question 2} améliore le processus en ne conservant que les permutations (telles que $1_{\{X_{i}\text{ permutation}\}} = 1$) 
@@ -501,28 +496,23 @@ $\hat{\gamma}_{t}=S_{\lceil(1-\rho)N\rceil}$
 
 \pause 
 
-Pour \only<2-6>{$\boldsymbol{m=n}$ (vraies permutations) }\only<7->{$\highlight{\boldsymbol{m>n}}$}
+Pour \only<2>{$\boldsymbol{m=n}$ (vraies permutations) }\only<3->{$\highlight{\boldsymbol{m>n}}$}
 \begin{itemize}
 \item Initialisation : on choisit $x_0$ une permutation au hasard et on fixe $t=0$.
 
-\pause 
 
 \item Itération : 
 \begin{itemize}
-\item On permute au hasard deux éléments $i$ et $j$ de $x_t$ et on note $x'$ la nouvelle permutation. \only<7->{$\highlight{\rightarrow\;i\text{ ou }j \leq n}$}
+\item On permute au hasard deux éléments $i$ et $j$ de $x_t$ et on note $x'$ la nouvelle permutation. \only<3->{$\highlight{\rightarrow\;i\text{ ou }j \leq n}$}
 
-\pause 
 
 \item On calcule la probabilité d'acceptation : $r(x',x_t)=\min\left(1,\,\frac{\pi_{\lambda,x^*}(x')}{\pi_{\lambda,x^*}(x_{t})}\right)
 =\min\left(1,\,\mathrm{e^{-\lambda(d(x',x^{*})-d(x_{t},x^{*}))}}\right)$  
 
- \onslide<7->{$\highlight{\rightarrow}$ \highlight{distances calculées sur} $\highlight{n}$ \highlight{premières coordonnées}}
+ \onslide<3->{$\highlight{\rightarrow}$ \highlight{distances calculées sur} $\highlight{n}$ \highlight{premières coordonnées}}
 
-\pause 
 
 \item Acceptation ou rejet : on génére une loi uniforme $u\in[0,1]$. Si $u \leq r(x',x_{t}) $ alors on accepte le nouvel état et on pose $x_{t+1}=x'$, sinon $x_{t+1}=x_{t}$.
-
-\pause 
 
 \item Incrémentation : $t=t+1$.
 \end{itemize}
