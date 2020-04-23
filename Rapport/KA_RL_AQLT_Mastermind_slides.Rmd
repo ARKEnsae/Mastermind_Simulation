@@ -599,14 +599,14 @@ Trouver le $x^*$ qui minimise la somme  $\sum_{i=1}^N 1_{\{S(X_{i})\geq\hat{\gam
 
 \pause 
 
-\item Intuitivement, il s'agit de $x^*=(x_1^*,\dots,x_n^*)$ tel que $x_j^*$ correspond au chiffre le plus fréquent dans la $j$ème coordonnée des 10 % meilleurs échantillons.
+\item Intuitivement, il s'agit de $x^*=(x_1^*,\dots,x_n^*)$ tel que $x_j^*$ correspond au chiffre le plus fréquent dans la $j$ème coordonnée des 10 \% meilleurs échantillons.
 
 \pause 
 
 \item On part de ce principe en imposant que $x^*$ soit bien une permutation :
 
 \begin{enumerate}
-\item On crée une matrice $F=(f_{i,j})\in\mathcal M_{n,m}(\mathbb{N})$ telle $f_{i,j}$ soit égal au nombre de fois que l'entier $j$ apparait en $i$ème position parmi les 10 % meilleurs échantillon.
+\item On crée une matrice $F=(f_{i,j})\in\mathcal M_{n,m}(\mathbb{N})$ telle $f_{i,j}$ soit égal au nombre de fois que l'entier $j$ apparait en $i$ème position parmi les 10 \% meilleurs échantillon.
 
 \item On sélectionne une composante par ligne et par colonne de $F$ de façon à ce que leur somme soit maximale
 \end{enumerate}
@@ -650,7 +650,7 @@ $$
 
 
 ## Résultats
-### Résultats
+### Résultats $N=5\times (n+1)$ 
 
 \tiny
 \begin{figure}
@@ -735,14 +735,95 @@ creation_tableau(round(stats$temps_arret),
 \normalsize
 
 
+<!-- ### Résultats avec $N=5\times m\times n$ -->
+
+<!-- \tiny -->
+<!-- \begin{figure} -->
+<!-- \begin{minipage}{.4\textwidth} -->
+<!-- \normalsize{Itération médiane -->
+
+<!-- de convergence -->
+
+<!-- \faArrowCircleRight \textbf{\ converge - vite} -->
+<!-- } -->
+<!-- \end{minipage}% -->
+<!-- \begin{minipage}{.6\textwidth} -->
+<!-- ```{r tabq3vsq1convmed, echo=FALSE} -->
+<!-- stats <- readRDS("Resultats/statsq3vsq1.RDS") -->
+<!-- note_debut <- "S'il n'y a pas convergence les statistiques ne sont pas calculées" -->
+<!-- creation_tableau(stats$it_arret_med, titre = "Médiane de l'itération de convergence", -->
+<!--                  note_debut = note_debut) -->
+<!-- ``` -->
+<!-- \end{minipage} -->
+<!-- \end{figure} -->
+
+
+<!-- \begin{figure} -->
+<!-- \begin{minipage}{.4\textwidth} -->
+<!-- \normalsize{Nombre de simulations -->
+
+<!-- n'ayant pas convergé -->
+
+<!-- vers la bonne valeur -->
+
+<!-- \faArrowCircleRight \textbf{\ converge - souvent} -->
+<!-- } -->
+<!-- \end{minipage}% -->
+<!-- \begin{minipage}{.6\textwidth} -->
+<!-- ```{r tabq3vsq1nbnonconv, echo=FALSE} -->
+<!-- creation_tableau(stats$nb_non_conv, -->
+<!--                  titre = "Nombre de simulations n'ayant pas convergé vers la bonne valeur", -->
+<!--                  nb_simuls = "5 x n x m") -->
+<!-- ``` -->
+
+<!-- \end{minipage} -->
+<!-- \end{figure} -->
+
+
+<!-- \begin{figure} -->
+<!-- \begin{minipage}{.4\textwidth} -->
+<!-- \normalsize{Moyenne de l'erreur -->
+
+<!-- à la simulation -->
+
+<!-- de convergence -->
+<!-- } -->
+<!-- \end{minipage}% -->
+<!-- \begin{minipage}{.6\textwidth} -->
+<!-- ```{r tabq3vsq1erreur, echo=FALSE} -->
+<!-- creation_tableau(round(stats$erreur_finale,3), titre = "Moyenne de l'erreur à la simulation de convergence", -->
+<!--                  note_debut = c(note_debut, "L'erreur est définie comme 1 - gamma_T")) -->
+<!-- ``` -->
+<!-- \end{minipage} -->
+<!-- \end{figure} -->
+
+<!-- \begin{figure} -->
+<!-- \begin{minipage}{.4\textwidth} -->
+<!-- \normalsize{Moyenne du temps de calcul -->
+
+<!-- jusqu'à la convergence -->
+
+<!-- \faArrowCircleRight \textbf{\ et est + gourmand} -->
+<!-- } -->
+<!-- \end{minipage}% -->
+<!-- \begin{minipage}{.6\textwidth} -->
+<!-- ```{r tabq3vsq1tempsconv, echo=FALSE} -->
+<!-- creation_tableau(round(stats$temps_arret), -->
+<!--                  titre = "Moyenne du temps de calcul jusqu'à la convergence (en secondes)", -->
+<!--                  nb_simuls = "5 x n x m", -->
+<!--                  note_debut = note_debut) -->
+<!-- ``` -->
+<!-- \end{minipage} -->
+<!-- \end{figure} -->
+
+
 ### Merci pour votre attention
 
 \href{https://github.com/ARKEnsae/Mastermind_Simulation}{\faGithub{} ARKEnsae/Mastermind\_Simulation}  
 
-\href{https://antuki.shinyapps.io/mastermind}{\faChartBar{} Application web}  
+\href{https://antuki.shinyapps.io/mastermind}{\faChartBar{} Application web :  antuki.shinyapps.io/mastermind} 
 
 \href{https://arkensae.github.io/Mastermind_Simulation/Rapport/Rapport.html}{\faEdit{} Rapport du projet}  
-
 
 \begin{center}
 \includegraphics[width = 2.5cm]{img/LOGO-ENSAE.png}
