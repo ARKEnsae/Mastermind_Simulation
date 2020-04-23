@@ -637,12 +637,10 @@ $$
 \textbf{Problème} : croissance rapide de $\lambda$ à chaque itération. Si $y$ n'est pas décodé dans les premières itérations, les échantillons $X_i$ générés seront très proches de $x^*$ et on ne trouvera pas $y$.
 
 \pause 
-\item croissance linéaire à chaque itération
+\item croissance linéaire à chaque itération \pause 
+
 \item constance
 \end{enumerate}
-
-
-\pause 
 
 
 
