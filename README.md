@@ -1,4 +1,4 @@
-# Mastermind_Simulation
+# Mastermind_Simulation  <img src="Rapport/img/LOGO-ENSAE.png" align="right" alt=""  width="100"/>
 
 Projet ENSAE 2020
 
@@ -11,6 +11,15 @@ Kim Antunez, Romain Lesauvage, Alain Quartier-la-Tente
 - Rapport et code : https://arkensae.github.io/Mastermind_Simulation/Rapport/Rapport.html
 
 - Slides : https://arkensae.github.io/Mastermind_Simulation/Rapport/KA_RL_AQLT_Mastermind_slides.pdf
+
+- [Cliquer ici pour le télécharger une compilation du code](https://arkensae.github.io/Mastermind_Simulation/Code_Mastermind.R)
+
+Pour lancer l'application depuis R :
+
+```r
+library(shiny)
+runGitHub("Mastermind_Simulation", "ARKEnsae", subdir = "shinyApp")
+```
 
 ## Sujet 
 
